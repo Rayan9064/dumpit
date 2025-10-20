@@ -200,23 +200,23 @@ export function Dashboard() {
         />
       )}
 
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 overflow-x-hidden">
         <div className="pt-8 pb-6">
           <h1 className="text-3xl font-extrabold text-slate-900">My Dashboard</h1>
           <p className="text-sm text-slate-600 mt-1">{resources.length} resources{activeCollection ? ` in “${activeCollection.name}”` : ' total'}</p>
         </div>
 
-  <div className="lg:grid lg:grid-cols-[240px,1fr] lg:items-start lg:gap-8">
-          <div className="lg:sticky lg:top-6 lg:self-start">
+	  <div className="lg:flex lg:items-start lg:gap-8">
+		  <div className="lg:shrink-0">
             <CollectionsSidebar
               activeCollectionId={selectedCollectionId}
               onSelect={(collectionId) => setSelectedCollectionId(collectionId)}
             />
           </div>
 
-          <main>
+		  <main className="min-w-0 flex-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-6">
-              <div className="flex flex-col sm:flex-row gap-3 items-center">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
@@ -228,7 +228,7 @@ export function Dashboard() {
                   />
                 </div>
 
-                <div className="w-40">
+                <div className="w-40 shrink-0">
                   <select
                     value={selectedTag}
                     onChange={(e) => setSelectedTag(e.target.value)}
@@ -256,7 +256,7 @@ export function Dashboard() {
                 </p>
               </div>
             ) : (
-              <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredResources.map((resource) => {
                   const assignedCollections = (resource.collection_ids || [])
                     .map((id) => collections.find((collection) => collection.id === id))
@@ -267,7 +267,7 @@ export function Dashboard() {
                   return (
                     <article
                       key={resource.id}
-                      className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-150 relative"
+                      className="min-w-0 min-h-[180px] bg-white rounded-lg shadow-sm border border-gray-200 p-3 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-150 relative"
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2">

@@ -85,7 +85,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
   }
 
   return (
-    <aside className="w-full rounded-2xl border border-slate-200 bg-white shadow-sm lg:w-72">
+    <aside className="w-full lg:w-64 lg:sticky lg:top-0 lg:max-h-screen lg:overflow-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Collections</h3>
         <button
