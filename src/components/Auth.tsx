@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { Loader2, LogIn, UserPlus } from 'lucide-react';
 import { useState } from 'react';
@@ -15,11 +15,8 @@ export function Auth() {
   const [usernameError, setUsernameError] = useState('');
   const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
   const { signIn, signUp, signInWithGoogle } = useAuth();
-
-  // Username validation regex: 3-20 characters, lowercase, numbers, underscores, hyphens
   const usernameRegex = /^[a-z0-9_-]{3,20}$/;
 
-  // Map Firebase error codes to user-friendly messages
   const getFriendlyErrorMessage = (errorCode: string): string => {
     switch (errorCode) {
       case 'auth/email-already-in-use':
@@ -64,46 +61,31 @@ export function Auth() {
       return data.available;
     } catch (error) {
       console.error('Error checking username uniqueness:', error);
-      return false; // Assume taken on error
+      return false;
     }
   };
 
   const generateUsernameSuggestions = (baseUsername: string): string[] => {
     const suggestions: string[] = [];
     const cleanBase = baseUsername.replace(/[^a-z0-9_-]/g, '').toLowerCase();
-
-    // Add numbers
-    for (let i = 1; i <= 5; i++) {
-      suggestions.push(`${cleanBase}${i}`);
-    }
-
-    // Add underscores with numbers
-    for (let i = 1; i <= 3; i++) {
-      suggestions.push(`${cleanBase}_${i}`);
-    }
-
-    return suggestions.slice(0, 5); // Return first 5 suggestions
+    for (let i = 1; i <= 5; i++) { suggestions.push(`${cleanBase}${i}`); }
+    for (let i = 1; i <= 3; i++) { suggestions.push(`${cleanBase}_${i}`); }
+    return suggestions.slice(0, 5);
   };
 
   const handleUsernameChange = async (value: string) => {
     setUsername(value);
     setUsernameError('');
     setUsernameSuggestions([]);
-
     if (value.trim() === '') return;
-
-    // Check format
     if (!validateUsernameFormat(value)) {
       setUsernameError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.');
       return;
     }
-
-    // Check uniqueness
     const isAvailable = await checkUsernameUniqueness(value);
     if (!isAvailable) {
       setUsernameError('This username is already taken.');
-      const suggestions = generateUsernameSuggestions(value);
-      setUsernameSuggestions(suggestions);
+      setUsernameSuggestions(generateUsernameSuggestions(value));
     }
   };
 
@@ -111,7 +93,6 @@ export function Auth() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
@@ -119,34 +100,28 @@ export function Auth() {
           setError(getFriendlyErrorMessage(error.code || ''));
           setLoading(false);
         }
-        // Success - auth state change will trigger navigation
       } else {
-        // Validate username for signup
         if (!username.trim()) {
           setError('Username is required');
           setLoading(false);
           return;
         }
-
         if (!validateUsernameFormat(username)) {
           setError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.');
           setLoading(false);
           return;
         }
-
         const isAvailable = await checkUsernameUniqueness(username);
         if (!isAvailable) {
           setError('This username is already taken. Please choose a different one.');
           setLoading(false);
           return;
         }
-
         const { error } = await signUp(email, password, username);
         if (error) {
           setError(getFriendlyErrorMessage(error.code || ''));
           setLoading(false);
         }
-        // Success - auth state change will trigger navigation
       }
     } catch (err) {
       console.error('Auth error:', err);
@@ -154,17 +129,15 @@ export function Auth() {
       setLoading(false);
     }
   };
-  
+
   const handleGoogleSignIn = async () => {
     setError('');
     setGoogleLoading(true);
-    
     try {
       const { error } = await signInWithGoogle();
       if (error) {
         setError(getFriendlyErrorMessage(error.code || '') || 'Failed to sign in with Google');
       }
-      // Success - auth state change will trigger navigation
     } catch (err) {
       console.error('Google auth error:', err);
       setError('An unexpected error occurred with Google sign-in. Please try again.');
@@ -174,25 +147,31 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-950 to-indigo-800 flex items-center justify-center px-3 sm:px-6 py-6">
+      {/* Decorative Background Blobs for visual depth */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <div className="absolute left-1/4 top-0 w-96 h-96 bg-indigo-600 opacity-20 rounded-full filter blur-3xl"></div>
+        <div className="absolute right-0 bottom-0 w-64 h-64 bg-purple-700 opacity-25 rounded-full filter blur-2xl"></div>
+      </div>
+      <div className="max-w-[95vw] xs:max-w-md sm:max-w-lg md:max-w-xl w-full">
+        <div className="bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl rounded-3xl shadow-2xl p-6 xs:p-8 sm:p-12 border border-white/80 dark:border-slate-900">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mb-4">
-              <span className="text-2xl font-bold text-white">D</span>
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl mb-3 shadow-lg ring-4 ring-indigo-100 dark:ring-indigo-900">
+              <span className="text-3xl sm:text-4xl font-extrabold text-white drop-shadow-lg">D</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">DumpIt</h1>
-            <p className="text-gray-600">Your Personal Resource Vault</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500 mb-1">DumpIt</h1>
+            <p className="text-center text-indigo-500 dark:text-indigo-300 text-xs sm:text-sm mb-1 font-medium">Your Personal Resource Vault</p>
           </div>
 
-          <div className="flex gap-2 mb-6">
+          {/* Tabs */}
+          <div className="flex gap-2 mb-6 sm:mb-8 bg-indigo-100/50 dark:bg-indigo-900/30 p-1 rounded-xl backdrop-blur-sm">
             <button
               type="button"
               onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-300 ${
                 isLogin
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-105'
+                  : 'text-indigo-700 dark:text-indigo-200 hover:bg-white/15'
               }`}
             >
               Login
@@ -200,10 +179,10 @@ export function Auth() {
             <button
               type="button"
               onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-300 ${
                 !isLogin
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-105'
+                  : 'text-indigo-700 dark:text-indigo-200 hover:bg-white/15'
               }`}
             >
               Sign Up
@@ -213,33 +192,31 @@ export function Auth() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
+                <label htmlFor="username" className="block text-sm font-medium text-indigo-700 dark:text-indigo-300 mb-1">Username</label>
                 <input
                   id="username"
                   type="text"
                   value={username}
                   onChange={(e) => handleUsernameChange(e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                    usernameError ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition ${
+                    usernameError ? 'border-red-500' : 'border-indigo-200 dark:border-indigo-700'
+                  } bg-slate-50 dark:bg-slate-900 text-indigo-900 dark:text-indigo-200`}
                   placeholder="johndoe"
                   required={!isLogin}
                 />
                 {usernameError && (
-                  <p className="mt-1 text-sm text-red-600">{usernameError}</p>
+                  <p className="mt-1 text-xs sm:text-sm text-red-600 dark:text-red-400">{usernameError}</p>
                 )}
                 {usernameSuggestions.length > 0 && (
                   <div className="mt-2">
-                    <p className="text-sm text-gray-600 mb-1">Try these instead:</p>
+                    <p className="text-xs text-indigo-500 mb-1">Try these instead:</p>
                     <div className="flex flex-wrap gap-1">
                       {usernameSuggestions.map((suggestion) => (
                         <button
                           key={suggestion}
                           type="button"
                           onClick={() => handleUsernameChange(suggestion)}
-                          className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                          className="px-2 py-1 text-xs bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition"
                         >
                           {suggestion}
                         </button>
@@ -251,30 +228,26 @@ export function Auth() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
+              <label htmlFor="email" className="block text-sm font-medium text-indigo-700 dark:text-indigo-300 mb-1">Email</label>
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-2 border border-indigo-200 dark:border-indigo-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition bg-slate-50 dark:bg-slate-900 text-indigo-900 dark:text-indigo-200"
                 placeholder="you@example.com"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
+              <label htmlFor="password" className="block text-sm font-medium text-indigo-700 dark:text-indigo-300 mb-1">Password</label>
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-2 border border-indigo-200 dark:border-indigo-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition bg-slate-50 dark:bg-slate-900 text-indigo-900 dark:text-indigo-200"
                 placeholder="••••••••"
                 required
                 minLength={6}
@@ -282,7 +255,7 @@ export function Auth() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 dark:bg-red-950 border border-red-400 text-red-700 dark:text-red-200 px-4 py-2 rounded-xl text-xs sm:text-sm">
                 {error}
               </div>
             )}
@@ -290,7 +263,7 @@ export function Auth() {
             <button
               type="submit"
               disabled={loading || googleLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl text-sm font-semibold hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -307,17 +280,17 @@ export function Auth() {
               )}
             </button>
             
-            <div className="mt-6 relative flex items-center">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="flex-shrink mx-4 text-gray-600 text-sm">or continue with</span>
-              <div className="flex-grow border-t border-gray-300"></div>
+            <div className="my-2 sm:my-4 flex items-center gap-2">
+              <div className="flex-grow h-px bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-50" />
+              <span className="text-xs sm:text-sm text-indigo-500 font-medium">or continue with</span>
+              <div className="flex-grow h-px bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-50" />
             </div>
             
             <button
               type="button"
               onClick={handleGoogleSignIn}
               disabled={loading || googleLoading}
-              className="mt-4 w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-slate-100 to-indigo-100 dark:from-slate-900 dark:to-indigo-900 border border-indigo-200 dark:border-indigo-900 text-indigo-700 dark:text-indigo-200 py-3 px-4 rounded-xl font-semibold hover:bg-indigo-50 hover:dark:bg-slate-950 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {googleLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
