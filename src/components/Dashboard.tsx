@@ -13,12 +13,10 @@ function formatDate(dateValue: any): string {
   if (!dateValue) return '';
   
   try {
-    // Handle Firestore Timestamp objects
     if (dateValue && typeof dateValue.toDate === 'function') {
       return dateValue.toDate().toLocaleDateString();
     }
     
-    // Handle string dates or timestamps
     const date = new Date(dateValue);
     return isNaN(date.getTime()) ? '' : date.toLocaleDateString();
   } catch (e) {
@@ -107,7 +105,6 @@ export function Dashboard() {
   const filterResources = () => {
     let filtered = [...resources];
 
-    // If a collection is selected, only show resources that belong to it
     if (selectedCollectionId) {
       filtered = filtered.filter(r => (r.collection_ids || []).includes(selectedCollectionId));
     }
@@ -181,16 +178,13 @@ export function Dashboard() {
           onApply={async (newCollectionIds) => {
             if (!managerResource) return;
             const resourceId = managerResource.id;
-            // Find collections to add and remove
             const prevIds = managerResource.collection_ids || [];
             const toAdd = newCollectionIds.filter((id) => !prevIds.includes(id));
             const toRemove = prevIds.filter((id) => !newCollectionIds.includes(id));
-            // Batch add/remove
             await Promise.all([
               ...toAdd.map((id) => addResourceToCollection(id, resourceId)),
               ...toRemove.map((id) => removeResourceFromCollection(id, resourceId)),
             ]);
-            // Update local state
             setResources((prev) => prev.map((resource) => {
               if (resource.id !== resourceId) return resource;
               return { ...resource, collection_ids: newCollectionIds };
@@ -206,15 +200,15 @@ export function Dashboard() {
           <p className="text-sm text-slate-600 mt-1">{resources.length} resources{activeCollection ? ` in “${activeCollection.name}”` : ' total'}</p>
         </div>
 
-	  <div className="lg:flex lg:items-start lg:gap-8">
-		  <div className="lg:shrink-0">
+        <div className="lg:flex lg:items-start lg:gap-8">
+          <div className="lg:shrink-0">
             <CollectionsSidebar
               activeCollectionId={selectedCollectionId}
               onSelect={(collectionId) => setSelectedCollectionId(collectionId)}
             />
           </div>
 
-		  <main className="min-w-0 flex-1">
+          <main className="min-w-0 flex-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-6">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex-1 relative">
@@ -305,10 +299,24 @@ export function Dashboard() {
                       )}
 
                       <div className="flex items-center justify-between">
-                        <a href={resource.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center gap-2"><ExternalLink className="w-4 h-4"/> Visit Link</a>
+                        <a
+                          href={resource.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={resource.link} // <-- Tooltip added here
+                          className="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center gap-2"
+                        >
+                          <ExternalLink className="w-4 h-4"/> Visit Link
+                        </a>
                         <div className="flex items-center gap-2">
                           {assignedCollections.map((collection) => (
-                            <span key={collection.id} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-white" style={{ backgroundColor: collection.color || '#2563eb' }}>{collection.icon || '🗂️'} {collection.name}</span>
+                            <span
+                              key={collection.id}
+                              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-white"
+                              style={{ backgroundColor: collection.color || '#2563eb' }}
+                            >
+                              {collection.icon || '🗂️'} {collection.name}
+                            </span>
                           ))}
                           {remainingCount > 0 && <span className="text-xs text-slate-500">+{remainingCount}</span>}
                         </div>
