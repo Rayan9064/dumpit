@@ -2,6 +2,24 @@
 
 A modern, full-featured web application for saving, organizing, and sharing your valuable links and resources. Built with Next.js 14, TypeScript, Tailwind CSS, and Firebase.
 
+## Table of Content
+- [Features](#-features)
+- [File Structure](#file-structure)
+- [Prerequirities](#-prerequirites)
+- [Setup steps](#️-setup-steps)
+- [Project Features](#-project-features)
+- [Development Commands](#️-development-commands)
+- [Deployment](#-deployment)
+- [Usage](#-usage)
+- [Tech stack](#️-tech-stack)
+- [Architecture](#️-architecture)
+- [Recent updates](#-recent-updates)
+- [contributing](#-contributing)
+- [License](#-license)
+- [Author](#-author)
+- [Acknowledgments](#-acknowledgments)
+
+
 ## ✨ Features
 
 ### Core Functionality
@@ -32,8 +50,55 @@ A modern, full-featured web application for saving, organizing, and sharing your
 </p>
 
 ---
+## File Structure
 
-## 🧾 **Prerequisites**
+```bash
+dumpit/
+├── .vscode/
+├── app/
+│   ├── api/
+│   │   ├── utils/
+│   │   ├── check-username/
+│   │   ├── collections/
+│   │   │   └── memberships
+│   │   ├── enrich/
+│   │   ├── public-resources/
+│   │   ├── resources/
+│   │   └── user-profile/
+│   ├── dashboard/
+│   └── login/
+├── public/
+├── src/
+│   ├── app-pages/
+│   ├── assets/
+│   ├── components/
+│   │   ├── collections/
+│   │   ├── landing/
+│   │   ├── ui/
+│   ├── contents/
+│   ├── hooks/
+│   ├── lib/
+├── .env.example
+├── .gitignore
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.MD
+├── eslint.config.js
+├── FEATURE_AI_ENRICHMENT.md
+├── FIREBASE_SETUP.md
+├── LICENSE.md
+├── next-env.d.ts
+├── next.config.js
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── README.md
+├── tailwind.config.js
+└── tsconfig.json
+
+```
+---
+
+## 🧾 **Prerequirites**
 
 Make sure you have the following installed before you start:
 
@@ -118,7 +183,7 @@ Visit 👉 [http://localhost:3000](http://localhost:3000)
 
 ---
 
-### 🧩 **Project Features**
+## 🧩 **Project Features**
 
 | Feature                      | Description                                  |
 | ---------------------------- | -------------------------------------------- |
@@ -130,7 +195,7 @@ Visit 👉 [http://localhost:3000](http://localhost:3000)
 
 ---
 
-### 🛠️ **Development Commands**
+## 🛠️ **Development Commands**
 
 | Command         | Description              |
 | --------------- | ------------------------ |
@@ -268,4 +333,6 @@ This project is open source and available under the MIT License.
 - Styled with [Tailwind CSS](https://tailwindcss.com/)
 - Icons from [Lucide](https://lucide.dev/)
 - Authentication & Database by [Firebase](https://firebase.google.com/)
+
+- [🔝 Back to Top](#dumpit---personal-resource-vault)
 
