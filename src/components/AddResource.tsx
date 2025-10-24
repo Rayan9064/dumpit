@@ -136,14 +136,14 @@ export function AddResource({ onSuccess }: AddResourceProps) {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">Add New Resource</h2>
-        <p className="text-gray-600 mt-1">Save a link to your vault</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Add New Resource</h2>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">Save a link to your vault</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="title" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Title
             </label>
             <input
@@ -152,13 +152,13 @@ export function AddResource({ onSuccess }: AddResourceProps) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="My Awesome Resource"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="link" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="link" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Link
             </label>
             <div className="flex gap-2">
@@ -177,7 +177,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
                   }
                 }}
                 placeholder="https://example.com (paste to auto-fill)"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 required
               />
               <button
@@ -268,7 +268,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
               id="tag"
               value={tag}
               onChange={(e) => setTag(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none bg-white cursor-pointer"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white cursor-pointer"
             >
               {PREDEFINED_TAGS.map((tagOption) => (
                 <option key={tagOption} value={tagOption}>

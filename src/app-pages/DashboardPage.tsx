@@ -9,6 +9,7 @@ import { AddResource } from '../components/AddResource';
 import { SharedDump } from '../components/SharedDump';
 import { Profile } from '../components/Profile';
 import { Loader2 } from 'lucide-react';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 type Page = 'dashboard' | 'add' | 'shared' | 'profile';
 
@@ -31,12 +32,14 @@ const DashboardPage = () => {
 
   // User is authenticated, show dashboard
   return (
-    <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
-      {currentPage === 'dashboard' && <Dashboard />}
-      {currentPage === 'add' && <AddResource onSuccess={() => setCurrentPage('dashboard')} />}
-      {currentPage === 'shared' && <SharedDump />}
-      {currentPage === 'profile' && <Profile />}
-    </Layout>
+    <ThemeProvider>
+      <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
+        {currentPage === 'dashboard' && <Dashboard />}
+        {currentPage  === 'add' && <AddResource onSuccess={() => setCurrentPage('dashboard')} />}
+        {currentPage === 'shared' && <SharedDump />}
+        {currentPage === 'profile' && <Profile />}
+      </Layout>
+    </ThemeProvider>
   );
 };
 
