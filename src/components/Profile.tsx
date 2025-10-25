@@ -168,10 +168,10 @@ export function Profile() {
         </form>
       </section>
 
-      <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">About DumpIt</h3>
-        <p className="text-gray-600 mb-4">DumpIt is your personal resource vault where you can save, organize, and share valuable links and resources.</p>
-        <div className="text-sm text-gray-500">Joined {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}</div>
+      <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">About DumpIt</h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">DumpIt is your personal resource vault where you can save, organize, and share valuable links and resources.</p>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Joined {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'}</div>
       </section>
     </div>
   );

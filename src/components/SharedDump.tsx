@@ -174,7 +174,7 @@ export function SharedDump() {
             <select
               value={selectedTag}
               onChange={(e) => setSelectedTag(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none bg-white cursor-pointer"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white cursor-pointer"
             >
               <option value="all">All Tags</option>
               {tags.map(tag => (
@@ -186,12 +186,12 @@ export function SharedDump() {
       </div>
 
       {filteredResources.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="w-8 h-8 text-gray-400" />
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Search className="w-8 h-8 text-gray-400 dark:text-gray-500" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No public resources found</h3>
-          <p className="text-gray-600">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No public resources found</h3>
+          <p className="text-gray-600 dark:text-gray-400">
             {resources.length === 0
               ? "No one has shared resources yet. Be the first!"
               : "Try adjusting your search or filter"}
@@ -209,17 +209,17 @@ export function SharedDump() {
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow"
               >
                 <div className="flex justify-between items-start mb-3">
-                  <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+                  <span className="px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">
                     {resource.tag}
                   </span>
                 </div>
 
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
                   {resource.title}
                 </h3>
 
                 {resource.note && (
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{resource.note}</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">{resource.note}</p>
                 )}
 
                 <div className="flex items-center gap-2 mb-4">
@@ -227,7 +227,7 @@ export function SharedDump() {
                     href={resource.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                    className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm"
                   >
                     <ExternalLink className="w-4 h-4" />
                     Visit Link
@@ -239,8 +239,8 @@ export function SharedDump() {
                   disabled={isSaved || isSaving}
                   className={`w-full py-2 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
                     isSaved
-                      ? 'bg-green-50 text-green-700 cursor-default'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 cursor-default'
+                      : 'bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-600'
                   } disabled:opacity-50`}
                 >
                   {isSaving ? (
@@ -258,7 +258,7 @@ export function SharedDump() {
                   )}
                 </button>
 
-                <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500">
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
                   {formatDate(resource.created_at)}
                 </div>
               </div>

@@ -207,16 +207,16 @@ export function AddResource({ onSuccess }: AddResourceProps) {
 
           {showComingSoon && (
             <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-                <h3 className="text-lg font-bold mb-3">AI Auto-Enrichment — Coming Soon</h3>
-                <p className="text-gray-700 mb-3">We'll automatically fetch page metadata and generate intelligent summaries and tags for you. This will:</p>
-                <ul className="list-disc list-inside text-gray-700 mb-4">
+              <div className="bg-white dark:bg-gray-800 dark:text-white rounded-lg shadow-lg p-6 max-w-md w-full">
+                <h3 className="text-lg font-bold mb-3 dark:text-white">AI Auto-Enrichment — Coming Soon</h3>
+                <p className="text-gray-700 dark:text-gray-300 mb-3">We'll automatically fetch page metadata and generate intelligent summaries and tags for you. This will:</p>
+                <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4">
                   <li>Save time by auto-filling title & description.</li>
                   <li>Provide concise, consistent summaries for better discovery.</li>
                   <li>Suggest relevant tags to improve organization.</li>
                 </ul>
                 <div className="flex justify-end">
-                  <button onClick={() => setShowComingSoon(false)} className="bg-blue-600 text-white py-2 px-4 rounded-lg">Got it</button>
+                  <button onClick={() => setShowComingSoon(false)} className="bg-blue-600 dark:bg-blue-500 text-white py-2 px-4 rounded-lg">Got it</button>
                 </div>
               </div>
             </div>
@@ -224,10 +224,10 @@ export function AddResource({ onSuccess }: AddResourceProps) {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label htmlFor="note" className="block text-sm font-semibold text-gray-700">
+              <label htmlFor="note" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Note (optional)
                 {isAiGenerated && (
-                  <span className="inline-flex items-center gap-1 text-xs text-purple-600 ml-2 font-normal">
+                    <span className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-300 ml-2 font-normal">
                     <Sparkles className="w-3 h-3" />
                     AI-generated
                   </span>
@@ -237,7 +237,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
                 <button
                   type="button"
                   onClick={() => setShowComingSoon(true)}
-                  className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium transition-colors"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 font-medium transition-colors"
                 >
                   <RefreshCw className="w-3 h-3" />
                   Regenerate (Coming Soon)
@@ -256,7 +256,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
               }}
               placeholder="AI will generate a summary when you add a link, or write your own..."
               rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
@@ -278,13 +278,13 @@ export function AddResource({ onSuccess }: AddResourceProps) {
             </select>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <label htmlFor="isPublic" className="font-semibold text-gray-700">
+                <label htmlFor="isPublic" className="font-semibold text-gray-700 dark:text-gray-300">
                   Make this resource public
                 </label>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Public resources can be viewed by others in Shared Dump
                 </p>
               </div>
@@ -292,11 +292,11 @@ export function AddResource({ onSuccess }: AddResourceProps) {
                 type="button"
                 onClick={() => setIsPublic(!isPublic)}
                 className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  isPublic ? 'bg-blue-600' : 'bg-gray-300'
+                  isPublic ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
                 }`}
               >
                 <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-100 shadow ring-0 transition duration-200 ease-in-out ${
                     isPublic ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
