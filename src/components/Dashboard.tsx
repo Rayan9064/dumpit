@@ -202,8 +202,8 @@ export function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 overflow-x-hidden">
         <div className="pt-8 pb-6">
-          <h1 className="text-3xl font-extrabold text-slate-900">My Dashboard</h1>
-          <p className="text-sm text-slate-600 mt-1">{resources.length} resources{activeCollection ? ` in “${activeCollection.name}”` : ' total'}</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">My Dashboard</h1>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{resources.length} resources{activeCollection ? ` in "${activeCollection.name}"` : ' total'}</p>
         </div>
 
 	  <div className="lg:flex lg:items-start lg:gap-8">
@@ -215,16 +215,16 @@ export function Dashboard() {
           </div>
 
 		  <main className="min-w-0 flex-1">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 mb-6">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                   <input
                     type="text"
                     placeholder="Search resources..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-slate-50 text-sm"
+                    className="w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-slate-50 dark:bg-gray-700 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                 </div>
 
@@ -232,7 +232,7 @@ export function Dashboard() {
                   <select
                     value={selectedTag}
                     onChange={(e) => setSelectedTag(e.target.value)}
-                    className="w-full pl-2 pr-2 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white text-sm"
+                    className="w-full pl-2 pr-2 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white"
                   >
                     <option value="all">All Tags</option>
                     {tags.map(tag => (
@@ -244,12 +244,12 @@ export function Dashboard() {
             </div>
 
             {filteredResources.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-8 h-8 text-gray-400" />
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-gray-400 dark:text-gray-500" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No resources found</h3>
-                <p className="text-gray-600">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No resources found</h3>
+                <p className="text-gray-600 dark:text-gray-400">
                   {resources.length === 0
                     ? "Start by adding your first resource!"
                     : "Try adjusting your search or filter"}
@@ -267,7 +267,7 @@ export function Dashboard() {
                   return (
                     <article
                       key={resource.id}
-                      className="min-w-0 min-h-[180px] bg-white rounded-lg shadow-sm border border-gray-200 p-3 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-150 relative"
+                      className="min-w-0 min-h-[180px] bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-150 relative"
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2">

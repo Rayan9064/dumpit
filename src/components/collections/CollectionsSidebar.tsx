@@ -85,12 +85,12 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
   }
 
   return (
-    <aside className="w-full lg:w-64 lg:sticky lg:top-0 lg:max-h-screen lg:overflow-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Collections</h3>
+    <aside className="w-full lg:w-64 lg:sticky lg:top-0 lg:max-h-screen lg:overflow-auto rounded-2xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 dark:border-gray-700 px-4 py-3">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">Collections</h3>
         <button
           onClick={handleCreate}
-          className="flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100"
+          className="flex items-center gap-1 rounded-lg bg-blue-50 dark:bg-blue-900/10 px-2 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/20"
         >
           <Plus className="h-4 w-4" /> New
         </button>
@@ -100,7 +100,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
         <button
           onClick={() => onSelect(null)}
           className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium ${
-            activeCollectionId === null ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100'
+            activeCollectionId === null ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-700'
           }`}
         >
           <span className="flex items-center gap-2">
@@ -114,11 +114,11 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
         {sortedCollections.map((collection, index) => {
           const isActive = activeCollectionId === collection.id
           return (
-            <div key={collection.id} className={`group flex items-center rounded-lg px-1 ${isActive ? 'bg-blue-50' : ''}`}>
+            <div key={collection.id} className={`group flex items-center rounded-lg px-1 ${isActive ? 'bg-blue-50 dark:bg-blue-900/10' : ''}`}>
               <button
                 onClick={() => onSelect(collection.id)}
                 className={`flex flex-1 items-center justify-between rounded-lg px-3 py-2 text-left text-sm ${
-                  isActive ? 'font-semibold text-blue-600' : 'text-slate-700 hover:bg-slate-100'
+                  isActive ? 'font-semibold text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-700'
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -131,7 +131,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
                   <span className="flex flex-col">
                     <span>{collection.name}</span>
                     {collection.is_shared && (
-                      <span className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-blue-500">
+                      <span className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-blue-500 dark:text-blue-400">
                         <Share2 className="h-3 w-3" /> Shared
                       </span>
                     )}
@@ -141,7 +141,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
               <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
                 <button
                   onClick={() => moveCollection(collection.id, 'up')}
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  className="rounded-md p-1 text-slate-400 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-700 hover:text-slate-600 dark:hover:text-gray-300"
                   disabled={index === 0}
                   title="Move up"
                 >
@@ -149,7 +149,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
                 </button>
                 <button
                   onClick={() => moveCollection(collection.id, 'down')}
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  className="rounded-md p-1 text-slate-400 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-700 hover:text-slate-600 dark:hover:text-gray-300"
                   disabled={index === sortedCollections.length - 1}
                   title="Move down"
                 >
@@ -157,7 +157,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
                 </button>
                 <button
                   onClick={(event) => openMenu(event, collection.id)}
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  className="rounded-md p-1 text-slate-400 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-700 hover:text-slate-600 dark:hover:text-gray-300"
                   title="Collection actions"
                 >
                   <MoreHorizontal className="h-4 w-4" />
@@ -167,8 +167,8 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
           )
         })}
 
-        <div className="mt-4 rounded-lg bg-slate-50 px-3 py-4 text-xs text-slate-600">
-          <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+        <div className="mt-4 rounded-lg bg-slate-50 dark:bg-gray-700 px-3 py-4 text-xs text-slate-600 dark:text-gray-400">
+          <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700 dark:text-gray-200">
             <Globe2 className="h-4 w-4" /> Discover shared collections
           </div>
           <p>Browse collections shared by the community directly from the Shared Dump page.</p>
@@ -178,7 +178,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
       {menuState.open && menuState.collectionId && (
         <div className="fixed inset-0 z-40" onClick={closeMenu}>
           <div
-            className="absolute z-50 w-48 rounded-lg border border-slate-200 bg-white shadow-lg"
+            className="absolute z-50 w-48 rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg"
             style={{
               top: (menuState.anchorRect?.bottom || 0) + 4,
               left: (menuState.anchorRect?.left || 0) - 96,
@@ -189,13 +189,13 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
                 const collection = collections.find((item) => item.id === menuState.collectionId)
                 if (collection) handleEdit(collection)
               }}
-              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-700"
             >
               <Pencil className="h-4 w-4" /> Edit collection
             </button>
             <button
               onClick={() => handleDelete(menuState.collectionId!)}
-              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
             >
               <Trash2 className="h-4 w-4" /> Delete collection
             </button>
