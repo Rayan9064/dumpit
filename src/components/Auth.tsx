@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { Loader2, LogIn, UserPlus } from 'lucide-react';
 import { useState } from 'react';
@@ -16,10 +16,8 @@ export function Auth() {
   const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
   const { signIn, signUp, signInWithGoogle } = useAuth();
 
-  // Username validation regex: 3-20 characters, lowercase, numbers, underscores, hyphens
   const usernameRegex = /^[a-z0-9_-]{3,20}$/;
 
-  // Map Firebase error codes to user-friendly messages
   const getFriendlyErrorMessage = (errorCode: string): string => {
     switch (errorCode) {
       case 'auth/email-already-in-use':
@@ -54,56 +52,39 @@ export function Auth() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username }),
       });
-
-      if (!response.ok) {
-        console.error('API error:', response.status);
-        return false; // Assume taken on error
-      }
-
+      if (!response.ok) return false;
       const data = await response.json();
       return data.available;
-    } catch (error) {
-      console.error('Error checking username uniqueness:', error);
-      return false; // Assume taken on error
+    } catch {
+      return false;
     }
   };
 
   const generateUsernameSuggestions = (baseUsername: string): string[] => {
     const suggestions: string[] = [];
     const cleanBase = baseUsername.replace(/[^a-z0-9_-]/g, '').toLowerCase();
-
-    // Add numbers
     for (let i = 1; i <= 5; i++) {
       suggestions.push(`${cleanBase}${i}`);
     }
-
-    // Add underscores with numbers
     for (let i = 1; i <= 3; i++) {
       suggestions.push(`${cleanBase}_${i}`);
     }
-
-    return suggestions.slice(0, 5); // Return first 5 suggestions
+    return suggestions.slice(0, 5);
   };
 
   const handleUsernameChange = async (value: string) => {
     setUsername(value);
     setUsernameError('');
     setUsernameSuggestions([]);
-
     if (value.trim() === '') return;
-
-    // Check format
     if (!validateUsernameFormat(value)) {
       setUsernameError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.');
       return;
     }
-
-    // Check uniqueness
     const isAvailable = await checkUsernameUniqueness(value);
     if (!isAvailable) {
       setUsernameError('This username is already taken.');
-      const suggestions = generateUsernameSuggestions(value);
-      setUsernameSuggestions(suggestions);
+      setUsernameSuggestions(generateUsernameSuggestions(value));
     }
   };
 
@@ -111,66 +92,52 @@ export function Auth() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
           setError(getFriendlyErrorMessage(error.code || ''));
-          setLoading(false);
         }
-        // Success - auth state change will trigger navigation
       } else {
-        // Validate username for signup
         if (!username.trim()) {
           setError('Username is required');
           setLoading(false);
           return;
         }
-
         if (!validateUsernameFormat(username)) {
           setError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.');
           setLoading(false);
           return;
         }
-
         const isAvailable = await checkUsernameUniqueness(username);
         if (!isAvailable) {
           setError('This username is already taken. Please choose a different one.');
           setLoading(false);
           return;
         }
-
         const { error } = await signUp(email, password, username);
         if (error) {
           setError(getFriendlyErrorMessage(error.code || ''));
-          setLoading(false);
         }
-        // Success - auth state change will trigger navigation
       }
-    } catch (err) {
-      console.error('Auth error:', err);
+    } catch {
       setError('An unexpected error occurred. Please try again.');
-      setLoading(false);
     }
+    setLoading(false);
   };
-  
+
   const handleGoogleSignIn = async () => {
     setError('');
     setGoogleLoading(true);
-    
     try {
       const { error } = await signInWithGoogle();
       if (error) {
         setError(getFriendlyErrorMessage(error.code || '') || 'Failed to sign in with Google');
       }
-      // Success - auth state change will trigger navigation
-    } catch (err) {
-      console.error('Google auth error:', err);
+    } catch {
       setError('An unexpected error occurred with Google sign-in. Please try again.');
-    } finally {
-      setGoogleLoading(false);
     }
+    setGoogleLoading(false);
   };
 
   return (
@@ -184,15 +151,12 @@ export function Auth() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">DumpIt</h1>
             <p className="text-gray-600">Your Personal Resource Vault</p>
           </div>
-
           <div className="flex gap-2 mb-6">
             <button
               type="button"
               onClick={() => setIsLogin(true)}
               className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                isLogin
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                isLogin ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               Login
@@ -201,15 +165,12 @@ export function Auth() {
               type="button"
               onClick={() => setIsLogin(false)}
               className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                !isLogin
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                !isLogin ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               Sign Up
             </button>
           </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
@@ -227,9 +188,7 @@ export function Auth() {
                   placeholder="johndoe"
                   required={!isLogin}
                 />
-                {usernameError && (
-                  <p className="mt-1 text-sm text-red-600">{usernameError}</p>
-                )}
+                {usernameError && <p className="mt-1 text-sm text-red-600">{usernameError}</p>}
                 {usernameSuggestions.length > 0 && (
                   <div className="mt-2">
                     <p className="text-sm text-gray-600 mb-1">Try these instead:</p>
@@ -249,7 +208,6 @@ export function Auth() {
                 )}
               </div>
             )}
-
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email
@@ -264,7 +222,6 @@ export function Auth() {
                 required
               />
             </div>
-
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Password
@@ -280,13 +237,11 @@ export function Auth() {
                 minLength={6}
               />
             </div>
-
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
-
             <button
               type="submit"
               disabled={loading || googleLoading}
@@ -306,13 +261,11 @@ export function Auth() {
                 </>
               )}
             </button>
-            
             <div className="mt-6 relative flex items-center">
               <div className="flex-grow border-t border-gray-300"></div>
               <span className="flex-shrink mx-4 text-gray-600 text-sm">or continue with</span>
               <div className="flex-grow border-t border-gray-300"></div>
             </div>
-            
             <button
               type="button"
               onClick={handleGoogleSignIn}
@@ -351,3 +304,5 @@ export function Auth() {
     </div>
   );
 }
+
+export default Auth;
