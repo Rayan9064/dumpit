@@ -18,7 +18,7 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="fixed inset-0 flex items-center justify-center w-full h-full bg-gradient-to-br from-blue-500/80 via-indigo-400/80 to-purple-600/80">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -32,11 +32,13 @@ export default function LoginPage() {
     return null
   }
 
-  // Show login component for unauthenticated users
+  // Responsive Fullscreen login with advanced background & centering
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full">
-        <Auth />
+    <div className="fixed inset-0 w-full h-full bg-gradient-to-br from-blue-500/80 via-indigo-400/80 to-purple-600/80 flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full max-w-xl px-2 sm:px-4 flex flex-col justify-center items-center h-full">
+          <Auth />
+        </div>
       </div>
     </div>
   )

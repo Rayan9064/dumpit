@@ -1,353 +1,204 @@
 'use client'
 
-import { Loader2, LogIn, UserPlus } from 'lucide-react';
-import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import Image from "next/image"
+import { useState } from "react"
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth"
+import { auth } from "@/lib/firebase"
+
+const GoogleLogo = () => (
+  <svg className="w-5 h-5 mr-2" viewBox="0 0 48 48">
+    <g>
+      <path fill="#4285F4" d="M44.5 20H24v8.5h11.6C34.6 34.6 29.6 38 24 38c-7.2 0-13-5.8-13-13s5.8-13 
+      13-13c3.2 0 6.2 1.2 8.5 3.2l6.9-6.9C34.3 6 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11.1 0 
+      20-8.9 20-20 0-1.3-.1-2.7-.3-4z"/>
+      <path fill="#34A853" d="M6.3 14.7l7 5.1C15.6 16.1 19.5 13 24 13c3.2 0 6.2 1.2 8.5 3.2l6.9-6.9C34.3 
+      6 29.4 4 24 4c-7.1 0-13.2 3.9-16.7 10.7z"/>
+      <path fill="#FBBC05" d="M24 44c5.2 0 10-1.8 13.7-5.1l-6.5-5.3C29.7 35 26.9 36 24 36c-5.5 0-10.3-
+      3.4-12.4-8.2l-7 5.4C7.1 39.1 14.9 44 24 44z"/>
+      <path fill="#EA4335" d="M44.5 20H24v8.5h11.6c-1.4 4.3-5.3 7.5-11.6 7.5-5.5 0-10.2-3.2-12.1-7.8
+      l-7-5.4C7.5 39.1 14.9 44 24 44c7.6 0 14-4.6 17.1-11.3z"/>
+    </g>
+  </svg>
+)
 
 export function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [usernameError, setUsernameError] = useState('');
-  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [tab, setTab] = useState("login") // login or signup
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [emailTouched, setEmailTouched] = useState(false)
+  const [passwordTouched, setPasswordTouched] = useState(false)
 
-  // Username validation regex: 3-20 characters, lowercase, numbers, underscores, hyphens
-  const usernameRegex = /^[a-z0-9_-]{3,20}$/;
+  // Input validations
+  const emailValid = email.includes("@") && email.includes(".")
+  const passwordValid = password.length >= 6
 
-  // Map Firebase error codes to user-friendly messages
-  const getFriendlyErrorMessage = (errorCode: string): string => {
-    switch (errorCode) {
-      case 'auth/email-already-in-use':
-        return 'This email is already registered. Try signing in instead.';
-      case 'auth/weak-password':
-        return 'Password should be at least 6 characters long.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/user-not-found':
-        return 'No account found with this email. Please sign up first.';
-      case 'auth/wrong-password':
-        return 'Incorrect password. Please try again.';
-      case 'auth/too-many-requests':
-        return 'Too many failed attempts. Please try again later.';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your connection and try again.';
-      case 'auth/user-disabled':
-        return 'This account has been disabled. Please contact support.';
-      default:
-        return 'An unexpected error occurred. Please try again.';
+  // Email/Password login or signup
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setEmailTouched(true)
+    setPasswordTouched(true)
+    if (!emailValid || !passwordValid) {
+      setError("Please fix the errors above")
+      return
     }
-  };
-
-  const validateUsernameFormat = (username: string): boolean => {
-    return usernameRegex.test(username);
-  };
-
-  const checkUsernameUniqueness = async (username: string): Promise<boolean> => {
+    setLoading(true)
+    setError("")
     try {
-      const response = await fetch('/api/check-username', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username }),
-      });
-
-      if (!response.ok) {
-        console.error('API error:', response.status);
-        return false; // Assume taken on error
-      }
-
-      const data = await response.json();
-      return data.available;
-    } catch (error) {
-      console.error('Error checking username uniqueness:', error);
-      return false; // Assume taken on error
-    }
-  };
-
-  const generateUsernameSuggestions = (baseUsername: string): string[] => {
-    const suggestions: string[] = [];
-    const cleanBase = baseUsername.replace(/[^a-z0-9_-]/g, '').toLowerCase();
-
-    // Add numbers
-    for (let i = 1; i <= 5; i++) {
-      suggestions.push(`${cleanBase}${i}`);
-    }
-
-    // Add underscores with numbers
-    for (let i = 1; i <= 3; i++) {
-      suggestions.push(`${cleanBase}_${i}`);
-    }
-
-    return suggestions.slice(0, 5); // Return first 5 suggestions
-  };
-
-  const handleUsernameChange = async (value: string) => {
-    setUsername(value);
-    setUsernameError('');
-    setUsernameSuggestions([]);
-
-    if (value.trim() === '') return;
-
-    // Check format
-    if (!validateUsernameFormat(value)) {
-      setUsernameError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.');
-      return;
-    }
-
-    // Check uniqueness
-    const isAvailable = await checkUsernameUniqueness(value);
-    if (!isAvailable) {
-      setUsernameError('This username is already taken.');
-      const suggestions = generateUsernameSuggestions(value);
-      setUsernameSuggestions(suggestions);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) {
-          setError(getFriendlyErrorMessage(error.code || ''));
-          setLoading(false);
-        }
-        // Success - auth state change will trigger navigation
+      if (tab === "login") {
+        await signInWithEmailAndPassword(auth, email, password)
       } else {
-        // Validate username for signup
-        if (!username.trim()) {
-          setError('Username is required');
-          setLoading(false);
-          return;
-        }
-
-        if (!validateUsernameFormat(username)) {
-          setError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.');
-          setLoading(false);
-          return;
-        }
-
-        const isAvailable = await checkUsernameUniqueness(username);
-        if (!isAvailable) {
-          setError('This username is already taken. Please choose a different one.');
-          setLoading(false);
-          return;
-        }
-
-        const { error } = await signUp(email, password, username);
-        if (error) {
-          setError(getFriendlyErrorMessage(error.code || ''));
-          setLoading(false);
-        }
-        // Success - auth state change will trigger navigation
+        await createUserWithEmailAndPassword(auth, email, password)
       }
-    } catch (err) {
-      console.error('Auth error:', err);
-      setError('An unexpected error occurred. Please try again.');
-      setLoading(false);
+    } catch (e: any) {
+      setError(e.message || "Authentication failed")
     }
-  };
-  
+    setLoading(false)
+  }
+
+  // Google sign in
   const handleGoogleSignIn = async () => {
-    setError('');
-    setGoogleLoading(true);
-    
+    setLoading(true)
+    setError("")
     try {
-      const { error } = await signInWithGoogle();
-      if (error) {
-        setError(getFriendlyErrorMessage(error.code || '') || 'Failed to sign in with Google');
-      }
-      // Success - auth state change will trigger navigation
-    } catch (err) {
-      console.error('Google auth error:', err);
-      setError('An unexpected error occurred with Google sign-in. Please try again.');
-    } finally {
-      setGoogleLoading(false);
+      const provider = new GoogleAuthProvider()
+      await signInWithPopup(auth, provider)
+    } catch (e: any) {
+      setError("Google sign-in failed: " + (e.message || ""))
     }
-  };
+    setLoading(false)
+  }
 
+  // UI
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mb-4">
-              <span className="text-2xl font-bold text-white">D</span>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">DumpIt</h1>
-            <p className="text-gray-600">Your Personal Resource Vault</p>
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="w-full max-w-md rounded-2xl bg-white/90 shadow-[0_12px_60px_-12px_rgba(30,64,175,0.32)] p-6 md:p-10 transition-all">
+        {/* Logo & Header */}
+        <div className="flex flex-col items-center space-y-2 pb-7 animate-fade-in">
+          <span className="block rounded-full bg-white shadow-lg p-2">
+            <Image
+              src="/logo.png"
+              alt="DumpIt Logo"
+              width={64}
+              height={64}
+              className="mx-auto"
+              priority
+            />
+          </span>
+          <h1 className="mt-3 text-3xl md:text-4xl font-extrabold text-gray-800 tracking-tight">DumpIt</h1>
+          <div className="text-gray-500 text-base md:text-lg font-medium text-center">Your Personal Resource Vault</div>
+        </div>
+        {/* Tab switch */}
+        <div className="flex justify-between items-center mb-7 gap-2">
+          {["login", "signup"].map(item => (
+            <button
+              key={item}
+              className={`flex-1 px-4 py-2 rounded-xl font-semibold border transition-all focus:outline-none hover:scale-[1.04] ${
+                tab === item
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+              onClick={() => { setTab(item); setError(""); }}
+              aria-selected={tab === item}
+            >
+              {item === "login" ? "Login" : "Sign Up"}
+            </button>
+          ))}
+        </div>
+        {/* Form */}
+        <form className="space-y-5" autoComplete="off" onSubmit={handleFormSubmit}>
+          <div>
+            <label htmlFor="email" className="block mb-1 text-gray-700 font-semibold text-sm">Email</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              className={`w-full rounded-xl border border-gray-300 p-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all ${emailTouched && !emailValid && "border-red-400"}`}
+              placeholder="you@example.com"
+              required
+              onChange={e => setEmail(e.target.value)}
+              onBlur={() => setEmailTouched(true)}
+            />
+            {emailTouched && !emailValid && <div className="text-red-500 text-xs mt-1">Enter a valid email</div>}
           </div>
-
-          <div className="flex gap-2 mb-6">
+          <div className="relative">
+            <label htmlFor="password" className="block mb-1 text-gray-700 font-semibold text-sm">Password</label>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              value={password}
+              className={`w-full rounded-xl border border-gray-300 p-3 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all ${passwordTouched && !passwordValid && "border-red-400"}`}
+              placeholder="Enter password"
+              required
+              minLength={6}
+              onChange={e => setPassword(e.target.value)}
+              onBlur={() => setPasswordTouched(true)}
+            />
             <button
               type="button"
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                isLogin
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              className="absolute top-9 right-3 text-gray-500 focus:outline-none hover:text-blue-700"
+              onClick={() => setShowPassword(val => !val)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              tabIndex={-1}
             >
-              Login
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                !isLogin
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Sign Up
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => handleUsernameChange(e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                    usernameError ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="johndoe"
-                  required={!isLogin}
-                />
-                {usernameError && (
-                  <p className="mt-1 text-sm text-red-600">{usernameError}</p>
-                )}
-                {usernameSuggestions.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-600 mb-1">Try these instead:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {usernameSuggestions.map((suggestion) => (
-                        <button
-                          key={suggestion}
-                          type="button"
-                          onClick={() => handleUsernameChange(suggestion)}
-                          className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                placeholder="••••••••"
-                required
-                minLength={6}
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading || googleLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : isLogin ? (
-                <>
-                  <LogIn className="w-5 h-5" />
-                  Login
-                </>
+              {showPassword ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.94 17.94A10.02 10.02 0 0112 20a10.02 10.02 0 01-7.94-2.06M3 3l18 18"></path>
+                </svg>
               ) : (
-                <>
-                  <UserPlus className="w-5 h-5" />
-                  Create Account
-                </>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm2.7 6.3a10 10 0 01-7.4 2.7 10 10 0 01-7.4-2.7"></path>
+                </svg>
               )}
             </button>
-            
-            <div className="mt-6 relative flex items-center">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="flex-shrink mx-4 text-gray-600 text-sm">or continue with</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-            
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={loading || googleLoading}
-              className="mt-4 w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {googleLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      fill="#34A853"
-                    />
-                    <path
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      fill="#EA4335"
-                    />
-                  </svg>
-                  Continue with Google
-                </>
-              )}
-            </button>
-          </form>
+            {passwordTouched && !passwordValid && <div className="text-red-500 text-xs mt-1">Password must be at least 6 characters</div>}
+          </div>
+          {error && (
+            <div className="text-red-600 text-sm mt-1 text-center">{error}</div>
+          )}
+          <button
+            type="submit"
+            disabled={!emailValid || !passwordValid || loading}
+            className={`w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 shadow-lg transition-all text-lg
+              ${emailValid && passwordValid && !loading ? "bg-blue-700 cursor-pointer hover:bg-blue-800" : "bg-gray-300 cursor-not-allowed"}
+            `}
+          >
+            <span>{tab === "login" ? "Login" : "Sign Up"}</span>
+            {!loading ? (
+              <svg className="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            ) : (
+              <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#fff" strokeWidth="4" fill="none"/><path d="M4 12a8 8 0 018-8v8z" fill="#fff"/></svg>
+            )}
+          </button>
+        </form>
+        {/* Social login separator and Google */}
+        <div className="flex items-center my-7">
+          <span className="border-t flex-1"></span>
+          <span className="mx-3 text-gray-400 text-xs">OR</span>
+          <span className="border-t flex-1"></span>
+        </div>
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          className="w-full py-3 flex items-center justify-center rounded-xl border border-gray-300 bg-white shadow-md hover:bg-gray-50 transition font-semibold text-base text-gray-600"
+          disabled={loading}
+        >
+          <GoogleLogo />
+          <span>{loading ? "Signing in..." : "Continue with Google"}</span>
+        </button>
+        {/* Legal/support links */}
+        <div className="flex flex-col items-center mt-5 text-xs text-gray-500 gap-1">
+          <span>By logging in, you accept our <a className="underline hover:text-blue-600" href="/privacy" tabIndex={0}>Privacy Policy</a>.</span>
+          <span>Need help? <a className="underline hover:text-blue-600" href="/support" tabIndex={0}>Contact Support</a></span>
         </div>
       </div>
     </div>
-  );
+  )
 }
