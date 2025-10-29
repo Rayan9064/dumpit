@@ -1,353 +1,203 @@
 'use client'
 
-import { Loader2, LogIn, UserPlus } from 'lucide-react';
-import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import Image from "next/image"
+import { useState } from "react"
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth"
+import { auth } from "@/lib/firebase"
 
 export function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [usernameError, setUsernameError] = useState('');
-  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [tab, setTab] = useState("login")
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [emailTouched, setEmailTouched] = useState(false)
+  const [passwordTouched, setPasswordTouched] = useState(false)
 
-  // Username validation regex: 3-20 characters, lowercase, numbers, underscores, hyphens
-  const usernameRegex = /^[a-z0-9_-]{3,20}$/;
+  const emailValid = email.includes("@") && email.includes(".")
+  const passwordValid = password.length >= 6
 
-  // Map Firebase error codes to user-friendly messages
-  const getFriendlyErrorMessage = (errorCode: string): string => {
-    switch (errorCode) {
-      case 'auth/email-already-in-use':
-        return 'This email is already registered. Try signing in instead.';
-      case 'auth/weak-password':
-        return 'Password should be at least 6 characters long.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/user-not-found':
-        return 'No account found with this email. Please sign up first.';
-      case 'auth/wrong-password':
-        return 'Incorrect password. Please try again.';
-      case 'auth/too-many-requests':
-        return 'Too many failed attempts. Please try again later.';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your connection and try again.';
-      case 'auth/user-disabled':
-        return 'This account has been disabled. Please contact support.';
-      default:
-        return 'An unexpected error occurred. Please try again.';
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setEmailTouched(true)
+    setPasswordTouched(true)
+    if (!emailValid || !passwordValid) {
+      setError("Please fix the errors above")
+      return
     }
-  };
-
-  const validateUsernameFormat = (username: string): boolean => {
-    return usernameRegex.test(username);
-  };
-
-  const checkUsernameUniqueness = async (username: string): Promise<boolean> => {
+    setLoading(true)
+    setError("")
     try {
-      const response = await fetch('/api/check-username', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username }),
-      });
-
-      if (!response.ok) {
-        console.error('API error:', response.status);
-        return false; // Assume taken on error
-      }
-
-      const data = await response.json();
-      return data.available;
-    } catch (error) {
-      console.error('Error checking username uniqueness:', error);
-      return false; // Assume taken on error
-    }
-  };
-
-  const generateUsernameSuggestions = (baseUsername: string): string[] => {
-    const suggestions: string[] = [];
-    const cleanBase = baseUsername.replace(/[^a-z0-9_-]/g, '').toLowerCase();
-
-    // Add numbers
-    for (let i = 1; i <= 5; i++) {
-      suggestions.push(`${cleanBase}${i}`);
-    }
-
-    // Add underscores with numbers
-    for (let i = 1; i <= 3; i++) {
-      suggestions.push(`${cleanBase}_${i}`);
-    }
-
-    return suggestions.slice(0, 5); // Return first 5 suggestions
-  };
-
-  const handleUsernameChange = async (value: string) => {
-    setUsername(value);
-    setUsernameError('');
-    setUsernameSuggestions([]);
-
-    if (value.trim() === '') return;
-
-    // Check format
-    if (!validateUsernameFormat(value)) {
-      setUsernameError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.');
-      return;
-    }
-
-    // Check uniqueness
-    const isAvailable = await checkUsernameUniqueness(value);
-    if (!isAvailable) {
-      setUsernameError('This username is already taken.');
-      const suggestions = generateUsernameSuggestions(value);
-      setUsernameSuggestions(suggestions);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) {
-          setError(getFriendlyErrorMessage(error.code || ''));
-          setLoading(false);
-        }
-        // Success - auth state change will trigger navigation
+      if (tab === "login") {
+        await signInWithEmailAndPassword(auth, email, password)
       } else {
-        // Validate username for signup
-        if (!username.trim()) {
-          setError('Username is required');
-          setLoading(false);
-          return;
-        }
-
-        if (!validateUsernameFormat(username)) {
-          setError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.');
-          setLoading(false);
-          return;
-        }
-
-        const isAvailable = await checkUsernameUniqueness(username);
-        if (!isAvailable) {
-          setError('This username is already taken. Please choose a different one.');
-          setLoading(false);
-          return;
-        }
-
-        const { error } = await signUp(email, password, username);
-        if (error) {
-          setError(getFriendlyErrorMessage(error.code || ''));
-          setLoading(false);
-        }
-        // Success - auth state change will trigger navigation
+        await createUserWithEmailAndPassword(auth, email, password)
       }
-    } catch (err) {
-      console.error('Auth error:', err);
-      setError('An unexpected error occurred. Please try again.');
-      setLoading(false);
+    } catch (e: any) {
+      setError(e.message || "Authentication failed")
     }
-  };
-  
+    setLoading(false)
+  }
+
   const handleGoogleSignIn = async () => {
-    setError('');
-    setGoogleLoading(true);
-    
+    setLoading(true)
+    setError("")
     try {
-      const { error } = await signInWithGoogle();
-      if (error) {
-        setError(getFriendlyErrorMessage(error.code || '') || 'Failed to sign in with Google');
-      }
-      // Success - auth state change will trigger navigation
-    } catch (err) {
-      console.error('Google auth error:', err);
-      setError('An unexpected error occurred with Google sign-in. Please try again.');
-    } finally {
-      setGoogleLoading(false);
+      const provider = new GoogleAuthProvider()
+      await signInWithPopup(auth, provider)
+    } catch (e: any) {
+      setError("Google sign-in failed: " + (e.message || ""))
     }
-  };
+    setLoading(false)
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mb-4">
-              <span className="text-2xl font-bold text-white">D</span>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">DumpIt</h1>
-            <p className="text-gray-600">Your Personal Resource Vault</p>
-          </div>
-
-          <div className="flex gap-2 mb-6">
+    <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 via-violet-400 to-purple-300 px-2">
+      <div
+        className="relative w-full max-w-md flex flex-col items-center justify-center
+        overflow-y-auto min-h-0 sm:min-h-[70vh] max-h-[98vh]
+        rounded-2xl border border-[rgba(100,170,255,0.34)]
+        bg-gradient-to-br from-white/80 via-white/70 to-blue-50/80
+        shadow-xl p-4 sm:p-7 md:p-10"
+        style={{
+          boxShadow: '0 8px 48px -8px rgba(66,110,255,0.23)'
+        }}
+      >
+        <span className="rounded-full bg-white shadow-md p-1 mb-2 -mt-4">
+          <Image src="/logo.png" alt="DumpIt Logo" width={56} height={56} className="mx-auto" priority />
+        </span>
+        <h1 className="mb-1 text-3xl md:text-4xl font-bold text-[#2075f7] text-center"
+          style={{
+            textShadow: '0 1px 22px #79b5ff, 0 0 1px #2075f7'
+          }}
+        >DumpIt</h1>
+        <div className="text-gray-700 text-base sm:text-lg mb-6 text-center font-medium">Your Personal Resource Vault</div>
+        <div className="flex justify-center w-full mb-6 gap-2">
+          {["login", "signup"].map(item => (
             <button
-              type="button"
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                isLogin
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              key={item}
+              className={`flex-1 py-2 rounded-xl text-base font-bold focus:outline-none transition-all
+              ${tab === item
+                ? "bg-[#2075f7] text-white shadow hover:bg-[#2075f7]/90"
+                : "bg-white text-[#2075f7] border border-blue-200/50 hover:bg-blue-50"}`}
+              onClick={() => { setTab(item); setError(""); }}
+              aria-selected={tab === item}
             >
-              Login
+              {item === "login" ? "Login" : "Sign Up"}
             </button>
-            <button
-              type="button"
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                !isLogin
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Sign Up
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => handleUsernameChange(e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                    usernameError ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="johndoe"
-                  required={!isLogin}
-                />
-                {usernameError && (
-                  <p className="mt-1 text-sm text-red-600">{usernameError}</p>
-                )}
-                {usernameSuggestions.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-600 mb-1">Try these instead:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {usernameSuggestions.map((suggestion) => (
-                        <button
-                          key={suggestion}
-                          type="button"
-                          onClick={() => handleUsernameChange(suggestion)}
-                          className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+          ))}
+        </div>
+        <form className="w-full flex flex-col gap-4" autoComplete="off" onSubmit={handleFormSubmit}>
+          <div>
+            <label htmlFor="email" className="block mb-1 text-gray-600 font-semibold text-[0.99rem]">Email</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              className={`w-full rounded-lg border border-gray-300 p-3 text-base bg-white focus:outline-none
+                focus:ring-2 focus:ring-[#2075f7] transition-all
+                ${emailTouched && !emailValid && "border-red-400 bg-red-50"}`}
+              placeholder="you@example.com"
+              required
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              onBlur={() => setEmailTouched(true)}
+            />
+            {emailTouched && !emailValid && (
+              <div className="text-red-500 text-xs mt-1 pl-1">Enter a valid email</div>
             )}
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
+          </div>
+          <div>
+            <label htmlFor="password" className="block mb-1 text-gray-600 font-semibold text-[0.99rem]">Password</label>
+            <div className="relative">
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
+                type={showPassword ? "text" : "password"}
                 id="password"
-                type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                placeholder="••••••••"
+                className={`w-full rounded-lg border border-gray-300 p-3 pr-12 text-base bg-white
+                  focus:outline-none focus:ring-2 focus:ring-[#2075f7] transition-all
+                  ${passwordTouched && !passwordValid && "border-red-400 bg-red-50"}`}
+                placeholder="Enter password"
                 required
                 minLength={6}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                onBlur={() => setPasswordTouched(true)}
               />
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading || googleLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : isLogin ? (
-                <>
-                  <LogIn className="w-5 h-5" />
-                  Login
-                </>
-              ) : (
-                <>
-                  <UserPlus className="w-5 h-5" />
-                  Create Account
-                </>
-              )}
-            </button>
-            
-            <div className="mt-6 relative flex items-center">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="flex-shrink mx-4 text-gray-600 text-sm">or continue with</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-            
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={loading || googleLoading}
-              className="mt-4 w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {googleLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      fill="#34A853"
-                    />
-                    <path
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      fill="#EA4335"
-                    />
+              <button
+                type="button"
+                className="absolute top-3 right-4 text-gray-400 focus:outline-none hover:text-[#2075f7]"
+                onClick={() => setShowPassword(val => !val)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.94 17.94A10.02 10.02 0 0112 20a10.02 10.02 0 01-7.94-2.06M3 3l18 18"></path>
                   </svg>
-                  Continue with Google
-                </>
-              )}
-            </button>
-          </form>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm2.7 6.3a10 10 0 01-7.4 2.7 10 10 0 01-7.4-2.7"></path>
+                  </svg>
+                )}
+              </button>
+            </div>
+            {passwordTouched && !passwordValid && (
+              <div className="text-red-500 text-xs mt-1 pl-1">Password must be at least 6 characters</div>
+            )}
+          </div>
+          {error && (
+            <div className="text-red-600 text-sm mt-1 text-center">{error}</div>
+          )}
+          <button
+            type="submit"
+            disabled={!emailValid || !passwordValid || loading}
+            className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 shadow-lg
+              text-[1.07rem] transition-all
+              ${emailValid && passwordValid && !loading
+                ? "bg-gradient-to-r from-[#287ffd] via-[#0b4edf] to-[#2ac6fa] text-white hover:brightness-110"
+                : "bg-gradient-to-r from-gray-300 to-gray-200 text-white"
+              }`}
+          >
+            <span>{tab === "login" ? "Login" : "Sign Up"}</span>
+            {!loading ? (
+              <svg className="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            ) : (
+              <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#fff" strokeWidth="4" fill="none"/><path d="M4 12a8 8 0 018-8v8z" fill="#fff"/></svg>
+            )}
+          </button>
+        </form>
+        <div className="flex items-center my-7 w-full">
+          <span className="border-t flex-1"></span>
+          <span className="mx-3 text-gray-400 text-xs">OR</span>
+          <span className="border-t flex-1"></span>
+        </div>
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          className="w-full py-3 flex items-center justify-center rounded-lg border border-gray-300
+          bg-white shadow hover:bg-blue-50/50 transition font-semibold text-base text-gray-700"
+          disabled={loading}
+        >
+          <Image
+            src="/Google.png"
+            alt="Google logo"
+            width={24}
+            height={24}
+            className="mr-2"
+            style={{ objectFit: "cover" }}
+          />
+          <span>{loading ? "Signing in..." : "Continue with Google"}</span>
+        </button>
+        <div className="flex flex-col items-center mt-5 text-xs text-gray-500 gap-1">
+          <span>By logging in, you accept our <a className="underline hover:text-[#2075f7]" href="/privacy" tabIndex={0}>Privacy Policy</a>.</span>
+          <span>Need help? <a className="underline hover:text-[#2075f7]" href="/support" tabIndex={0}>Contact Support</a></span>
         </div>
       </div>
     </div>
-  );
+  )
 }
