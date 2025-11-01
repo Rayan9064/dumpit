@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUrlEnrichment } from '../hooks/useUrlEnrichment';
 import { MetadataPreviewCard } from './ui/MetadataPreviewCard';
+import { ShareModal } from './ui/ShareModal';
 
 const PREDEFINED_TAGS = [
   'Tutorial',
@@ -44,6 +45,8 @@ export function AddResource({ onSuccess }: AddResourceProps) {
   const [isAiGenerated, setIsAiGenerated] = useState(false);
   const [metadata, _setMetadata] = useState<any>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [sharedResourceData, setSharedResourceData] = useState<{title: string, note?: string}>({title: '', note: ''});
   const { loading: enriching, error: enrichError } = useUrlEnrichment();
 
   useEffect(() => {
@@ -101,15 +104,24 @@ export function AddResource({ onSuccess }: AddResourceProps) {
       }
 
       setSuccess(true);
+      
+      // Store resource data for sharing
+      setSharedResourceData({
+        title: title,
+        note: note.trim() || undefined
+      });
+
+      // Reset form
       setTitle('');
       setLink('');
       setNote('');
       setTag(PREDEFINED_TAGS[0]);
       setIsPublic(userProfile?.share_by_default || false);
 
+      // Show share modal after a brief success message
       setTimeout(() => {
         setSuccess(false);
-        onSuccess();
+        setShowShareModal(true);
       }, 1500);
     } catch (error: any) {
       setError(error.message || 'Failed to add resource. Please try again.');
@@ -131,6 +143,11 @@ export function AddResource({ onSuccess }: AddResourceProps) {
     } catch {
       return false;
     }
+  };
+
+  const handleShareModalClose = () => {
+    setShowShareModal(false);
+    onSuccess();
   };
 
   return (
@@ -333,6 +350,14 @@ export function AddResource({ onSuccess }: AddResourceProps) {
           </button>
         </form>
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={handleShareModalClose}
+        resourceTitle={sharedResourceData.title}
+        resourceNote={sharedResourceData.note}
+      />
     </div>
   );
 }
