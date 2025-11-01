@@ -98,34 +98,34 @@ export function CollectionFormModal({ open, title, initialData, onClose, onSubmi
         }
       }}
     >
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl mx-2 relative" style={{ minWidth: 0 }}>
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 shadow-2xl mx-2 relative" style={{ minWidth: 0 }}>
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-gray-700 px-6 py-4">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h2>
+          <button onClick={onClose} className="text-slate-400 dark:text-gray-400 hover:text-slate-600 dark:hover:text-gray-200">
             <X className="h-5 w-5" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700">Name</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-gray-300">Name</label>
             <input
               type="text"
               value={formState.name}
               onChange={(e) => setFormState((prev) => ({ ...prev, name: e.target.value }))}
               placeholder="Frontend Favorites"
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              className="mt-2 w-full rounded-lg border border-slate-200 dark:border-gray-600 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700">Description</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-gray-300">Description</label>
             <textarea
               value={formState.description}
               onChange={(e) => setFormState((prev) => ({ ...prev, description: e.target.value }))}
               placeholder="A curated list of my go-to frontend tools."
               rows={3}
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              className="mt-2 w-full rounded-lg border border-slate-200 dark:border-gray-600 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
@@ -150,7 +150,7 @@ export function CollectionFormModal({ open, title, initialData, onClose, onSubmi
                     key={color}
                     onClick={() => setFormState((prev) => ({ ...prev, color }))}
                     className={`h-8 w-8 rounded-full border-2 ${
-                      formState.color === color ? 'border-slate-900 ring-2 ring-offset-1 ring-offset-white ring-slate-400' : 'border-transparent'
+                      formState.color === color ? 'border-slate-900 ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900 ring-slate-400 dark:ring-slate-600' : 'border-transparent'
                     }`}
                     style={{ backgroundColor: color }}
                     aria-label={`Select color ${color}`}
@@ -160,23 +160,23 @@ export function CollectionFormModal({ open, title, initialData, onClose, onSubmi
             </div>
           </div>
 
-          <label className="flex items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 text-sm">
+          <label className="flex items-center gap-3 rounded-lg border border-slate-200 dark:border-gray-700 px-4 py-3 text-sm bg-white dark:bg-gray-700">
             <input
               type="checkbox"
               checked={formState.is_shared}
               onChange={(e) => setFormState((prev) => ({ ...prev, is_shared: e.target.checked }))}
-              className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              className="h-4 w-4 rounded border-slate-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
             />
             <div>
-              <span className="font-medium text-slate-800">Share this collection</span>
-              <p className="text-xs text-slate-500">Shared collections can be discovered by other users.</p>
+              <span className="font-medium text-slate-800 dark:text-white">Share this collection</span>
+              <p className="text-xs text-slate-500 dark:text-gray-400">Shared collections can be discovered by other users.</p>
             </div>
           </label>
 
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+          {error && <p className="rounded-lg bg-red-50 dark:bg-red-900/20 px-3 py-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-          <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">
-            <button type="button" onClick={onClose} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+          <div className="flex justify-end gap-3 border-t border-slate-200 dark:border-gray-700 pt-4">
+            <button type="button" onClick={onClose} className="rounded-lg border border-slate-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-slate-600 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/50">
               Cancel
             </button>
             <button
