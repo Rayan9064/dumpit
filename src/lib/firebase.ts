@@ -1,52 +1,20 @@
-import { isSupported as analyticsSupported, getAnalytics } from 'firebase/analytics';
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+// src/lib/firebase.ts
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
-// Read config from Next.js env. These should be set in your .env as NEXT_PUBLIC_FIREBASE_*
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyBMPM93qI02vLppxEOwIRF13JZqRf_kbQs",
+  authDomain: "dumpit-50760.firebaseapp.com",
+  projectId: "dumpit-50760",
+  storageBucket: "dumpit-50760.appspot.com",
+  messagingSenderId: "924635227217",
+  appId: "1:924635227217:web:aecaee9b8591294e274470",
+  measurementId: "G-FX15XKQWJN"
 };
 
-// Validate required keys
-const requiredKeys = ['apiKey', 'authDomain', 'projectId', 'appId'] as const;
-const missing = requiredKeys.filter((k) => !(firebaseConfig as any)[k]);
-const isDummyConfig = missing.length > 0 || firebaseConfig.apiKey?.includes('Dummy') || firebaseConfig.apiKey?.includes('dummy');
+const app = initializeApp(firebaseConfig);
 
-if (isDummyConfig) {
-  // eslint-disable-next-line no-console
-  console.warn(
-    '⚠️  Firebase configuration is incomplete or using dummy values. \n' +
-    'Please add NEXT_PUBLIC_FIREBASE_* environment variables to your .env.local file.\n' +
-    'See FIREBASE_SETUP.md for instructions.'
-  );
-}
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig as any);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-
-// Guard analytics initialization: it will fail in SSR or if measurementId is not provided
-(async () => {
-  try {
-    if (firebaseConfig.measurementId && typeof window !== 'undefined') {
-      const ok = await analyticsSupported();
-      if (ok) {
-        getAnalytics(app);
-      }
-    }
-  } catch (err) {
-    // Not fatal — analytics optional, but surface the error to console for debugging
-    // eslint-disable-next-line no-console
-    console.warn('Firebase analytics not available:', err);
-  }
-})();
-
-export default app;
+// REMOVE analytics initialization here!
