@@ -16,7 +16,7 @@ export function ShareModal({ isOpen, onClose, resourceTitle, resourceNote }: Sha
   if (!isOpen) return null;
 
   // Create a mock public link for the resource
-  const publicLink = `https://dumpit.app/shared/${Date.now()}`;
+  const publicLink = `https://dumpit-three.vercel.app/`;
   const userHandle = '@DumpItApp';
 
   const handleTwitterShare = () => {
@@ -26,8 +26,9 @@ export function ShareModal({ isOpen, onClose, resourceTitle, resourceNote }: Sha
   };
 
   const handleLinkedInShare = () => {
-    const linkedInText = `Just discovered: "${resourceTitle}"\n\n${resourceNote ? `${resourceNote.substring(0, 150)}...` : ''}\n\nWorth checking out: ${publicLink}\n\nShared via DumpIt ${userHandle}`;
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicLink)}&summary=${encodeURIComponent(linkedInText)}`;
+    const linkedInTitle = `Just discovered: "${resourceTitle}"`;
+    const linkedInSummary = `${resourceNote ? `${resourceNote.substring(0, 150)}...` : 'Worth checking out!'}\n\nShared via DumpIt ${userHandle}`;
+    const url = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(linkedInTitle + '\n\n' + linkedInSummary + '\n\n' + publicLink)}`;
     window.open(url, '_blank');
   };
 
