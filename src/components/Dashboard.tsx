@@ -1,6 +1,7 @@
 'use client'
 
 import { Edit, ExternalLink, FolderPlus, Globe, Loader2, Lock, MoreHorizontal, Search, Trash2 } from 'lucide-react';
+import { Tooltip } from 'react-tooltip';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCollections, type Collection } from '../contexts/CollectionsContext';
@@ -305,7 +306,7 @@ export function Dashboard() {
                       )}
 
                       <div className="flex items-center justify-between">
-                        <a href={resource.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center gap-2"><ExternalLink className="w-4 h-4"/> Visit Link</a>
+                        <a href={resource.link} target="_blank" rel="noopener noreferrer" data-tooltip-id="dashboard-tooltip" data-tooltip-content={resource.link} className="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center gap-2"><ExternalLink className="w-4 h-4"/> Visit Link</a>
                         <div className="flex items-center gap-2">
                           {assignedCollections.map((collection) => (
                             <span key={collection.id} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-white" style={{ backgroundColor: collection.color || '#2563eb' }}>{collection.icon || '🗂️'} {collection.name}</span>
@@ -323,6 +324,7 @@ export function Dashboard() {
           </main>
         </div>
       </div>
+      <Tooltip id="dashboard-tooltip" />
     </>
   );
 }

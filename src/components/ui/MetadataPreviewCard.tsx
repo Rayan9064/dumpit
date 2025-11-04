@@ -1,4 +1,5 @@
 import { ExternalLink } from 'lucide-react';
+import { Tooltip } from 'react-tooltip';
 import { EnrichmentResult } from '../../hooks/useUrlEnrichment';
 
 interface MetadataPreviewCardProps {
@@ -33,7 +34,8 @@ export function MetadataPreviewCard({ metadata, url }: MetadataPreviewCardProps)
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-700 transition-colors flex-shrink-0"
-              title="Open link"
+              data-tooltip-id="metadata-tooltip"
+              data-tooltip-content={url}
             >
               <ExternalLink className="w-4 h-4" />
             </a>
@@ -46,6 +48,7 @@ export function MetadataPreviewCard({ metadata, url }: MetadataPreviewCardProps)
           )}
         </div>
       </div>
+      <Tooltip id="metadata-tooltip" />
     </div>
   );
 }
