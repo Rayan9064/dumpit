@@ -1,6 +1,7 @@
 'use client'
 
 import { CheckCircle, ExternalLink, Filter, Loader2, Plus, Search } from 'lucide-react';
+import { Tooltip } from 'react-tooltip';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -227,7 +228,8 @@ export function SharedDump() {
                     href={resource.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title={resource.link}
+                    data-tooltip-id="shared-dump-tooltip"
+                    data-tooltip-content={resource.link}
                     className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -267,6 +269,7 @@ export function SharedDump() {
           })}
         </div>
       )}
+      <Tooltip id="shared-dump-tooltip" />
     </div>
   );
 }
