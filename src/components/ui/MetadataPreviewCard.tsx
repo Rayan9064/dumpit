@@ -33,7 +33,7 @@ export function MetadataPreviewCard({ metadata, url }: MetadataPreviewCardProps)
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-700 transition-colors flex-shrink-0"
-              title="Open link"
+              title={url}
             >
               <ExternalLink className="w-4 h-4" />
             </a>

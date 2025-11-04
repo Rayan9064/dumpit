@@ -305,7 +305,7 @@ export function Dashboard() {
                       )}
 
                       <div className="flex items-center justify-between">
-                        <a href={resource.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center gap-2"><ExternalLink className="w-4 h-4"/> Visit Link</a>
+                        <a href={resource.link} target="_blank" rel="noopener noreferrer" title={resource.link} className="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center gap-2"><ExternalLink className="w-4 h-4"/> Visit Link</a>
                         <div className="flex items-center gap-2">
                           {assignedCollections.map((collection) => (
                             <span key={collection.id} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-white" style={{ backgroundColor: collection.color || '#2563eb' }}>{collection.icon || '🗂️'} {collection.name}</span>
