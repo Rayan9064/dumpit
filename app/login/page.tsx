@@ -10,7 +10,6 @@ export default function LoginPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // If user is already authenticated, redirect to dashboard
     if (!loading && user) {
       router.push('/dashboard')
     }
@@ -18,26 +17,16 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-gradient-to-br from-blue-500 via-indigo-400 to-purple-600">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/30 border-t-white mx-auto mb-4"></div>
+          <p className="text-white font-semibold text-lg">Loading...</p>
         </div>
       </div>
     )
   }
 
-  // If user is authenticated, don't render anything (effect will redirect)
-  if (user) {
-    return null
-  }
+  if (user) return null
 
-  // Show login component for unauthenticated users
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full">
-        <Auth />
-      </div>
-    </div>
-  )
+  return <Auth />
 }

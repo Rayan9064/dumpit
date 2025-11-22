@@ -1,353 +1,281 @@
 'use client'
 
-import { Loader2, LogIn, UserPlus } from 'lucide-react';
-import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import Image from "next/image"
+import { useState } from "react"
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth"
+import { auth } from "@/lib/firebase"
 
 export function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [usernameError, setUsernameError] = useState('');
-  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [tab, setTab] = useState<"login" | "signup">("login")
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [emailTouched, setEmailTouched] = useState(false)
+  const [passwordTouched, setPasswordTouched] = useState(false)
 
-  // Username validation regex: 3-20 characters, lowercase, numbers, underscores, hyphens
-  const usernameRegex = /^[a-z0-9_-]{3,20}$/;
+  const emailValid = email.includes("@") && email.includes(".")
+  const passwordValid = password.length >= 6
 
-  // Map Firebase error codes to user-friendly messages
-  const getFriendlyErrorMessage = (errorCode: string): string => {
-    switch (errorCode) {
-      case 'auth/email-already-in-use':
-        return 'This email is already registered. Try signing in instead.';
-      case 'auth/weak-password':
-        return 'Password should be at least 6 characters long.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/user-not-found':
-        return 'No account found with this email. Please sign up first.';
-      case 'auth/wrong-password':
-        return 'Incorrect password. Please try again.';
-      case 'auth/too-many-requests':
-        return 'Too many failed attempts. Please try again later.';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your connection and try again.';
-      case 'auth/user-disabled':
-        return 'This account has been disabled. Please contact support.';
-      default:
-        return 'An unexpected error occurred. Please try again.';
-    }
-  };
-
-  const validateUsernameFormat = (username: string): boolean => {
-    return usernameRegex.test(username);
-  };
-
-  const checkUsernameUniqueness = async (username: string): Promise<boolean> => {
-    try {
-      const response = await fetch('/api/check-username', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username }),
-      });
-
-      if (!response.ok) {
-        console.error('API error:', response.status);
-        return false; // Assume taken on error
-      }
-
-      const data = await response.json();
-      return data.available;
-    } catch (error) {
-      console.error('Error checking username uniqueness:', error);
-      return false; // Assume taken on error
-    }
-  };
-
-  const generateUsernameSuggestions = (baseUsername: string): string[] => {
-    const suggestions: string[] = [];
-    const cleanBase = baseUsername.replace(/[^a-z0-9_-]/g, '').toLowerCase();
-
-    // Add numbers
-    for (let i = 1; i <= 5; i++) {
-      suggestions.push(`${cleanBase}${i}`);
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setEmailTouched(true)
+    setPasswordTouched(true)
+    
+    if (!emailValid || !passwordValid) {
+      setError("Please fix the errors above")
+      return
     }
 
-    // Add underscores with numbers
-    for (let i = 1; i <= 3; i++) {
-      suggestions.push(`${cleanBase}_${i}`);
-    }
-
-    return suggestions.slice(0, 5); // Return first 5 suggestions
-  };
-
-  const handleUsernameChange = async (value: string) => {
-    setUsername(value);
-    setUsernameError('');
-    setUsernameSuggestions([]);
-
-    if (value.trim() === '') return;
-
-    // Check format
-    if (!validateUsernameFormat(value)) {
-      setUsernameError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.');
-      return;
-    }
-
-    // Check uniqueness
-    const isAvailable = await checkUsernameUniqueness(value);
-    if (!isAvailable) {
-      setUsernameError('This username is already taken.');
-      const suggestions = generateUsernameSuggestions(value);
-      setUsernameSuggestions(suggestions);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) {
-          setError(getFriendlyErrorMessage(error.code || ''));
-          setLoading(false);
-        }
-        // Success - auth state change will trigger navigation
-      } else {
-        // Validate username for signup
-        if (!username.trim()) {
-          setError('Username is required');
-          setLoading(false);
-          return;
-        }
-
-        if (!validateUsernameFormat(username)) {
-          setError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.');
-          setLoading(false);
-          return;
-        }
-
-        const isAvailable = await checkUsernameUniqueness(username);
-        if (!isAvailable) {
-          setError('This username is already taken. Please choose a different one.');
-          setLoading(false);
-          return;
-        }
-
-        const { error } = await signUp(email, password, username);
-        if (error) {
-          setError(getFriendlyErrorMessage(error.code || ''));
-          setLoading(false);
-        }
-        // Success - auth state change will trigger navigation
-      }
-    } catch (err) {
-      console.error('Auth error:', err);
-      setError('An unexpected error occurred. Please try again.');
-      setLoading(false);
-    }
-  };
-  
-  const handleGoogleSignIn = async () => {
-    setError('');
-    setGoogleLoading(true);
+    setLoading(true)
+    setError("")
     
     try {
-      const { error } = await signInWithGoogle();
-      if (error) {
-        setError(getFriendlyErrorMessage(error.code || '') || 'Failed to sign in with Google');
+      if (tab === "login") {
+        await signInWithEmailAndPassword(auth, email, password)
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password)
       }
-      // Success - auth state change will trigger navigation
-    } catch (err) {
-      console.error('Google auth error:', err);
-      setError('An unexpected error occurred with Google sign-in. Please try again.');
+    } catch (e: any) {
+      setError(e.message || "Authentication failed")
     } finally {
-      setGoogleLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true)
+    setError("")
+    
+    try {
+      const provider = new GoogleAuthProvider()
+      await signInWithPopup(auth, provider)
+    } catch (e: any) {
+      setError("Google sign-in failed: " + (e.message || ""))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mb-4">
-              <span className="text-2xl font-bold text-white">D</span>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">DumpIt</h1>
-            <p className="text-gray-600">Your Personal Resource Vault</p>
+    <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-400 to-purple-600 p-4 sm:p-6 overflow-y-auto">
+      <div
+        className="relative w-full max-w-md my-auto rounded-2xl border border-blue-200/40 bg-white/95 backdrop-blur-sm shadow-2xl p-6 sm:p-8 md:p-10"
+        style={{
+          boxShadow: '0 10px 60px -10px rgba(66, 110, 255, 0.4)'
+        }}
+      >
+        <div className="flex justify-center mb-4">
+          <div className="rounded-full bg-white shadow-lg p-2">
+            <Image 
+              src="/logo.png" 
+              alt="DumpIt Logo" 
+              width={64} 
+              height={64} 
+              className="w-14 h-14 sm:w-16 sm:h-16" 
+              priority 
+            />
           </div>
+        </div>
 
-          <div className="flex gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                isLogin
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Login
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                !isLogin
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Sign Up
-            </button>
-          </div>
+        <h1 
+          className="mb-2 text-3xl sm:text-4xl font-bold text-[#2075f7] text-center"
+          style={{
+            textShadow: '0 2px 24px rgba(32, 117, 247, 0.3)'
+          }}
+        >
+          DumpIt
+        </h1>
+        
+        <p className="text-gray-600 text-sm sm:text-base mb-6 text-center font-medium">
+          Your Personal Resource Vault
+        </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => handleUsernameChange(e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                    usernameError ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="johndoe"
-                  required={!isLogin}
-                />
-                {usernameError && (
-                  <p className="mt-1 text-sm text-red-600">{usernameError}</p>
-                )}
-                {usernameSuggestions.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-600 mb-1">Try these instead:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {usernameSuggestions.map((suggestion) => (
-                        <button
-                          key={suggestion}
-                          type="button"
-                          onClick={() => handleUsernameChange(suggestion)}
-                          className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+        <div className="flex justify-center w-full mb-6 gap-2">
+          {(["login", "signup"] as const).map((item) => (
+            <button
+              key={item}
+              className={`flex-1 py-2.5 rounded-xl text-sm sm:text-base font-bold focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all
+              ${tab === item
+                ? "bg-[#2075f7] text-white shadow-lg hover:bg-[#1a5fd6]"
+                : "bg-white text-[#2075f7] border-2 border-blue-200 hover:bg-blue-50"}`}
+              onClick={() => {
+                setTab(item)
+                setError("")
+              }}
+              aria-selected={tab === item}
+              role="tab"
+            >
+              {item === "login" ? "Login" : "Sign Up"}
+            </button>
+          ))}
+        </div>
+
+        <form className="w-full flex flex-col gap-4" autoComplete="off" onSubmit={handleFormSubmit}>
+          <div>
+            <label htmlFor="email" className="block mb-1.5 text-gray-700 font-semibold text-sm">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              className={`w-full rounded-lg border-2 p-3 text-sm sm:text-base bg-white focus:outline-none transition-all
+                ${emailTouched && !emailValid 
+                  ? "border-red-400 bg-red-50 focus:ring-2 focus:ring-red-400" 
+                  : "border-gray-300 focus:border-[#2075f7] focus:ring-2 focus:ring-blue-200"
+                }`}
+              placeholder="you@example.com"
+              required
+              onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => setEmailTouched(true)}
+              disabled={loading}
+            />
+            {emailTouched && !emailValid && (
+              <p className="text-red-500 text-xs mt-1.5 pl-1">
+                Please enter a valid email address
+              </p>
             )}
+          </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
+          <div>
+            <label htmlFor="password" className="block mb-1.5 text-gray-700 font-semibold text-sm">
+              Password
+            </label>
+            <div className="relative">
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
+                type={showPassword ? "text" : "password"}
                 id="password"
-                type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                placeholder="••••••••"
+                className={`w-full rounded-lg border-2 p-3 pr-12 text-sm sm:text-base bg-white focus:outline-none transition-all
+                  ${passwordTouched && !passwordValid 
+                    ? "border-red-400 bg-red-50 focus:ring-2 focus:ring-red-400" 
+                    : "border-gray-300 focus:border-[#2075f7] focus:ring-2 focus:ring-blue-200"
+                  }`}
+                placeholder="Enter password"
                 required
                 minLength={6}
+                onChange={(e) => setPassword(e.target.value)}
+                onBlur={() => setPasswordTouched(true)}
+                disabled={loading}
               />
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading || googleLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : isLogin ? (
-                <>
-                  <LogIn className="w-5 h-5" />
-                  Login
-                </>
-              ) : (
-                <>
-                  <UserPlus className="w-5 h-5" />
-                  Create Account
-                </>
-              )}
-            </button>
-            
-            <div className="mt-6 relative flex items-center">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="flex-shrink mx-4 text-gray-600 text-sm">or continue with</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-            
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={loading || googleLoading}
-              className="mt-4 w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {googleLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      fill="#34A853"
-                    />
-                    <path
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      fill="#EA4335"
-                    />
+              <button
+                type="button"
+                className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-400 hover:text-[#2075f7] focus:outline-none transition-colors"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                tabIndex={-1}
+                disabled={loading}
+              >
+                {showPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                   </svg>
-                  Continue with Google
-                </>
-              )}
-            </button>
-          </form>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            {passwordTouched && !passwordValid && (
+              <p className="text-red-500 text-xs mt-1.5 pl-1">
+                Password must be at least 6 characters
+              </p>
+            )}
+          </div>
+
+          {error && (
+            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={!emailValid || !passwordValid || loading}
+            className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 shadow-lg text-base sm:text-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2
+              ${emailValid && passwordValid && !loading
+                ? "bg-gradient-to-r from-[#2075f7] to-[#1a5fd6] text-white hover:from-[#1a5fd6] hover:to-[#154bb8] focus:ring-blue-500 cursor-pointer"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+          >
+            {loading ? (
+              <>
+                <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24">
+                  <circle 
+                    className="opacity-25" 
+                    cx="12" 
+                    cy="12" 
+                    r="10" 
+                    stroke="currentColor" 
+                    strokeWidth="4" 
+                    fill="none"
+                  />
+                  <path 
+                    className="opacity-75" 
+                    fill="currentColor" 
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>{tab === "login" ? "Logging in..." : "Signing up..."}</span>
+              </>
+            ) : (
+              <>
+                <span>{tab === "login" ? "Login" : "Sign Up"}</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="flex items-center my-6 w-full">
+          <div className="border-t border-gray-300 flex-1"></div>
+          <span className="mx-4 text-gray-400 text-xs font-medium">OR</span>
+          <div className="border-t border-gray-300 flex-1"></div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          className="w-full py-3 flex items-center justify-center gap-3 rounded-lg border-2 border-gray-300 bg-white shadow-md hover:bg-gray-50 hover:border-gray-400 hover:shadow-lg transition-all font-semibold text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={loading}
+        >
+          <Image
+            src="/Google.png"
+            alt="Google"
+            width={24}
+            height={24}
+            className="w-5 h-5 sm:w-6 sm:h-6"
+          />
+          <span>{loading ? "Signing in..." : "Continue with Google"}</span>
+        </button>
+
+        <div className="flex flex-col items-center mt-6 text-xs text-gray-500 gap-1.5">
+          <span>
+            By logging in, you accept our{" "}
+            <a className="underline hover:text-[#2075f7] transition-colors" href="/privacy">
+              Privacy Policy
+            </a>
+            .
+          </span>
+          <span>
+            Need help?{" "}
+            <a className="underline hover:text-[#2075f7] transition-colors" href="/support">
+              Contact Support
+            </a>
+          </span>
         </div>
       </div>
     </div>
-  );
+  )
 }
