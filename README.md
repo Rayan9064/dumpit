@@ -77,10 +77,31 @@ npm install
 
 ### 4️⃣ Configure Environment Variables
 
-Create a file named `.env.local` in your project root directory and paste your Firebase configuration 👇
+Copy the example env file and populate the values. The repo includes a committed ` .env.example` with the variables used by the project.
+
+PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Unix / macOS:
 
 ```bash
-# 🔓 Firebase Client Configuration (Visible to Browser)
+cp .env.example .env
+```
+
+Then open `.env` and fill in the values. Notes:
+- Client-side vars should be `NEXT_PUBLIC_*` (used by Next.js in `src/lib/firebase.ts`). Some files and comments reference `VITE_*`; if you use a Vite-based workflow, the example includes those variants as well.
+- Server-side (Admin) vars are required for Firebase Admin SDK and must never be exposed to the browser. These are:
+   - `FIREBASE_PROJECT_ID`
+   - `FIREBASE_CLIENT_EMAIL`
+   - `FIREBASE_PRIVATE_KEY` (must contain newlines; in many hosts you should replace real newlines with `\n`)
+
+Example values you should populate in `.env`:
+
+```env
+# Client (public) - set these for the browser
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
@@ -88,17 +109,19 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
-# 🔐 Firebase Admin SDK (Server-side only – Keep this secret!)
+# Server (admin) - keep these secret
 FIREBASE_PROJECT_ID=your_project_id
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
 
-# 🤖 Optional: Gemini AI Integration
-GEMINI_API_KEY=your-gemini-api-key
-GEMINI_MODEL=gemini-2.0-flash-exp
+# Optional: Gemini AI (examples included)
+VITE_GEMINI_API_KEY=your_gemini_api_key
+VITE_GEMINI_MODEL=gemini-2.5-pro
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-2.5-pro
 ```
 
-> ⚠️ **Important:** Do not share or commit your `.env.local` file. Add it to `.gitignore`.
+> ⚠️ **Important:** Do not share or commit your `.env` file. `.gitignore` already excludes `.env` and `.env.local`.
 
 ---
 

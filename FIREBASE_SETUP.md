@@ -85,6 +85,28 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 VITE_FIREBASE_APP_ID=1:123456789:web:abcdef123456
 ```
 
+### 6.a Firebase Admin (Server) credentials
+
+The server-side code (Firebase Admin SDK) requires service account credentials. Create a service account in the Firebase Console and download the JSON key:
+
+1. Go to **Firebase Console → Project Settings → Service accounts**
+2. Click **Generate new private key** and download the JSON file
+
+From the downloaded JSON, set these environment variables on your server or in your local `.env` (do NOT commit):
+
+```env
+# Server-only (Firebase Admin SDK)
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com
+# Copy the private_key value from the JSON. If your platform requires a single-line env value
+# replace actual newlines with the literal \n sequence.
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_CONTENT\n-----END PRIVATE KEY-----\n"
+```
+
+Notes:
+- The code in `app/api/_utils/firebaseAdmin.ts` reads these variables and will throw an error if they are missing.
+- For many hosting providers you must escape newlines in `FIREBASE_PRIVATE_KEY` (replace real newlines with `\n`). Locally you can keep real newlines by wrapping the value in quotes.
+
 ### 7. Create Firestore Indexes (if needed)
 
 If you get index errors when running queries, Firebase will show a link in the console error to auto-create the index. Just click it!
