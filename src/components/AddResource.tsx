@@ -3,6 +3,7 @@
 import { CheckCircle, Loader2, Plus, RefreshCw, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useCollections } from '../contexts/CollectionsContext';
 import { useUrlEnrichment } from '../hooks/useUrlEnrichment';
 import { MetadataPreviewCard } from './ui/MetadataPreviewCard';
 import { ShareModal } from './ui/ShareModal';
@@ -37,6 +38,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
   const [link, setLink] = useState('');
   const [note, setNote] = useState('');
   const [tag, setTag] = useState(PREDEFINED_TAGS[0]);
+  const [selectedCollectionId, setSelectedCollectionId] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -54,6 +56,8 @@ export function AddResource({ onSuccess }: AddResourceProps) {
       loadUserProfile();
     }
   }, [user]);
+
+  const { collections, loading: collectionsLoading } = useCollections();
 
   const loadUserProfile = async () => {
     try {
@@ -89,13 +93,14 @@ export function AddResource({ onSuccess }: AddResourceProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: user!.uid,
-          title,
-          link,
-          note: note.trim() || null,
-          tag,
-          is_public: isPublic,
-        }),
+            user_id: user!.uid,
+            title,
+            link,
+            note: note.trim() || null,
+            tag,
+            is_public: isPublic,
+            collection_ids: selectedCollectionId ? [selectedCollectionId] : [],
+          }),
       });
 
       if (!response.ok) {
@@ -116,6 +121,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
       setLink('');
       setNote('');
       setTag(PREDEFINED_TAGS[0]);
+      setSelectedCollectionId('');
       setIsPublic(userProfile?.share_by_default || false);
 
       // Show share modal after a brief success message
@@ -278,6 +284,24 @@ export function AddResource({ onSuccess }: AddResourceProps) {
           </div>
 
           <div>
+            <label htmlFor="collection" className="block text-sm font-semibold text-gray-700 mb-2">
+              Add to collection (optional)
+            </label>
+            <select
+              id="collection"
+              value={selectedCollectionId}
+              onChange={(e) => setSelectedCollectionId(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white cursor-pointer mb-3"
+            >
+              <option value="">No collection</option>
+              {collectionsLoading && <option disabled>Loading...</option>}
+              {collections.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
             <label htmlFor="tag" className="block text-sm font-semibold text-gray-700 mb-2">
               Tag
             </label>
