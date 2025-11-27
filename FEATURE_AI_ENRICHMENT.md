@@ -138,6 +138,25 @@ VITE_GEMINI_MODEL=gemini-1.0
 - Temperature set to 0.2 for consistent results
 - Max tokens: 200 for summaries
 
+### How to obtain and configure a Gemini API key
+
+1. Visit the Google Cloud or Google AI console where Gemini/API keys are managed and create an API key for the Gemini model you intend to use.
+2. Add the key to your local `.env` (or `.env.local`) file. This project references `VITE_GEMINI_API_KEY` in code comments; some docs use `GEMINI_API_KEY`. The `.env.example` includes both variants. Example:
+
+```env
+# Client (if enabled):
+VITE_GEMINI_API_KEY=your_gemini_api_key
+VITE_GEMINI_MODEL=gemini-2.5-pro
+
+# Server (preferred for secure calls):
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-2.5-pro
+```
+
+Notes:
+- Client-side Gemini calls are disabled by default in the codebase to avoid exposing keys in the browser. If you need to enable AI calls from the client, be aware of the security risk—prefer server-side proxying for production.
+- If you enable server-side usage, place `GEMINI_API_KEY` in server environment variables and make requests from server API routes.
+
 ## 🧪 Testing Checklist
 
 ### ✅ Basic Functionality
