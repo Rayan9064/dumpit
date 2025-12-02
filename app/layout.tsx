@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import '@/index.css'
+import './globals.css'
 import { RootLayoutClient } from './RootLayoutClient'
 
 export const metadata: Metadata = {
