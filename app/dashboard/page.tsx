@@ -2,13 +2,20 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import DashboardPage from '@/app-pages/DashboardPage'
+import { useEffect, useState } from 'react'
 import { CollectionsProvider } from '@/contexts/CollectionsContext'
+import { Layout } from '@/components/Layout'
+import { Dashboard } from '@/components/Dashboard'
+import { AddResource } from '@/components/AddResource'
+import { SharedDump } from '@/components/SharedDump'
+import { Profile } from '@/components/Profile'
+
+type Page = 'dashboard' | 'add' | 'shared' | 'profile'
 
 export default function DashboardRoute() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const [currentPage, setCurrentPage] = useState<Page>('dashboard')
 
   useEffect(() => {
     // If not authenticated, redirect to login
@@ -17,26 +24,20 @@ export default function DashboardRoute() {
     }
   }, [user, loading, router])
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
   // If not authenticated, don't render anything (effect will redirect)
   if (!user) {
     return null
   }
 
-  // Show dashboard for authenticated users — collections provider only here
+  // Show dashboard for authenticated users
   return (
-    <CollectionsProvider>
-      <DashboardPage />
+    <CollectionsProvider fetchOnMount={true}>
+      <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
+        {currentPage === 'dashboard' && <Dashboard />}
+        {currentPage === 'add' && <AddResource onSuccess={() => setCurrentPage('dashboard')} />}
+        {currentPage === 'shared' && <SharedDump />}
+        {currentPage === 'profile' && <Profile />}
+      </Layout>
     </CollectionsProvider>
   )
 }
