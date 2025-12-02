@@ -54,6 +54,8 @@ export function Dashboard() {
     collections,
     addResourceToCollection,
     removeResourceFromCollection,
+    refreshCollections,
+    fetchSharedCollections,
   } = useCollections();
   const [resources, setResources] = useState<Resource[]>([]);
   const [filteredResources, setFilteredResources] = useState<Resource[]>([]);
@@ -64,6 +66,13 @@ export function Dashboard() {
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [managerResource, setManagerResource] = useState<Resource | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      refreshCollections();
+      fetchSharedCollections();
+    }
+  }, [user, refreshCollections, fetchSharedCollections]);
 
   useEffect(() => {
     if (user) {

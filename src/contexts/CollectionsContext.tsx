@@ -18,6 +18,7 @@ interface CollectionsContextValue {
   loading: boolean;
   sharedCollections: Collection[];
   refreshCollections: () => Promise<void>;
+  fetchSharedCollections: () => Promise<void>;
   createCollection: (payload: Partial<Collection> & { name: string }) => Promise<Collection | null>;
   updateCollection: (collectionId: string, updates: Partial<Collection>) => Promise<Collection | null>;
   deleteCollection: (collectionId: string) => Promise<boolean>;
@@ -62,13 +63,7 @@ export function CollectionsProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  useEffect(() => {
-    fetchCollections();
-  }, [uid]);
-
-  useEffect(() => {
-    fetchSharedCollections();
-  }, []);
+  // Removed useEffect hooks to prevent automatic fetching on mount
 
   const refreshCollections = async () => {
     await fetchCollections();
@@ -202,6 +197,7 @@ export function CollectionsProvider({ children }: { children: ReactNode }) {
     sharedCollections,
     loading,
     refreshCollections,
+    fetchSharedCollections,
     createCollection,
     updateCollection,
     deleteCollection,
