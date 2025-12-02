@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import DashboardPage from '@/app-pages/DashboardPage'
+import { CollectionsProvider } from '@/contexts/CollectionsContext'
 
 export default function DashboardRoute() {
   const { user, loading } = useAuth()
@@ -32,6 +33,10 @@ export default function DashboardRoute() {
     return null
   }
 
-  // Show dashboard for authenticated users
-  return <DashboardPage />
+  // Show dashboard for authenticated users — collections provider only here
+  return (
+    <CollectionsProvider>
+      <DashboardPage />
+    </CollectionsProvider>
+  )
 }
