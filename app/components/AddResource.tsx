@@ -1,8 +1,9 @@
 'use client'
 
 import { Loader2, Plus, Globe, Lock } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useCollections } from '../contexts/CollectionsContext';
 
 interface AddResourceProps {
   onSuccess: () => void;
@@ -23,6 +24,7 @@ const TAGS = [
 
 export function AddResource({ onSuccess }: AddResourceProps) {
   const { user } = useAuth();
+  const { collections, fetchCollections, refreshCollections } = useCollections();
   const [title, setTitle] = useState('');
   const [link, setLink] = useState('');
   const [note, setNote] = useState('');
@@ -30,6 +32,12 @@ export function AddResource({ onSuccess }: AddResourceProps) {
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedCollectionId, setSelectedCollectionId] = useState('none');
+  const [newCollectionName, setNewCollectionName] = useState('');
+
+  useEffect(() => {
+    if (user) fetchCollections().catch(() => {});
+  }, [user, fetchCollections]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,23 +47,36 @@ export function AddResource({ onSuccess }: AddResourceProps) {
     setError('');
 
     try {
+      const payload: any = {
+        user_id: user.uid,
+        title,
+        link,
+        note,
+        tag,
+        is_public: isPublic,
+      };
+
+      // If user selected an existing collection, include it
+      if (selectedCollectionId && selectedCollectionId !== 'none' && selectedCollectionId !== 'new') {
+        payload.collection_ids = [selectedCollectionId];
+      }
+
+      // If user wants to create a new collection, include new_collection payload
+      if (selectedCollectionId === 'new' && newCollectionName.trim().length > 0) {
+        payload.new_collection = { name: newCollectionName.trim() };
+      }
+
       const response = await fetch('/api/resources', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uid: user.uid,
-          title,
-          link,
-          note,
-          tag,
-          is_public: isPublic,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to add resource');
       }
+      const data = await response.json();
 
       // Reset form
       setTitle('');
@@ -63,7 +84,16 @@ export function AddResource({ onSuccess }: AddResourceProps) {
       setNote('');
       setTag('Article');
       setIsPublic(false);
+      // If the backend created a collection for us, select it -- otherwise clear the selection
+      if (data && data.createdCollectionId) {
+        setSelectedCollectionId(data.createdCollectionId);
+      } else {
+        setSelectedCollectionId('none');
+      }
+      setNewCollectionName('');
 
+      // Refresh local collections so newly created collection appears in the UI
+      refreshCollections().catch(() => {});
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Failed to add resource');
@@ -142,6 +172,55 @@ export function AddResource({ onSuccess }: AddResourceProps) {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Collection</label>
+            <div className="flex gap-2 items-center">
+              <select
+                value={selectedCollectionId}
+                onChange={(e) => setSelectedCollectionId(e.target.value)}
+                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="none">No collection</option>
+                {collections.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+                <option value="new">Create new collection...</option>
+              </select>
+
+              {/* Quick create button to toggle to new-collection mode */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCollectionId('new');
+                  setNewCollectionName('');
+                  // Move focus to the new collection input after next paint
+                  setTimeout(() => {
+                    const el = document.getElementById('new-collection-name-input') as HTMLInputElement | null;
+                    el?.focus();
+                  }, 50);
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 dark:bg-blue-900/10 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/20"
+                title="Create new collection"
+              >
+                <Plus className="w-4 h-4" /> New
+              </button>
+            </div>
+
+            {selectedCollectionId === 'new' && (
+              <div className="mt-2">
+                <input
+                  id="new-collection-name-input"
+                  type="text"
+                  value={newCollectionName}
+                  onChange={(e) => setNewCollectionName(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="New collection name"
+                  required
+                />
+              </div>
+            )}
           </div>
 
           <div>
