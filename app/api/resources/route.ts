@@ -48,10 +48,12 @@ export async function GET(request: NextRequest) {
 // POST /api/resources - Create new resource
 export async function POST(request: NextRequest) {
   try {
-    const { user_id, title, link, note, tag, is_public, collection_ids } = await request.json();
+    const body = await request.json();
+    const { user_id, title, link, note, tag, is_public, collection_ids, new_collection } = body;
 
     // Validate required fields
     if (!user_id || !title || !link || !tag) {
+      console.warn('POST /api/resources - missing required fields', { body });
       return NextResponse.json(
         { error: 'Missing required fields: user_id, title, link, tag' },
         { status: 400 }
@@ -87,7 +89,31 @@ export async function POST(request: NextRequest) {
       updated_at: now,
     };
 
+    let createdCollectionId: string | null = null;
     await db.runTransaction(async (transaction) => {
+      // If a new collection was provided, create it first and include its id
+      if (new_collection && typeof new_collection === 'object') {
+        if (!new_collection.name || typeof new_collection.name !== 'string') {
+          throw new Error('new_collection.name is required and must be a string');
+        }
+        const collectionsRef = db.collection('users').doc(user_id).collection('collections');
+        const collectionRef = collectionsRef.doc();
+        const collectionData: any = {
+          name: new_collection.name,
+          description: new_collection.description || '',
+          icon: new_collection.icon || null,
+          color: new_collection.color || null,
+          is_shared: Boolean(new_collection.is_shared || false),
+          sort_order: typeof new_collection.sort_order === 'number' ? new_collection.sort_order : Date.now(),
+          created_at: now,
+          updated_at: now,
+        };
+
+        transaction.set(collectionRef, collectionData);
+        normalizedCollectionIds.push(collectionRef.id);
+        createdCollectionId = collectionRef.id;
+      }
+
       transaction.set(resourceRef, resourceData);
 
       normalizedCollectionIds.forEach((collectionId: string) => {
@@ -109,7 +135,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Resource created successfully',
-      resourceId: resourceRef.id
+      resourceId: resourceRef.id,
+      createdCollectionId,
+      bodyReceived: body // include for debugging in development
     });
 
   } catch (error) {
