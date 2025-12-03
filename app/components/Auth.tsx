@@ -1,17 +1,25 @@
 'use client'
 
 import { Loader2, LogIn, UserPlus } from 'lucide-react';
-import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 
-export function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+interface AuthProps {
+  defaultIsLogin?: boolean;
+}
+
+export function Auth({ defaultIsLogin = true }: AuthProps) {
+  const [isLogin, setIsLogin] = useState(defaultIsLogin);
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  const searchParams = useSearchParams();
   const [usernameError, setUsernameError] = useState('');
   const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
   const { signIn, signUp, signInWithGoogle } = useAuth();
@@ -150,6 +158,18 @@ export function Auth() {
     }
   };
 
+  useEffect(() => {
+    // If the `signup` param is present, use it to switch the default tab. Use the prop as override otherwise.
+    if (searchParams) {
+      const signupParam = searchParams.get('signup');
+      if (signupParam === 'true') {
+        setIsLogin(false);
+      } else if (signupParam === 'false') {
+        setIsLogin(true);
+      }
+    }
+  }, [searchParams]);
+
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -203,7 +223,7 @@ export function Auth() {
                 type="text"
                 value={username}
                 onChange={(e) => handleUsernameChange(e.target.value.toLowerCase())}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
                 placeholder="Choose a username"
                 required={!isLogin}
               />
@@ -239,7 +259,7 @@ export function Auth() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
               placeholder="you@example.com"
               required
             />
@@ -249,15 +269,31 @@ export function Auth() {
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-              placeholder="••••••••"
-              required
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowPassword(!showPassword);
+                }}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700 transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
 
           <button
