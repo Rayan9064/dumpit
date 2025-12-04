@@ -1,7 +1,7 @@
 'use client'
 
-import { Loader2, Plus, Globe, Lock } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Loader2, Plus, Globe, Lock, Sparkles } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCollections } from '../contexts/CollectionsContext';
 
@@ -32,8 +32,10 @@ export function AddResource({ onSuccess }: AddResourceProps) {
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [enriching, setEnriching] = useState(false);
   const [selectedCollectionId, setSelectedCollectionId] = useState('none');
   const [newCollectionName, setNewCollectionName] = useState('');
+  const lastEnrichedLinkRef = useRef<string>('');
 
   useEffect(() => {
     if (user) fetchCollections().catch(() => {});
@@ -94,6 +96,8 @@ export function AddResource({ onSuccess }: AddResourceProps) {
 
       // Refresh local collections so newly created collection appears in the UI
       refreshCollections().catch(() => {});
+      // Refresh local collections so newly created collection appears in the UI
+      refreshCollections().catch(() => {});
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Failed to add resource');
@@ -134,14 +138,60 @@ export function AddResource({ onSuccess }: AddResourceProps) {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Link *
             </label>
-            <input
-              type="url"
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="https://example.com"
-              required
-            />
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={link}
+                onChange={(e) => {
+                  const newLink = e.target.value;
+                  setLink(newLink);
+                  // If link changed and is different from last enriched link, clear auto-filled fields
+                  if (newLink !== lastEnrichedLinkRef.current && lastEnrichedLinkRef.current !== '') {
+                    setTitle('');
+                    setNote('');
+                    setTag('Article');
+                  }
+                }}
+                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="https://example.com"
+                required
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!link) return;
+                  setEnriching(true);
+                  try {
+                    const resp = await fetch('/api/enrich', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ url: link }),
+                    });
+                    if (resp.ok) {
+                      const data = await resp.json();
+                      if (!title && data.title) setTitle(data.title);
+                      if (!note && data.description) setNote(data.description);
+                      if (!tag && data.suggestedTag) setTag(data.suggestedTag);
+                      // Track this link as the last enriched link
+                      lastEnrichedLinkRef.current = link;
+                    }
+                  } catch (err) {
+                    console.error('Enrichment error:', err);
+                  } finally {
+                    setEnriching(false);
+                  }
+                }}
+                disabled={!link || enriching}
+                className="px-3 py-2 bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm font-semibold whitespace-nowrap"
+                title="Auto-fill title, description, and tag from link"
+              >
+                {enriching ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div>

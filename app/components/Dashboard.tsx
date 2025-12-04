@@ -2,7 +2,7 @@
 
 import { Edit, ExternalLink, FolderPlus, Globe, Loader2, Lock, MoreHorizontal, Search, Trash2 } from 'lucide-react';
 import { Tooltip } from 'react-tooltip';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCollections } from '../contexts/CollectionsContext';
 import { CollectionsSidebar } from './collections/CollectionsSidebar';
@@ -64,12 +64,20 @@ export function Dashboard() {
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [managerResource, setManagerResource] = useState<Resource | null>(null);
+  const hasInitialFetchRef = useRef(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && !hasInitialFetchRef.current) {
+      hasInitialFetchRef.current = true;
+      loadResources(null);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (hasInitialFetchRef.current && selectedCollectionId !== null) {
       loadResources(selectedCollectionId);
     }
-  }, [user, selectedCollectionId]);
+  }, [selectedCollectionId]);
 
   useEffect(() => {
     filterResources();

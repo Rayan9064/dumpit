@@ -8,6 +8,16 @@ A modern, full-featured web application for saving, organizing, and sharing your
 - **🔐 User Authentication**: Secure sign up and login with Firebase Auth
 - **📚 Resource Management**: Create, read, update, and delete your resources
 - **🤖 AI-Powered Auto-Enrichment**: Automatically fetch titles, generate descriptions, and suggest tags from URLs
+   - Uses `link-preview-js` on the server to extract metadata
+Running tests
+-------------
+Unit tests are configured using `vitest`. After installing dependencies run:
+
+```powershell
+npm install
+npm test
+```
+
 - **🏷️ Tag Organization**: Categorize resources with predefined tags (Tutorial, Article, Video, Tool, etc.)
 - **🔍 Search & Filter**: Quickly find resources with search and tag filtering
 - **🌍 Public/Private Toggle**: Share resources publicly or keep them private

@@ -216,6 +216,10 @@ Notes:
 - [ ] Image/favicon extraction via metadata API
 - [ ] Caching for repeated URLs (sessionStorage)
 - [ ] Bulk URL import with batch enrichment
+
+Integration: `link-preview-js`
+-------------------------------
+We now use the `link-preview-js` package on the server to perform robust metadata extraction from URLs (title, description, images/favicons). This is used by the `POST /api/enrich` endpoint and falls back to a regex-based HTML parse if the library fails. The client also calls `POST /api/enrich` from the Add Resource UI to auto-fill title and tag on blur.
 - [ ] YouTube video summarization
 - [ ] PDF analysis and summarization
 - [ ] GitHub repo auto-tagging
