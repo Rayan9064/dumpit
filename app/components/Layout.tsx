@@ -124,19 +124,19 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
         <div
           id="mobile-menu"
           className={`md:hidden border-t border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 ${
-            isMobileMenuOpen ? 'max-h-64 pointer-events-auto' : 'max-h-0 pointer-events-none'
+            isMobileMenuOpen ? 'max-h-72 pointer-events-auto' : 'max-h-0 pointer-events-none'
           }`}
           aria-hidden={!isMobileMenuOpen}
           role="navigation"
           aria-label="Mobile navigation"
         >
-          <div className="bg-white dark:bg-gray-800 px-4 py-3 space-y-1">
+          <div className="bg-white dark:bg-gray-800 px-4 py-3 grid grid-cols-2 gap-2">
             {navItems.map((item, index) => {
               const Icon = item.icon;
               return (
                 <button
                   key={item.id}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                  className={`flex flex-col items-center gap-2 px-3 py-3 rounded-lg font-medium transition-all ${
                     currentPage === item.id
                       ? 'bg-blue-600 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -150,7 +150,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
                   role="menuitem"
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
-                  <span>{item.label}</span>
+                  <span className="text-xs">{item.label}</span>
                 </button>
               );
             })}
@@ -159,27 +159,29 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
                 signOut();
                 setIsMobileMenuOpen(false);
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all"
+              className="flex flex-col items-center gap-2 px-3 py-3 rounded-lg font-medium text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all"
               tabIndex={isMobileMenuOpen ? 0 : -1}
               role="menuitem"
             >
               <LogOut className="w-5 h-5 flex-shrink-0" />
-              <span>Logout</span>
+              <span className="text-xs">Logout</span>
             </button>
           </div>
         </div>
 
-        {/* Click overlay for mobile menu to close when clicking outside */}
-        {isMobileMenuOpen && (
-          <div
-            className="fixed inset-0 z-40 md:hidden bg-black/20 transition-opacity duration-200"
-            onClick={() => setIsMobileMenuOpen(false)}
-            aria-hidden="true"
-          />
-        )}
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Click overlay for mobile menu to close when clicking outside */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 md:hidden bg-black/20 transition-opacity duration-200"
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+          style={{ pointerEvents: 'auto' }}
+        />
+      )}
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-4 relative z-0">
         {children}
       </main>
     </div>
