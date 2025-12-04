@@ -14,6 +14,7 @@ async function fallbackExtractMetadata(url: string): Promise<Partial<LinkPreview
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
+      redirect: 'follow',
     });
 
     if (!response.ok) return {};
@@ -36,7 +37,13 @@ async function fallbackExtractMetadata(url: string): Promise<Partial<LinkPreview
 
 export async function getPreviewFromUrl(url: string): Promise<LinkPreviewResult> {
   try {
-    const data: any = await getLinkPreview(url, { imagesPropertyType: 'og' });
+    const data: any = await getLinkPreview(url, { 
+      imagesPropertyType: 'og',
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
 
     // Normalise fields
     const title = data.title || data.siteName || undefined;
