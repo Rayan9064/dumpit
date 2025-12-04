@@ -41,8 +41,6 @@ export function AddResource({ onSuccess }: AddResourceProps) {
     if (user) fetchCollections().catch(() => {});
   }, [user, fetchCollections]);
 
-  const enrichTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
