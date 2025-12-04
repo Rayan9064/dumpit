@@ -1,0 +1,30 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='420'>
+  <style>
+    .txt{font-family:Arial, sans-serif; font-size:13px; fill:#e6eef8}
+    .title{font-family:Arial, sans-serif; font-size:14px; fill:#fff; font-weight:600}
+    .box{fill:#0b1220;stroke:#2b6cb0;stroke-width:2;rx:8}
+    .line{stroke:#9fbde8; stroke-width:2; fill:none; marker-end:url(#arrowhead)}
+  </style>
+  <defs>
+    <marker id='arrowhead' markerWidth='10' markerHeight='7' refX='10' refY='3.5' orient='auto'>
+      <polygon points='0 0, 10 3.5, 0 7' fill='#9fbde8' />
+    </marker>
+  </defs>
+  <rect x='40' y='40' width='140' height='50' class='box'/><text x='62' y='70' class='title'>Browser</text>
+  <rect x='260' y='40' width='220' height='50' class='box'/><text x='315' y='70' class='title'>Next.js App</text>
+  <rect x='540' y='40' width='220' height='50' class='box'/><text x='605' y='70' class='title'>Enrichment Service</text>
+  <rect x='820' y='40' width='200' height='50' class='box'/><text x='850' y='70' class='title'>External APIs</text>
+
+  <path d='M180 65 L 260 65' class='line'/>
+  <text x='180' y='50' class='txt'>Click "Preview" (POST /api/enrich)</text>
+
+  <path d='M480 65 L 540 65' class='line'/>
+  <text x='420' y='45' class='txt'>link-preview-js + fallback</text>
+
+  <path d='M760 65 L 820 65' class='line'/>
+  <text x='650' y='45' class='txt'>Calls third-party to parse metadata (optional)</text>
+
+  <path d='M820 115 L 540 115' class='line'/>
+  <text x='560' y='95' class='txt'>Return title/description/tag</text>
+
+</svg>

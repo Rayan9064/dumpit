@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500">
+  <style>
+    .box { fill:#0b1220; stroke:#2b6cb0; stroke-width:2; rx:10; }
+    .txt { font-family: Arial, sans-serif; font-size:14px; fill:#e6eef8; }
+    .title { font-size:16px; font-weight:bold; fill:#fff; }
+    .arrow { stroke:#9fbde8; stroke-width:2; fill:none; marker-end:url(#arrowhead); }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#9fbde8" />
+    </marker>
+  </defs>
+  <rect class="box" x="40" y="40" width="250" height="70" />
+  <text x="65" y="85" class="title">Browser / Client</text>
+
+  <rect class="box" x="450" y="40" width="270" height="70" />
+  <text x="495" y="85" class="title">Next.js App (Server + Client)</text>
+
+  <rect class="box" x="870" y="40" width="250" height="70" />
+  <text x="915" y="85" class="title">Firebase (Auth & Firestore)</text>
+
+  <rect x="440" y="160" width="540" height="120" fill="#07102a" stroke="#2b6cb0" stroke-width="1" rx="8"/>
+  <text x="530" y="185" class="txt">Server components:</text>
+  <text x="530" y="206" class="txt">- API routes (/api/resources, /api/collections, /api/enrich...)</text>
+  <text x="530" y="226" class="txt">- Firebase Admin SDK (server-side token verification)</text>
+
+  <path d="M 290 75 L 445 75" class="arrow" />
+  <path d="M 720 75 L 870 75" class="arrow" />
+  <path d="M 600 120 L 600 160" class="arrow" />
+  <path d="M 600 280 L 600 330" class="arrow" />
+
+  <text x="70" y="115" class="txt">HTTP / WebSocket</text>
+  <text x="560" y="105" class="txt">Server-side logic and API routes</text>
+
+  <rect x="40" y="350" width="250" height="70" class="box"/>
+  <text x="95" y="395" class="title">External AI / API</text>
+  <path d="M 670 270 L 500 355" class="arrow" />
+
+  <text x="560" y="360" class="txt">(Optional) Gemini / third-party Tags Service</text>
+</svg>

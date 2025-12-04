@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700">
+  <style>
+    .box{fill:#0a1622; stroke:#2b6cb0; stroke-width:2; rx:8;}
+    .txt{font-family:Arial, sans-serif; font-size:13px; fill:#e6eef8;}
+    .title{font-family:Arial, sans-serif; font-size:16px; fill:#fff; font-weight:600}
+    .arrow{stroke:#9fbde8; stroke-width:2; fill:none; marker-end:url(#arrowhead)}
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#9fbde8" />
+    </marker>
+  </defs>
+
+  <!-- Browser -->
+  <rect class="box" x="40" y="40" width="240" height="60" /><text x="85" y="75" class="title">Browser (Client)</text>
+  <text x="65" y="95" class="txt">React Components, Hooks, Firebase Client SDK</text>
+
+  <!-- Next App -->
+  <rect class="box" x="380" y="30" width="420" height="110" /><text x="470" y="60" class="title">Next.js Application</text>
+  <text x="410" y="80" class="txt">Server- and client-side rendering, API route handlers</text>
+  <text x="410" y="100" class="txt">API: /api/resources, /api/collections, /api/enrich, /api/public-resources, /api/user-profile</text>
+
+  <!-- Firestore -->
+  <rect class="box" x="880" y="40" width="240" height="60" /><text x="930" y="75" class="title">Firebase / Firestore</text>
+  <text x="910" y="95" class="txt">Auth, Firestore, Admin SDK</text>
+
+  <!-- Arrows -->
+  <path d="M 280 60 L 380 60" class="arrow" />
+  <path d="M 800 60 L 880 60" class="arrow" />
+
+  <!-- Enrichment sub-system -->
+  <rect x="380" y="170" width="740" height="150" fill="#07102a" stroke="#2b6cb0" stroke-width="1" rx="8"/>
+  <text x="420" y="190" class="title">Enrichment Service</text>
+  <text x="420" y="210" class="txt">link-preview-js + fallback HTML parsing + optional Gemini tag suggestions</text>
+  <path d="M 600 140 L 600 170" class="arrow" />
+
+  <!-- External API -->
+  <rect x="40" y="350" width="240" height="60" class="box" /><text x="70" y="385" class="title">External APIs</text>
+  <text x="70" y="405" class="txt">Gemini / OpenAI, third-party metadata providers</text>
+  <path d="M 580 320 L 200 350" class="arrow" />
+
+</svg>
