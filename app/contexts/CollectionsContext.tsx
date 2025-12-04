@@ -48,23 +48,31 @@ export function CollectionsProvider({ children, fetchOnMount = false }: Collecti
   const [sharedCollections, setSharedCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);
   const hasFetchedRef = useRef(false);
+  const lastFetchTimeRef = useRef<number>(0);
+  const CACHE_DURATION_MS = 30000; // 30 seconds cache
 
   const uid = user?.uid;
 
   const fetchCollections = useCallback(async () => {
     if (!uid) return;
+    const now = Date.now();
+    // Only fetch if cache has expired
+    if (now - lastFetchTimeRef.current < CACHE_DURATION_MS && collections.length > 0) {
+      return;
+    }
     setLoading(true);
     try {
       const response = await fetch(`/api/collections?uid=${uid}`);
       if (!response.ok) throw new Error('Failed to load collections');
       const data = await response.json();
       setCollections(data.collections || []);
+      lastFetchTimeRef.current = now;
     } catch (error) {
       console.error('Error loading collections:', error);
     } finally {
       setLoading(false);
     }
-  }, [uid]);
+  }, [uid, collections.length]);
 
   const fetchSharedCollections = useCallback(async () => {
     try {

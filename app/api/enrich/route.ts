@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getPreviewFromUrl } from '../_utils/linkPreview';
 
 interface EnrichRequest {
   url: string
@@ -12,42 +13,7 @@ interface EnrichResponse {
   error?: string
 }
 
-async function extractMetadata(url: string): Promise<Partial<EnrichResponse>> {
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      },
-    })
-
-    if (!response.ok) {
-      return {}
-    }
-
-    const html = await response.text()
-
-    // Extract title
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
-    const title = titleMatch ? titleMatch[1].trim() : undefined
-
-    // Extract description from meta tags
-    const descMatch = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i)
-    const description = descMatch ? descMatch[1].trim() : undefined
-
-    // Extract og:image if available
-    const ogImageMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i)
-
-    return {
-      title,
-      description,
-      favicon: ogImageMatch ? ogImageMatch[1] : undefined,
-    }
-  } catch (error) {
-    console.error(`Error extracting metadata from ${url}:`, error)
-    return {}
-  }
-}
+// The real extraction logic now lives in app/api/_utils/linkPreview.ts
 
 /**
  * POST /api/enrich
@@ -77,8 +43,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<EnrichRes
       )
     }
 
-    // Extract metadata
-    const metadata = await extractMetadata(url)
+    // Extract metadata using link-preview-js with fallback
+    const metadata = await getPreviewFromUrl(url)
 
     // TODO: Integrate Gemini API for AI-generated suggestions if needed
     // const geminiKey = process.env.GEMINI_API_KEY
@@ -91,7 +57,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<EnrichRes
       {
         title: metadata.title || 'Untitled',
         description: metadata.description || 'No description available',
-        suggestedTag: 'Article',
+        suggestedTag: metadata.suggestedTag || 'Article',
         favicon: metadata.favicon,
       },
       { status: 200 }

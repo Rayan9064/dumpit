@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerFirestore } from '../_utils/firebaseAdmin';
+import { getPreviewFromUrl } from '../_utils/linkPreview';
 
 // GET /api/resources?uid=<uid> - Get user's resources
 export async function GET(request: NextRequest) {
@@ -52,10 +53,10 @@ export async function POST(request: NextRequest) {
     const { user_id, title, link, note, tag, is_public, collection_ids, new_collection } = body;
 
     // Validate required fields
-    if (!user_id || !title || !link || !tag) {
+    if (!user_id || !link) {
       console.warn('POST /api/resources - missing required fields', { body });
       return NextResponse.json(
-        { error: 'Missing required fields: user_id, title, link, tag' },
+        { error: 'Missing required fields: user_id, link' },
         { status: 400 }
       );
     }
@@ -66,6 +67,19 @@ export async function POST(request: NextRequest) {
         { error: 'Link must start with http:// or https://' },
         { status: 400 }
       );
+    }
+
+    // If title or tag is missing, attempt to auto-enrich from link
+    let enrichedTitle = title;
+    let enrichedTag = tag;
+    if (!enrichedTitle || !enrichedTag) {
+      try {
+        const metadata = await getPreviewFromUrl(link);
+        if (!enrichedTitle && metadata.title) enrichedTitle = metadata.title;
+        if (!enrichedTag && metadata.suggestedTag) enrichedTag = metadata.suggestedTag;
+      } catch (err) {
+        console.warn('Failed to enrich link:', err);
+      }
     }
 
     const db = getServerFirestore();
@@ -79,10 +93,10 @@ export async function POST(request: NextRequest) {
 
     const resourceData = {
       user_id,
-      title,
+      title: enrichedTitle,
       link,
       note: note || null,
-      tag,
+      tag: enrichedTag || 'Article',
       is_public: is_public ?? false,
       collection_ids: normalizedCollectionIds,
       created_at: now,
