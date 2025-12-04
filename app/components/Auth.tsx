@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader2, LogIn, UserPlus } from 'lucide-react';
+import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -174,8 +175,15 @@ export function Auth({ defaultIsLogin = true }: AuthProps) {
     <div className="w-full max-w-md mx-auto">
       <div className="bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mb-4">
-            <span className="text-2xl font-bold text-white">D</span>
+          <div className="mb-1 leading-none">
+              {/* Increased logo size for better visibility on landing/auth */}
+              <Image
+                src="/logo.png"
+                alt="DumpIt logo"
+                width={96}
+                height={96}
+                className="block mx-auto rounded-2xl w-20 h-20 sm:w-24 sm:h-24 object-contain"
+              />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">DumpIt</h1>
           <p className="text-gray-600">Your Personal Resource Vault</p>

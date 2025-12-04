@@ -37,13 +37,12 @@ async function fallbackExtractMetadata(url: string): Promise<Partial<LinkPreview
 
 export async function getPreviewFromUrl(url: string): Promise<LinkPreviewResult> {
   try {
-    // Try with redirect follow option for getLinkPreview
     const data: any = await getLinkPreview(url, { 
       imagesPropertyType: 'og',
+      timeout: 10000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
-      timeout: 10000,
     });
 
     // Normalise fields
