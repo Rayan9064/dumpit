@@ -1,18 +1,52 @@
 # Testing Guide
 
-## Overview
-This document covers testing strategies, setup instructions, and best practices for the DumpIt project. The testing stack includes unit tests, integration tests, and Firebase emulator usage for local testing.
+> **⚠️ NOTICE: Testing Infrastructure Not Yet Implemented**
+>
+> This documentation serves as a **reference guide** for future testing implementation.
+> Currently, the DumpIt project **does not have any testing setup** configured.
+>
+> **Current Status:**
+> - ❌ No Jest configuration
+> - ❌ No test files exist
+> - ❌ No testing dependencies installed
+> - ❌ No Firebase emulator configuration
+> - ❌ No CI/CD test pipeline
+>
+> **To implement testing, follow the guide below to:**
+> 1. Install testing dependencies
+> 2. Configure Jest and React Testing Library
+> 3. Set up Firebase Emulator Suite
+> 4. Write your first tests
+> 5. Integrate with CI/CD
+>
+> ---
 
-## Testing Stack
+## Overview
+This document covers testing strategies, setup instructions, and best practices for the DumpIt project. The testing stack will include unit tests, integration tests, and Firebase emulator usage for local testing.
+
+## Proposed Testing Stack
 - **Jest** - JavaScript testing framework
 - **React Testing Library** - Component testing
 - **Firebase Emulator Suite** - Local Firebase services for testing
 - **Supertest** (optional) - API route testing
 
-## Prerequisites
+## Prerequisites (For Future Implementation)
 - Node.js 18+ installed
 - Firebase CLI installed globally: `npm install -g firebase-tools`
 - Project dependencies installed: `npm install`
+
+## Installation Steps (Not Yet Done)
+
+### 1. Install Testing Dependencies
+```bash
+npm install --save-dev jest @testing-library/react @testing-library/jest-dom @testing-library/user-event jest-environment-jsdom
+npm install --save-dev @firebase/rules-unit-testing
+```
+
+### 2. Install Next.js Testing Support
+```bash
+npm install --save-dev @next/jest
+```
 
 ## Running Tests
 
