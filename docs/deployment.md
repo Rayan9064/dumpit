@@ -1,0 +1,279 @@
+# Deployment Guide
+
+## Overview
+DumpIt is deployed as a Next.js application on Vercel with Firebase (Firestore + Auth) as the backend. This guide covers deployment setup, environment variables, and configuration.
+
+## Prerequisites
+- Node.js 18+ installed
+- Firebase project created
+- Vercel account (for production deployment)
+- Git repository connected to Vercel
+
+## Environment Variables
+
+### Required Environment Variables
+Create a `.env.local` file in the project root with the following variables:
+
+```bash
+# Firebase Client SDK Configuration (Public - used in browser)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+# Firebase Admin SDK (Server-side - KEEP SECRET)
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your_project.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour_Private_Key_Here\n-----END PRIVATE KEY-----\n"
+
+# Optional: Gemini AI API Key (for AI-powered features)
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### Environment Variable Notes
+- **NEXT_PUBLIC_*** variables are exposed to the browser and should only contain public Firebase config
+- **FIREBASE_PRIVATE_KEY** must be kept secret and should never be committed to version control
+- The private key should include `\n` characters for line breaks (as shown above)
+- For Vercel deployment, add these in the Vercel dashboard under Project Settings → Environment Variables
+
+## Firebase Setup
+
+### 1. Create Firebase Project
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project or select existing one
+3. Enable **Firestore Database** (production mode)
+4. Enable **Authentication** with Email/Password provider
+
+### 2. Firestore Security Rules
+Apply the following security rules in Firebase Console → Firestore Database → Rules:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Resources collection
+    match /resources/{resourceId} {
+      // Anyone can read public resources
+      allow read: if resource.data.is_public == true || isOwner(resource.data.user_id);
+      // Only authenticated users can create resources
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.user_id;
+      // Only owner can update/delete
+      allow update, delete: if isOwner(resource.data.user_id);
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if isOwner(userId);
+      // Users can create/update their own profile
+      allow create, update: if isOwner(userId);
+      
+      // User's collections subcollection
+      match /collections/{collectionId} {
+        allow read, write: if isOwner(userId);
+        
+        // Collection resources (membership)
+        match /resources/{resourceId} {
+          allow read, write: if isOwner(userId);
+        }
+      }
+    }
+  }
+}
+```
+
+### 3. Firestore Indexes
+Create composite indexes for efficient queries:
+
+1. **Resources by user and creation time:**
+   - Collection: `resources`
+   - Fields: `user_id` (Ascending), `created_at` (Descending)
+
+2. **Shared collections:**
+   - Collection Group: `collections`
+   - Fields: `is_shared` (Ascending), `sort_order` (Ascending)
+
+You can create these in Firebase Console → Firestore Database → Indexes, or they will be auto-suggested when you run queries that need them.
+
+### 4. Get Firebase Admin SDK Credentials
+1. Go to Firebase Console → Project Settings → Service Accounts
+2. Click "Generate New Private Key"
+3. Download the JSON file
+4. Extract the following values for your `.env.local`:
+   - `project_id` → `FIREBASE_PROJECT_ID`
+   - `client_email` → `FIREBASE_CLIENT_EMAIL`
+   - `private_key` → `FIREBASE_PRIVATE_KEY` (keep the `\n` characters)
+
+## Vercel Deployment
+
+### Initial Setup
+1. **Connect Repository:**
+   ```bash
+   # Push your code to GitHub
+   git push origin main
+   ```
+
+2. **Import to Vercel:**
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Click "Add New Project"
+   - Import your GitHub repository
+   - Vercel will auto-detect Next.js configuration
+
+3. **Configure Environment Variables:**
+   - In Vercel dashboard → Project Settings → Environment Variables
+   - Add all variables from your `.env.local`
+   - Set them for Production, Preview, and Development environments
+
+4. **Deploy:**
+   - Click "Deploy"
+   - Vercel will build and deploy automatically
+
+### Continuous Deployment
+- Every push to `main` branch triggers a production deployment
+- Pull requests create preview deployments automatically
+- Preview URLs are generated for each PR
+
+### Build Configuration
+Vercel uses these default settings (no changes needed):
+- **Build Command:** `npm run build` or `next build`
+- **Output Directory:** `.next`
+- **Install Command:** `npm install`
+- **Development Command:** `npm run dev`
+
+## Local Development
+
+### Setup
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Rayan9064/dumpit.git
+   cd dumpit
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Create `.env.local` with your Firebase credentials (see above)
+
+4. Run development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000)
+
+### Using Firebase Emulator (Optional)
+For local development without affecting production data:
+
+1. Install Firebase CLI:
+   ```bash
+   npm install -g firebase-tools
+   ```
+
+2. Initialize emulators:
+   ```bash
+   firebase init emulators
+   ```
+   Select: Firestore, Authentication
+
+3. Start emulators:
+   ```bash
+   firebase emulators:start
+   ```
+
+4. Update `.env.local` to point to emulators:
+   ```bash
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=localhost
+   FIRESTORE_EMULATOR_HOST=localhost:8080
+   FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+   ```
+
+See `docs/testing.md` for more details on emulator usage.
+
+## Production Checklist
+
+Before deploying to production, ensure:
+
+- [ ] All environment variables are set in Vercel
+- [ ] Firebase security rules are configured
+- [ ] Firestore indexes are created
+- [ ] Firebase Authentication is enabled
+- [ ] `.env.local` is in `.gitignore` (never commit secrets!)
+- [ ] Build succeeds locally: `npm run build`
+- [ ] No console errors in production build
+- [ ] Test authentication flow
+- [ ] Test resource creation and retrieval
+
+## Troubleshooting
+
+### Build Failures
+- **Error: Missing environment variables**
+  - Ensure all `NEXT_PUBLIC_*` and `FIREBASE_*` variables are set in Vercel
+  
+- **Error: Firebase Admin initialization failed**
+  - Check `FIREBASE_PRIVATE_KEY` formatting (must include `\n` for newlines)
+  - Verify `FIREBASE_CLIENT_EMAIL` and `FIREBASE_PROJECT_ID` are correct
+
+### Runtime Errors
+- **401 Unauthorized errors**
+  - Verify Firebase security rules allow the operation
+  - Check that ID token is being sent with requests
+  
+- **Firestore permission denied**
+  - Review security rules in Firebase Console
+  - Ensure user is authenticated before making requests
+
+### Performance Issues
+- **Slow queries**
+  - Check if composite indexes are created
+  - Review Firestore usage in Firebase Console → Usage tab
+  
+- **High costs**
+  - Monitor Firestore reads/writes in Firebase Console
+  - Consider caching frequently accessed data
+  - Implement pagination for large collections
+
+## Monitoring & Logs
+
+### Vercel Logs
+- View deployment logs: Vercel Dashboard → Deployments → [Select deployment]
+- View runtime logs: Vercel Dashboard → Logs
+
+### Firebase Monitoring
+- Firestore usage: Firebase Console → Firestore Database → Usage
+- Authentication: Firebase Console → Authentication → Users
+- Performance: Firebase Console → Performance (if enabled)
+
+## Rollback Procedure
+
+If a deployment causes issues:
+
+1. **Via Vercel Dashboard:**
+   - Go to Deployments
+   - Find the last working deployment
+   - Click "..." → "Promote to Production"
+
+2. **Via Git:**
+   ```bash
+   git revert HEAD
+   git push origin main
+   ```
+
+## Additional Resources
+- [Next.js Deployment Documentation](https://nextjs.org/docs/deployment)
+- [Vercel Documentation](https://vercel.com/docs)
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Firestore Security Rules](https://firebase.google.com/docs/firestore/security/get-started)
