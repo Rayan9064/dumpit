@@ -1,40 +1,77 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500">
-  <style>
-    .box { fill:#0b1220; stroke:#2b6cb0; stroke-width:2; rx:10; }
-    .txt { font-family: Arial, sans-serif; font-size:14px; fill:#e6eef8; }
-    .title { font-size:16px; font-weight:bold; fill:#fff; }
-    .arrow { stroke:#9fbde8; stroke-width:2; fill:none; marker-end:url(#arrowhead); }
-  </style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">
   <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#9fbde8" />
+    <style>
+      .box { fill: #1a1f35; stroke: #4a90e2; stroke-width: 2; }
+      .database { fill: #1a1f35; stroke: #4a90e2; stroke-width: 2; }
+      .text { fill: #ffffff; font-family: Arial, sans-serif; font-size: 14px; text-anchor: middle; }
+      .label { fill: #a0aec0; font-family: Arial, sans-serif; font-size: 12px; }
+      .arrow { stroke: #4a90e2; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .dashed { stroke-dasharray: 5,5; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#4a90e2" />
     </marker>
   </defs>
-  <rect class="box" x="40" y="40" width="250" height="70" />
-  <text x="65" y="85" class="title">Browser / Client</text>
 
-  <rect class="box" x="450" y="40" width="270" height="70" />
-  <text x="495" y="85" class="title">Next.js App (Server + Client)</text>
+  <!-- Browser -->
+  <rect class="box" x="50" y="250" width="180" height="100" rx="8"/>
+  <text class="text" x="140" y="305">Browser</text>
+  <text class="text" x="140" y="325">(Web Client)</text>
 
-  <rect class="box" x="870" y="40" width="250" height="70" />
-  <text x="915" y="85" class="title">Firebase (Auth & Firestore)</text>
+  <!-- Next.js App -->
+  <rect class="box" x="450" y="250" width="200" height="100" rx="8"/>
+  <text class="text" x="550" y="295">Next.js App</text>
+  <text class="text" x="550" y="315">(Server &amp; Route</text>
+  <text class="text" x="550" y="335">Handlers)</text>
 
-  <rect x="440" y="160" width="540" height="120" fill="#07102a" stroke="#2b6cb0" stroke-width="1" rx="8"/>
-  <text x="530" y="185" class="txt">Server components:</text>
-  <text x="530" y="206" class="txt">- API routes (/api/resources, /api/collections, /api/enrich...)</text>
-  <text x="530" y="226" class="txt">- Firebase Admin SDK (server-side token verification)</text>
+  <!-- Firestore -->
+  <ellipse class="database" cx="900" cy="200" rx="90" ry="60"/>
+  <text class="text" x="900" y="205">Firestore</text>
 
-  <path d="M 290 75 L 445 75" class="arrow" />
-  <path d="M 720 75 L 870 75" class="arrow" />
-  <path d="M 600 120 L 600 160" class="arrow" />
-  <path d="M 600 280 L 600 330" class="arrow" />
+  <!-- Firebase Auth -->
+  <ellipse class="database" cx="900" cy="400" rx="90" ry="60"/>
+  <text class="text" x="900" y="405">Firebase Auth</text>
 
-  <text x="70" y="115" class="txt">HTTP / WebSocket</text>
-  <text x="560" y="105" class="txt">Server-side logic and API routes</text>
+  <!-- Gemini AI -->
+  <rect class="box" x="800" y="50" width="140" height="60" rx="8"/>
+  <text class="text" x="870" y="85">Gemini / AI</text>
 
-  <rect x="40" y="350" width="250" height="70" class="box"/>
-  <text x="95" y="395" class="title">External AI / API</text>
-  <path d="M 670 270 L 500 355" class="arrow" />
+  <!-- Link Preview -->
+  <rect class="box" x="450" y="50" width="180" height="60" rx="8"/>
+  <text class="text" x="540" y="75">link-preview-js</text>
+  <text class="text" x="540" y="95">(Server-side fetch)</text>
 
-  <text x="560" y="360" class="txt">(Optional) Gemini / third-party Tags Service</text>
+  <!-- Firestore Client SDK -->
+  <ellipse class="database" cx="140" cy="450" rx="100" ry="50"/>
+  <text class="text" x="140" y="445">Firestore Client</text>
+  <text class="text" x="140" y="465">+ Auth SDK</text>
+
+  <!-- Arrows -->
+  <!-- Browser to Next.js -->
+  <path class="arrow" d="M 230 300 L 450 300"/>
+  <text class="label" x="340" y="290">HTTP/HTTPS</text>
+
+  <!-- Next.js to Firestore -->
+  <path class="arrow" d="M 650 270 L 810 220"/>
+  <text class="label" x="720" y="240">Admin SDK</text>
+
+  <!-- Next.js to Firebase Auth -->
+  <path class="arrow" d="M 650 330 L 810 380"/>
+  <text class="label" x="720" y="360">Admin SDK</text>
+
+  <!-- Next.js to Gemini (Optional) -->
+  <path class="arrow" d="M 600 250 L 800 100"/>
+  <text class="label" x="680" y="160">Optional</text>
+
+  <!-- Next.js to Link Preview -->
+  <path class="arrow" d="M 550 250 L 550 110"/>
+  <text class="label" x="570" y="180">Uses</text>
+
+  <!-- Browser to Firestore Client -->
+  <path class="arrow" d="M 140 350 L 140 400"/>
+  <text class="label" x="160" y="380">Client SDK</text>
+
+  <!-- Browser to Next.js (Auth Token - dashed) -->
+  <path class="arrow dashed" d="M 230 320 L 450 320"/>
+  <text class="label" x="340" y="340">Auth Token</text>
 </svg>
