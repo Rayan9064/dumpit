@@ -1,42 +1,123 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700">
-  <style>
-    .box{fill:#0a1622; stroke:#2b6cb0; stroke-width:2; rx:8;}
-    .txt{font-family:Arial, sans-serif; font-size:13px; fill:#e6eef8;}
-    .title{font-family:Arial, sans-serif; font-size:16px; fill:#fff; font-weight:600}
-    .arrow{stroke:#9fbde8; stroke-width:2; fill:none; marker-end:url(#arrowhead)}
-  </style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800">
   <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#9fbde8" />
+    <style>
+      .container { fill: #1a1f35; stroke: #4a90e2; stroke-width: 2; }
+      .subgraph { fill: #0f1419; stroke: #2d5a8c; stroke-width: 2; stroke-dasharray: 5,5; }
+      .component { fill: #2d3748; stroke: #4a90e2; stroke-width: 1.5; }
+      .text { fill: #ffffff; font-family: Arial, sans-serif; font-size: 14px; }
+      .subtext { fill: #a0aec0; font-family: Arial, sans-serif; font-size: 11px; }
+      .title { fill: #ffffff; font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; }
+      .subtitle { fill: #cbd5e0; font-family: Arial, sans-serif; font-size: 12px; }
+      .arrow { stroke: #4a90e2; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#4a90e2" />
     </marker>
   </defs>
 
-  <!-- Browser -->
-  <rect class="box" x="40" y="40" width="240" height="60" /><text x="85" y="75" class="title">Browser (Client)</text>
-  <text x="65" y="95" class="txt">React Components, Hooks, Firebase Client SDK</text>
+  <!-- Client Subgraph -->
+  <rect class="subgraph" x="50" y="50" width="300" height="250" rx="10"/>
+  <text class="title" x="70" y="85">Client - Browser</text>
+  
+  <!-- Client Components -->
+  <rect class="component" x="80" y="110" width="240" height="60" rx="5"/>
+  <text class="text" x="140" y="135">Next.js React UI</text>
+  <text class="subtext" x="90" y="155">Components, Pages, Hooks</text>
 
-  <!-- Next App -->
-  <rect class="box" x="380" y="30" width="420" height="110" /><text x="470" y="60" class="title">Next.js Application</text>
-  <text x="410" y="80" class="txt">Server- and client-side rendering, API route handlers</text>
-  <text x="410" y="100" class="txt">API: /api/resources, /api/collections, /api/enrich, /api/public-resources, /api/user-profile</text>
+  <rect class="component" x="80" y="190" width="240" height="60" rx="5"/>
+  <text class="text" x="120" y="215">Firebase Client SDK</text>
+  <text class="subtext" x="90" y="235">Auth, Firestore Client</text>
 
-  <!-- Firestore -->
-  <rect class="box" x="880" y="40" width="240" height="60" /><text x="930" y="75" class="title">Firebase / Firestore</text>
-  <text x="910" y="95" class="txt">Auth, Firestore, Admin SDK</text>
+  <!-- Server Subgraph -->
+  <rect class="subgraph" x="450" y="50" width="500" height="500" rx="10"/>
+  <text class="title" x="470" y="85">Next.js Server</text>
+
+  <!-- Server Components -->
+  <rect class="component" x="480" y="110" width="200" height="60" rx="5"/>
+  <text class="text" x="530" y="135">API Routes &amp;</text>
+  <text class="text" x="545" y="155">Handlers</text>
+
+  <rect class="component" x="720" y="110" width="200" height="60" rx="5"/>
+  <text class="text" x="775" y="135">Enrich Service</text>
+  <text class="subtext" x="730" y="155">link-preview-js</text>
+
+  <rect class="component" x="480" y="200" width="200" height="60" rx="5"/>
+  <text class="text" x="505" y="225">Token Verification</text>
+  <text class="subtext" x="490" y="245">Auth Middleware</text>
+
+  <rect class="component" x="720" y="200" width="200" height="60" rx="5"/>
+  <text class="text" x="745" y="225">Firebase Admin SDK</text>
+  <text class="subtext" x="730" y="245">Server-side Operations</text>
+
+  <!-- API Endpoints Box -->
+  <rect class="container" x="480" y="290" width="440" height="240" rx="5"/>
+  <text class="subtitle" x="500" y="315">API Endpoints:</text>
+  <text class="subtext" x="500" y="340">• POST /api/resources - Create/update resources</text>
+  <text class="subtext" x="500" y="360">• GET /api/resources - Fetch user resources</text>
+  <text class="subtext" x="500" y="380">• POST /api/collections - Manage collections</text>
+  <text class="subtext" x="500" y="400">• POST /api/enrich - URL metadata extraction</text>
+  <text class="subtext" x="500" y="420">• GET /api/public-resources - Browse public items</text>
+  <text class="subtext" x="500" y="440">• POST /api/user-profile - User management</text>
+  <text class="subtext" x="500" y="460">• POST /api/check-username - Username validation</text>
+  <text class="subtext" x="500" y="480">• POST /api/collections/memberships - Collection ops</text>
+
+  <!-- Cloud Services Subgraph -->
+  <rect class="subgraph" x="1050" y="50" width="300" height="350" rx="10"/>
+  <text class="title" x="1070" y="85">Cloud Services</text>
+
+  <!-- Cloud Components -->
+  <rect class="component" x="1080" y="110" width="240" height="60" rx="5"/>
+  <text class="text" x="1160" y="135">Firestore DB</text>
+  <text class="subtext" x="1090" y="155">NoSQL Document Store</text>
+
+  <rect class="component" x="1080" y="190" width="240" height="60" rx="5"/>
+  <text class="text" x="1150" y="215">Firebase Auth</text>
+  <text class="subtext" x="1090" y="235">User Authentication</text>
+
+  <rect class="component" x="1080" y="270" width="240" height="60" rx="5"/>
+  <text class="text" x="1140" y="295">Gemini / AI</text>
+  <text class="subtext" x="1100" y="315">(Optional) AI Features</text>
+
+  <!-- External Services -->
+  <rect class="container" x="50" y="400" width="300" height="100" rx="5"/>
+  <text class="text" x="120" y="440">Link Preview Service</text>
+  <text class="subtext" x="60" y="465">Server-side URL metadata</text>
+  <text class="subtext" x="60" y="485">extraction and parsing</text>
 
   <!-- Arrows -->
-  <path d="M 280 60 L 380 60" class="arrow" />
-  <path d="M 800 60 L 880 60" class="arrow" />
+  <!-- Client UI to API -->
+  <path class="arrow" d="M 350 140 L 480 140"/>
+  <text class="subtext" x="360" y="135">POST /api/resources</text>
 
-  <!-- Enrichment sub-system -->
-  <rect x="380" y="170" width="740" height="150" fill="#07102a" stroke="#2b6cb0" stroke-width="1" rx="8"/>
-  <text x="420" y="190" class="title">Enrichment Service</text>
-  <text x="420" y="210" class="txt">link-preview-js + fallback HTML parsing + optional Gemini tag suggestions</text>
-  <path d="M 600 140 L 600 170" class="arrow" />
+  <!-- Client UI to Enrich -->
+  <path class="arrow" d="M 320 200 L 720 150"/>
+  <text class="subtext" x="450" y="165">POST /api/enrich</text>
 
-  <!-- External API -->
-  <rect x="40" y="350" width="240" height="60" class="box" /><text x="70" y="385" class="title">External APIs</text>
-  <text x="70" y="405" class="txt">Gemini / OpenAI, third-party metadata providers</text>
-  <path d="M 580 320 L 200 350" class="arrow" />
+  <!-- API to Admin SDK -->
+  <path class="arrow" d="M 680 230 L 720 230"/>
+  <text class="subtext" x="685" y="225">Admin SDK</text>
 
+  <!-- Admin SDK to Firestore -->
+  <path class="arrow" d="M 920 230 L 1080 140"/>
+  <text class="subtext" x="960" y="180">reads/writes</text>
+
+  <!-- Enrich to Link Preview -->
+  <path class="arrow" d="M 720 170 L 350 400"/>
+  <text class="subtext" x="480" y="270">fetch/parse</text>
+
+  <!-- Enrich to Gemini -->
+  <path class="arrow" d="M 920 150 L 1080 300"/>
+  <text class="subtext" x="960" y="220">AI suggestions</text>
+
+  <!-- API to Token Verification -->
+  <path class="arrow" d="M 580 170 L 580 200"/>
+  <text class="subtext" x="590" y="190">verify tokens</text>
+
+  <!-- Client SDK to Firestore -->
+  <path class="arrow" d="M 320 220 L 1080 140"/>
+  <text class="subtext" x="600" y="100">Client reads/writes</text>
+
+  <!-- Client SDK to Firebase Auth -->
+  <path class="arrow" d="M 320 240 L 1080 220"/>
+  <text class="subtext" x="650" y="240">Authentication</text>
 </svg>
