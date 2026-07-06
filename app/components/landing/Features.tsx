@@ -1,75 +1,68 @@
-import { Save, Sparkles, Lock, Share2, Tag, Bell } from "lucide-react";
-import { Card } from "../ui/card";
+import { Bot, FolderKanban, Globe2, LockKeyhole, Search, Tags } from 'lucide-react'
 
 const features = [
   {
-    icon: Save,
-    title: "Quick Save Anything",
-    description: "Instantly save links, posts, photos—no manual organizing required.",
+    icon: Bot,
+    title: 'Ask across your vault',
+    description: 'Use natural language to query indexed resources and receive cited answers.',
   },
   {
-    icon: Sparkles,
-    title: "AI-Powered Summaries",
-    description: "Let our AI enrich everything you save with context and insights.",
+    icon: Search,
+    title: 'Semantic retrieval',
+    description: 'Find relevant links even when your question does not match the original title.',
   },
   {
-    icon: Lock,
-    title: "Private & Public Modes",
-    description: "Choose what's just for you, or curate collections to share.",
+    icon: LockKeyhole,
+    title: 'Private and shared modes',
+    description: 'Separate personal knowledge from public discoveries with explicit visibility states.',
   },
   {
-    icon: Share2,
-    title: "Shareable Collections",
-    description: "Build and share your favorite finds in one click.",
+    icon: FolderKanban,
+    title: 'Collections that stay useful',
+    description: 'Group links by project, course, research topic, or workflow.',
   },
   {
-    icon: Tag,
-    title: "Smart Tags",
-    description: "Powerful search capabilities keep your content organized.",
+    icon: Tags,
+    title: 'Tags and metadata',
+    description: 'Capture context up front with enrichment, notes, tags, and source details.',
   },
   {
-    icon: Bell,
-    title: "Reminders",
-    description: "Timely nudges keep your digital memory fresh.",
+    icon: Globe2,
+    title: 'Community discovery',
+    description: 'Browse public resources, save the useful ones, and make them part of your own vault.',
   },
-];
+]
 
 const Features = () => {
   return (
-    <section id="features" className="py-24 relative">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16 animate-fade-in-up">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Everything You Need to{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-              Stay Organized
-            </span>
-          </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Powerful features designed to make personal knowledge management effortless
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <Card
-                key={index}
-                className="group p-6 bg-slate-800/50 border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors">
-                  <Icon className="w-6 h-6 text-blue-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-gray-400">{feature.description}</p>
-              </Card>
-            );
-          })}
+    <section className="border-b border-slate-200 bg-stone-50 py-20 dark:border-slate-800 dark:bg-slate-950">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <span className="app-chip mb-4">Product surface</span>
+            <h2 className="text-3xl font-bold tracking-normal text-slate-950 dark:text-white sm:text-4xl">
+              Built around retrieval, not folders for folders' sake.
+            </h2>
+            <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">
+              The interface should help users ask, verify, save, and refine. Every feature supports that loop.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {features.map((feature) => {
+              const Icon = feature.icon
+              return (
+                <article key={feature.title} className="app-panel p-5">
+                  <Icon className="mb-4 h-5 w-5 text-blue-600" />
+                  <h3 className="font-bold text-slate-950 dark:text-white">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{feature.description}</p>
+                </article>
+              )
+            })}
+          </div>
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default Features;
+export default Features

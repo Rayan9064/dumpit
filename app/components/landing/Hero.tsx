@@ -1,95 +1,144 @@
 'use client'
 
-import { ArrowRight } from "lucide-react";
-import { Button } from "../ui/button";
-import Link from "../ui/Link";
+import { ArrowRight, Bot, CheckCircle2, Database, ExternalLink, Lock, Search, Sparkles } from 'lucide-react'
+import Link from '../ui/Link'
+
+const sources = [
+  { label: 'Firebase Auth guide', type: 'Private', tag: 'Docs' },
+  { label: 'RAG patterns for citations', type: 'Shared', tag: 'AI' },
+  { label: 'Next.js route handlers', type: 'Private', tag: 'Code' },
+]
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800">
-      {/* Background effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+    <section className="relative overflow-hidden border-b border-slate-200 bg-stone-50 dark:border-slate-800 dark:bg-slate-950">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.06)_1px,transparent_1px)] bg-[size:44px_44px] opacity-60 dark:bg-[linear-gradient(to_right,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.08)_1px,transparent_1px)]" />
 
-      <div className="container mx-auto px-6 py-20 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-12">
-          <div className="flex-1 text-center lg:text-left">
-            <div className="flex flex-col space-y-6">
-              <div className="inline-block mb-2">
-                <span className="px-4 py-2 bg-blue-950/50 border border-blue-700/50 backdrop-blur-xl rounded-full text-sm font-medium text-blue-200">
-                  Your Personal Digital Vault
-                </span>
+      <div className="relative mx-auto flex min-h-[92vh] max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
+        <header className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <img src="/logo.png" alt="DumpIt" className="h-9 w-9 object-contain" />
+            <span className="text-lg font-bold text-slate-950 dark:text-white">DumpIt</span>
+          </Link>
+          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300 md:flex">
+            <a href="#workflow" className="hover:text-slate-950 dark:hover:text-white">Workflow</a>
+            <a href="#trust" className="hover:text-slate-950 dark:hover:text-white">Trust</a>
+            <a href="#discover" className="hover:text-slate-950 dark:hover:text-white">Discover</a>
+          </nav>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+          >
+            Open app
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </header>
+
+        <div className="grid flex-1 items-center gap-10 py-14 lg:grid-cols-[0.88fr_1.12fr] lg:py-20">
+          <div>
+            <div className="app-chip app-chip-ai mb-5">
+              <Sparkles className="h-3.5 w-3.5" />
+              AI knowledge vault for saved links
+            </div>
+            <h1 className="max-w-3xl text-5xl font-bold leading-[1.02] tracking-normal text-slate-950 dark:text-white sm:text-6xl lg:text-7xl">
+              Ask your saved internet.
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
+              DumpIt turns the links you save into an AI-searchable workspace. Capture useful resources, keep private and shared knowledge separate, then get answers with source citations.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/login?signup=true"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+              >
+                Start your vault
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a
+                href="#workflow"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              >
+                See the workflow
+              </a>
+            </div>
+
+            <div className="mt-8 grid max-w-xl gap-3 text-sm text-slate-600 dark:text-slate-300 sm:grid-cols-3">
+              <div className="flex items-center gap-2">
+                <Lock className="h-4 w-4 text-emerald-600" />
+                Private by default
               </div>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-4">
-                <img src="/logo-with-text.png" alt="DumpIt Logo" className="w-32 h-auto inline-block mb-2 lg:mb-0" />
-                <span>
-                  Your Digital Memory.{" "}
-                  <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                    Organized.
-                  </span>
-                </span>
-              </h1>
-              <p className="text-xl text-gray-300 max-w-2xl mx-auto lg:mx-0">
-                All your links, notes, and snapshots of inspiration—secure, searchable,
-                and always in sync. Welcome to smarter personal storage.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link href="/dashboard" tabIndex={-1} className="contents">
-                  <Button variant="hero" size="lg" className="group">
-                    Get Started Free
-                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-                <Button
-                  variant="glass"
-                  size="lg"
-                  onClick={() => {
-                    const el = document.getElementById('features');
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                >
-                  See How It Works
-                </Button>
+              <div className="flex items-center gap-2">
+                <Database className="h-4 w-4 text-blue-600" />
+                Indexed sources
               </div>
-              <div className="flex items-center gap-8 justify-center lg:justify-start text-sm text-gray-400">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/50" />
-                    <div className="w-8 h-8 rounded-full bg-blue-600/20 border border-blue-600/50" />
-                    <div className="w-8 h-8 rounded-full bg-blue-700/20 border border-blue-700/50" />
-                  </div>
-                  <span>Join early users</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-yellow-400">★★★★★</span>
-                  <span>5.0 rating</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-teal-600" />
+                Cited answers
               </div>
             </div>
           </div>
 
-          {/* Hero visual */}
-          <div className="flex-1 relative">
-            <div className="relative w-full max-w-lg mx-auto">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 to-blue-600/30 rounded-3xl blur-3xl opacity-30 animate-pulse" />
-              <div className="relative z-10 w-full h-auto bg-gradient-to-br from-blue-900/50 to-slate-900/50 rounded-3xl border border-blue-700/50 p-8 backdrop-blur-xl">
-                <div className="space-y-4">
-                  <div className="h-40 bg-blue-800/30 rounded-xl" />
-                  <div className="flex gap-4">
-                    <div className="h-20 flex-1 bg-blue-800/30 rounded-lg" />
-                    <div className="h-20 flex-1 bg-blue-800/30 rounded-lg" />
+          <div className="relative">
+            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl shadow-slate-300/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/30">
+              <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
+                <div className="flex items-center gap-2">
+                  <Bot className="h-5 w-5 text-blue-600" />
+                  <span className="text-sm font-semibold text-slate-900 dark:text-white">Ask DumpIt</span>
+                </div>
+                <span className="app-chip app-chip-success">All sources</span>
+              </div>
+
+              <div className="grid gap-0 lg:grid-cols-[1.2fr_0.8fr]">
+                <div className="border-b border-slate-200 p-5 dark:border-slate-800 lg:border-b-0 lg:border-r">
+                  <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+                    <div className="flex items-center gap-3">
+                      <Search className="h-5 w-5 text-slate-400" />
+                      <span className="text-sm text-slate-700 dark:text-slate-200">What should I read before implementing Firebase auth?</span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-blue-100 bg-blue-50/70 p-4 dark:border-blue-950 dark:bg-blue-950/30">
+                    <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-blue-800 dark:text-blue-200">
+                      <Sparkles className="h-4 w-4" />
+                      Answer from your vault
+                    </div>
+                    <p className="text-sm leading-6 text-slate-700 dark:text-slate-200">
+                      Start with Firebase ID token verification, then move ownership checks server-side. Your saved Next.js route handler notes explain the API boundary, and the RAG citation guide covers why answers should include sources.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <span className="app-chip">[1] Auth guide</span>
+                      <span className="app-chip">[2] Route handlers</span>
+                      <span className="app-chip">[3] Citation pattern</span>
+                    </div>
                   </div>
                 </div>
+
+                <aside className="bg-slate-50 p-5 dark:bg-slate-950/70">
+                  <div className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Sources</div>
+                  <div className="space-y-3">
+                    {sources.map((source, index) => (
+                      <div key={source.label} className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                          <span className="text-xs font-bold text-blue-600">[{index + 1}]</span>
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{source.type}</span>
+                        </div>
+                        <div className="line-clamp-2 text-sm font-semibold text-slate-900 dark:text-white">{source.label}</div>
+                        <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+                          <span>{source.tag}</span>
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </aside>
               </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default Hero;
+export default Hero

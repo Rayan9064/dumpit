@@ -2,6 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-stone-50 text-slate-950 antialiased dark:bg-slate-950 dark:text-slate-50;
+  }
+
+  * {
+    @apply border-slate-200 dark:border-slate-800;
+  }
+}
+
+@layer components {
+  .app-surface {
+    @apply border border-slate-200/80 bg-white/90 shadow-sm shadow-slate-200/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/20;
+  }
+
+  .app-panel {
+    @apply rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+  }
+
+  .app-muted-panel {
+    @apply rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60;
+  }
+
+  .app-input {
+    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus:border-blue-500 dark:focus:ring-blue-950;
+  }
+
+  .app-label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200;
+  }
+
+  .app-chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300;
+  }
+
+  .app-chip-ai {
+    @apply border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-300;
+  }
+
+  .app-chip-success {
+    @apply border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300;
+  }
+
+  .app-chip-warning {
+    @apply border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300;
+  }
+
+  .app-focus {
+    @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 dark:focus-visible:ring-blue-950;
+  }
+}
+
 /* Custom animations */
 @keyframes fade-in-up {
   from {
@@ -42,11 +102,6 @@
 
 .animate-glow-pulse {
   animation: glow-pulse 2s ease-in-out infinite;
-}
-
-/* Dark mode body styles */
-body {
-  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white;
 }
 
 /* Custom scrollbar */
