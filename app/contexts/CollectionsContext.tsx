@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { authFetch, jsonAuthFetch } from '../lib/authFetch';
 import { useAuth } from './AuthContext';
 
 export interface Collection {
@@ -54,7 +55,7 @@ export function CollectionsProvider({ children, fetchOnMount = false }: Collecti
   const uid = user?.uid;
 
   const fetchCollections = useCallback(async () => {
-    if (!uid) return;
+    if (!user) return;
     const now = Date.now();
     // Only fetch if cache has expired
     if (now - lastFetchTimeRef.current < CACHE_DURATION_MS && collections.length > 0) {
@@ -62,7 +63,7 @@ export function CollectionsProvider({ children, fetchOnMount = false }: Collecti
     }
     setLoading(true);
     try {
-      const response = await fetch(`/api/collections?uid=${uid}`);
+      const response = await authFetch(user, '/api/collections');
       if (!response.ok) throw new Error('Failed to load collections');
       const data = await response.json();
       setCollections(data.collections || []);
@@ -72,7 +73,7 @@ export function CollectionsProvider({ children, fetchOnMount = false }: Collecti
     } finally {
       setLoading(false);
     }
-  }, [uid, collections.length]);
+  }, [uid, user, collections.length]);
 
   const fetchSharedCollections = useCallback(async () => {
     try {
@@ -99,17 +100,16 @@ export function CollectionsProvider({ children, fetchOnMount = false }: Collecti
   }, [uid]);
 
   const refreshCollections = useCallback(async () => {
+    lastFetchTimeRef.current = 0;
     await fetchCollections();
   }, [fetchCollections]);
 
   const createCollection: CollectionsContextValue['createCollection'] = async (payload) => {
-    if (!uid) return null;
+    if (!user) return null;
     try {
-      const response = await fetch('/api/collections', {
+      const response = await jsonAuthFetch(user, '/api/collections', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          uid,
           name: payload.name,
           description: payload.description || '',
           icon: payload.icon || null,
@@ -130,10 +130,10 @@ export function CollectionsProvider({ children, fetchOnMount = false }: Collecti
 
   const updateCollection: CollectionsContextValue['updateCollection'] = async (id, payload) => {
     try {
-      const response = await fetch('/api/collections', {
+      if (!user) return false;
+      const response = await jsonAuthFetch(user, '/api/collections', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, ...payload }),
+        body: JSON.stringify({ collectionId: id, ...payload }),
       });
       if (!response.ok) throw new Error('Failed to update collection');
       await refreshCollections();
@@ -146,7 +146,8 @@ export function CollectionsProvider({ children, fetchOnMount = false }: Collecti
 
   const deleteCollection: CollectionsContextValue['deleteCollection'] = async (id) => {
     try {
-      const response = await fetch(`/api/collections?id=${id}`, {
+      if (!user) return false;
+      const response = await authFetch(user, `/api/collections?collectionId=${encodeURIComponent(id)}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete collection');
@@ -160,9 +161,9 @@ export function CollectionsProvider({ children, fetchOnMount = false }: Collecti
 
   const reorderCollections: CollectionsContextValue['reorderCollections'] = async (orderedIds) => {
     try {
-      const response = await fetch('/api/collections', {
+      if (!user) return false;
+      const response = await jsonAuthFetch(user, '/api/collections', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderedIds }),
       });
       if (!response.ok) throw new Error('Failed to reorder collections');
@@ -176,9 +177,9 @@ export function CollectionsProvider({ children, fetchOnMount = false }: Collecti
 
   const addResourceToCollection: CollectionsContextValue['addResourceToCollection'] = async (collectionId, resourceId) => {
     try {
-      const response = await fetch('/api/collections/memberships', {
+      if (!user) return false;
+      const response = await jsonAuthFetch(user, '/api/collections/memberships', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ collectionId, resourceId }),
       });
       if (!response.ok) throw new Error('Failed to add resource to collection');
@@ -191,9 +192,9 @@ export function CollectionsProvider({ children, fetchOnMount = false }: Collecti
 
   const removeResourceFromCollection: CollectionsContextValue['removeResourceFromCollection'] = async (collectionId, resourceId) => {
     try {
-      const response = await fetch('/api/collections/memberships', {
+      if (!user) return false;
+      const response = await jsonAuthFetch(user, '/api/collections/memberships', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ collectionId, resourceId }),
       });
       if (!response.ok) throw new Error('Failed to remove resource from collection');

@@ -5,6 +5,7 @@ import { Tooltip } from 'react-tooltip';
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCollections } from '../contexts/CollectionsContext';
+import { authFetch } from '../lib/authFetch';
 import { CollectionsSidebar } from './collections/CollectionsSidebar';
 import { ResourceCollectionManager } from './collections/ResourceCollectionManager';
 import { EditResource } from './EditResource';
@@ -91,12 +92,13 @@ export function Dashboard() {
     if (!user) return;
     setLoading(true);
     try {
-      const queryParams = new URLSearchParams({ uid: user.uid });
+      const queryParams = new URLSearchParams();
       if (collectionId) {
         queryParams.set('collectionId', collectionId);
       }
 
-      const response = await fetch(`/api/resources?${queryParams.toString()}`);
+      const url = queryParams.toString() ? `/api/resources?${queryParams.toString()}` : '/api/resources';
+      const response = await authFetch(user, url);
 
       if (!response.ok) {
         throw new Error('Failed to load resources');
@@ -144,10 +146,11 @@ export function Dashboard() {
   };
 
   const deleteResource = async (id: string) => {
+    if (!user) return;
     if (!confirm('Are you sure you want to delete this resource?')) return;
 
     try {
-      const response = await fetch(`/api/resources?id=${id}`, {
+      const response = await authFetch(user, `/api/resources?id=${id}`, {
         method: 'DELETE',
       });
 

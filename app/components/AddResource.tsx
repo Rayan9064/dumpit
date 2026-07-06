@@ -4,6 +4,7 @@ import { Loader2, Plus, Globe, Lock, Sparkles } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCollections } from '../contexts/CollectionsContext';
+import { jsonAuthFetch } from '../lib/authFetch';
 
 interface AddResourceProps {
   onSuccess: () => void;
@@ -50,7 +51,6 @@ export function AddResource({ onSuccess }: AddResourceProps) {
 
     try {
       const payload: any = {
-        user_id: user.uid,
         title,
         link,
         note,
@@ -68,9 +68,8 @@ export function AddResource({ onSuccess }: AddResourceProps) {
         payload.new_collection = { name: newCollectionName.trim() };
       }
 
-      const response = await fetch('/api/resources', {
+      const response = await jsonAuthFetch(user, '/api/resources', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
@@ -94,8 +93,6 @@ export function AddResource({ onSuccess }: AddResourceProps) {
       }
       setNewCollectionName('');
 
-      // Refresh local collections so newly created collection appears in the UI
-      refreshCollections().catch(() => {});
       // Refresh local collections so newly created collection appears in the UI
       refreshCollections().catch(() => {});
       onSuccess();

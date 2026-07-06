@@ -1,25 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isAuthError, requireAuth, unauthorizedResponse } from '../_utils/auth';
 import { getServerFirestore } from '../_utils/firebaseAdmin';
 import { getPreviewFromUrl } from '../_utils/linkPreview';
 
-// GET /api/resources?uid=<uid> - Get user's resources
+// GET /api/resources - Get the authenticated user's resources
 export async function GET(request: NextRequest) {
   try {
+    const authUser = await requireAuth(request);
     const { searchParams } = new URL(request.url);
-    const uid = searchParams.get('uid');
     const collectionId = searchParams.get('collectionId');
-
-    if (!uid) {
-      return NextResponse.json(
-        { error: 'Missing uid parameter' },
-        { status: 400 }
-      );
-    }
 
     const db = getServerFirestore();
 
     let query: FirebaseFirestore.Query = db.collection('resources')
-      .where('user_id', '==', uid);
+      .where('user_id', '==', authUser.uid);
 
     if (collectionId) {
       query = query.where('collection_ids', 'array-contains', collectionId);
@@ -38,6 +32,10 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error fetching resources:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -49,14 +47,14 @@ export async function GET(request: NextRequest) {
 // POST /api/resources - Create new resource
 export async function POST(request: NextRequest) {
   try {
+    const authUser = await requireAuth(request);
     const body = await request.json();
-    const { user_id, title, link, note, tag, is_public, collection_ids, new_collection } = body;
+    const { title, link, note, tag, is_public, collection_ids, new_collection } = body;
 
     // Validate required fields
-    if (!user_id || !link) {
-      console.warn('POST /api/resources - missing required fields', { body });
+    if (!link) {
       return NextResponse.json(
-        { error: 'Missing required fields: user_id, link' },
+        { error: 'Missing required field: link' },
         { status: 400 }
       );
     }
@@ -92,7 +90,7 @@ export async function POST(request: NextRequest) {
     const now = new Date();
 
     const resourceData = {
-      user_id,
+      user_id: authUser.uid,
       title: enrichedTitle,
       link,
       note: note || null,
@@ -110,7 +108,7 @@ export async function POST(request: NextRequest) {
         if (!new_collection.name || typeof new_collection.name !== 'string') {
           throw new Error('new_collection.name is required and must be a string');
         }
-        const collectionsRef = db.collection('users').doc(user_id).collection('collections');
+        const collectionsRef = db.collection('users').doc(authUser.uid).collection('collections');
         const collectionRef = collectionsRef.doc();
         const collectionData: any = {
           name: new_collection.name,
@@ -131,9 +129,9 @@ export async function POST(request: NextRequest) {
       transaction.set(resourceRef, resourceData);
 
       normalizedCollectionIds.forEach((collectionId: string) => {
-        const membershipRef = db
-          .collection('users')
-          .doc(user_id)
+          const membershipRef = db
+            .collection('users')
+          .doc(authUser.uid)
           .collection('collections')
           .doc(collectionId)
           .collection('resources')
@@ -151,10 +149,13 @@ export async function POST(request: NextRequest) {
       message: 'Resource created successfully',
       resourceId: resourceRef.id,
       createdCollectionId,
-      bodyReceived: body // include for debugging in development
     });
 
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error creating resource:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -166,6 +167,7 @@ export async function POST(request: NextRequest) {
 // PUT /api/resources - Update resource
 export async function PUT(request: NextRequest) {
   try {
+    const authUser = await requireAuth(request);
     const { id, title, link, note, tag, is_public, collection_ids } = await request.json();
 
     // Validate required fields
@@ -193,6 +195,10 @@ export async function PUT(request: NextRequest) {
     }
 
     const existingData = existingSnapshot.data() || {};
+    if (existingData.user_id !== authUser.uid) {
+      return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
+    }
+
     const existingCollectionIds: string[] = Array.isArray(existingData.collection_ids)
       ? existingData.collection_ids
       : [];
@@ -258,6 +264,10 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error updating resource:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -269,6 +279,7 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/resources?id=<resourceId> - Delete resource
 export async function DELETE(request: NextRequest) {
   try {
+    const authUser = await requireAuth(request);
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -289,6 +300,10 @@ export async function DELETE(request: NextRequest) {
 
     const data = snapshot.data() || {};
     const userId: string | undefined = data.user_id;
+    if (userId !== authUser.uid) {
+      return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
+    }
+
     const collectionIds: string[] = Array.isArray(data.collection_ids) ? data.collection_ids : [];
 
     await db.runTransaction(async (transaction) => {
@@ -314,6 +329,10 @@ export async function DELETE(request: NextRequest) {
     });
 
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error deleting resource:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

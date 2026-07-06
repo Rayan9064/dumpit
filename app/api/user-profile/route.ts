@@ -1,59 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { isAuthError, requireAuth, unauthorizedResponse } from '../_utils/auth';
+import { getServerFirestore } from '../_utils/firebaseAdmin';
 
-// Lazy initialization of Firebase Admin
-let db: any = null;
+const usernameRegex = /^[a-z0-9_-]{3,20}$/;
 
-const initializeFirebaseAdmin = () => {
-  if (!db) {
-    if (!getApps().length) {
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+const getProfileStats = async (db: FirebaseFirestore.Firestore, uid: string) => {
+  const resourcesQuery = await db.collection('resources')
+    .where('user_id', '==', uid)
+    .get();
 
-      if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !privateKey) {
-        throw new Error('Missing Firebase Admin SDK environment variables');
-      }
+  const allResources = resourcesQuery.docs.map((doc) => doc.data());
+  const publicCount = allResources.filter((resource) => resource.is_public).length;
 
-      initializeApp({
-        credential: cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: privateKey,
-        }),
-      });
-    }
-    db = getFirestore();
-  }
-  return db;
+  return {
+    resource_count: allResources.length,
+    public_resource_count: publicCount,
+  };
 };
 
-// POST /api/user-profile - Create or update user profile
+// POST /api/user-profile - Create or update the authenticated user's profile
 export async function POST(request: NextRequest) {
   try {
-    const { uid, username, email, share_by_default } = await request.json();
+    const authUser = await requireAuth(request);
+    const { username, email, share_by_default } = await request.json();
 
-    // Validate required fields
-    if (!uid || !username || !email) {
+    if (!username) {
       return NextResponse.json(
-        { error: 'Missing required fields: uid, username, email' },
+        { error: 'Missing required field: username' },
         { status: 400 }
       );
     }
 
-    // Validate username format
-    const usernameRegex = /^[a-z0-9_-]{3,20}$/;
     if (!usernameRegex.test(username)) {
       return NextResponse.json({
         error: 'Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.'
       }, { status: 400 });
     }
 
-    const db = initializeFirebaseAdmin();
+    const db = getServerFirestore();
 
-    // Check if username is already taken by another user
     const usernameQuery = await db.collection('users')
       .where('username', '==', username)
-      .where('id', '!=', uid)
+      .where('id', '!=', authUser.uid)
       .get();
 
     if (!usernameQuery.empty) {
@@ -62,17 +50,20 @@ export async function POST(request: NextRequest) {
       }, { status: 409 });
     }
 
-    // Create or update user profile
+    const userRef = db.collection('users').doc(authUser.uid);
+    const existingProfile = await userRef.get();
+    const now = new Date();
+
     const userData = {
-      id: uid,
+      id: authUser.uid,
       username,
-      email,
+      email: email || authUser.email || '',
       share_by_default: share_by_default ?? false,
-      created_at: new Date(),
-      updated_at: new Date(),
+      created_at: existingProfile.exists ? existingProfile.data()?.created_at || now : now,
+      updated_at: now,
     };
 
-    await db.collection('users').doc(uid).set(userData, { merge: true });
+    await userRef.set(userData, { merge: true });
 
     return NextResponse.json({
       success: true,
@@ -80,6 +71,10 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error creating/updating user profile:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -88,59 +83,46 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/user-profile?uid=<uid>&type=<profile|stats> - Get user profile or stats
+// GET /api/user-profile?type=<profile|stats> - Get authenticated user's profile or stats
 export async function GET(request: NextRequest) {
   try {
+    const authUser = await requireAuth(request);
     const { searchParams } = new URL(request.url);
-    const uid = searchParams.get('uid');
-    const type = searchParams.get('type'); // 'stats' or 'profile'
+    const type = searchParams.get('type');
+    const db = getServerFirestore();
 
-    if (!uid) {
+    if (type === 'stats') {
+      return NextResponse.json({
+        success: true,
+        stats: await getProfileStats(db, authUser.uid),
+      });
+    }
+
+    const userDoc = await db.collection('users').doc(authUser.uid).get();
+
+    if (!userDoc.exists) {
       return NextResponse.json(
-        { error: 'Missing uid parameter' },
-        { status: 400 }
+        { error: 'User profile not found' },
+        { status: 404 }
       );
     }
 
-    const db = initializeFirebaseAdmin();
+    const profile = userDoc.data();
+    const stats = await getProfileStats(db, authUser.uid);
 
-    if (type === 'stats') {
-      // Get user resource statistics
-      const resourcesQuery = await db.collection('resources')
-        .where('user_id', '==', uid)
-        .get();
-
-      const allResources = resourcesQuery.docs.map((doc: any) => doc.data());
-      const publicCount = allResources.filter((r: any) => r.is_public).length;
-
-      return NextResponse.json({
-        success: true,
-        stats: {
-          total: allResources.length,
-          public: publicCount,
-          private: allResources.length - publicCount
-        }
-      });
-    } else {
-      // Get user profile (default behavior)
-      const userDoc = await db.collection('users').doc(uid).get();
-
-      if (!userDoc.exists) {
-        return NextResponse.json(
-          { error: 'User profile not found' },
-          { status: 404 }
-        );
+    return NextResponse.json({
+      success: true,
+      profile: {
+        ...profile,
+        ...stats,
       }
-
-      const userData = userDoc.data();
-
-      return NextResponse.json({
-        success: true,
-        profile: userData
-      });
-    }
+    });
 
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error fetching user data:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -149,36 +131,24 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PUT /api/user-profile - Update user profile
+// PUT /api/user-profile - Update authenticated user's profile
 export async function PUT(request: NextRequest) {
   try {
-    const { uid, username, share_by_default } = await request.json();
+    const authUser = await requireAuth(request);
+    const { username, share_by_default } = await request.json();
 
-    // Validate required fields
-    if (!uid) {
-      return NextResponse.json(
-        { error: 'Missing required field: uid' },
-        { status: 400 }
-      );
+    if (username && !usernameRegex.test(username)) {
+      return NextResponse.json({
+        error: 'Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.'
+      }, { status: 400 });
     }
 
-    // Validate username format if provided
-    if (username) {
-      const usernameRegex = /^[a-z0-9_-]{3,20}$/;
-      if (!usernameRegex.test(username)) {
-        return NextResponse.json({
-          error: 'Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.'
-        }, { status: 400 });
-      }
-    }
+    const db = getServerFirestore();
 
-    const db = initializeFirebaseAdmin();
-
-    // Check if username is already taken by another user (if updating username)
     if (username) {
       const usernameQuery = await db.collection('users')
         .where('username', '==', username)
-        .where('id', '!=', uid)
+        .where('id', '!=', authUser.uid)
         .get();
 
       if (!usernameQuery.empty) {
@@ -188,15 +158,14 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Update user profile
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       updated_at: new Date(),
     };
 
     if (username !== undefined) updateData.username = username;
     if (share_by_default !== undefined) updateData.share_by_default = share_by_default;
 
-    await db.collection('users').doc(uid).update(updateData);
+    await db.collection('users').doc(authUser.uid).set(updateData, { merge: true });
 
     return NextResponse.json({
       success: true,
@@ -204,6 +173,10 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error updating user profile:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

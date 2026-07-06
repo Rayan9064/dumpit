@@ -2,6 +2,8 @@
 
 import { Globe, Loader2, Lock, Save, X } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { jsonAuthFetch } from '../lib/authFetch';
 
 interface Resource {
   id: string;
@@ -32,6 +34,7 @@ const TAGS = [
 ];
 
 export function EditResource({ resource, onSuccess, onCancel }: EditResourceProps) {
+  const { user } = useAuth();
   const [title, setTitle] = useState(resource.title);
   const [link, setLink] = useState(resource.link);
   const [note, setNote] = useState(resource.note || '');
@@ -46,9 +49,9 @@ export function EditResource({ resource, onSuccess, onCancel }: EditResourceProp
     setError('');
 
     try {
-      const response = await fetch('/api/resources', {
+      if (!user) return;
+      const response = await jsonAuthFetch(user, '/api/resources', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: resource.id,
           title,
