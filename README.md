@@ -7,6 +7,7 @@ A modern, full-featured web application for saving, organizing, and sharing your
 ### Core Functionality
 - **🔐 User Authentication**: Secure sign up and login with Firebase Auth
 - **📚 Resource Management**: Create, read, update, and delete your resources
+- **🤖 Ask DumpIt**: Ask questions across indexed private and shared resources with cited source links
 - **🤖 AI-Powered Auto-Enrichment**: Automatically fetch titles, generate descriptions, and suggest tags from URLs
    - Uses `link-preview-js` on the server to extract metadata
 Running tests
@@ -157,7 +158,7 @@ Visit 👉 [http://localhost:3000](http://localhost:3000)
 | 🔐 **Authentication**        | Secure Email/Password Login                  |
 | 💾 **Firestore**             | Real-time database for data storage          |
 | ⚙️ **Firebase Admin SDK**    | Server-side configuration for secure actions |
-| 🤖 **Gemini AI (Optional)**  | AI-powered resource enrichment               |
+| 🤖 **Gemini AI (Optional)**  | RAG search, answers, and resource indexing   |
 | 🧱 **Next.js 14 App Router** | Modern routing and server components         |
 
 ---
@@ -192,7 +193,17 @@ This Next.js application can be deployed to any platform that supports Node.js:
 Ensure all environment variables are set in your deployment platform:
 - `NEXT_PUBLIC_FIREBASE_*` variables for client-side Firebase config
 - `FIREBASE_*` variables for server-side Admin SDK
-- `GEMINI_*` variables for AI features (optional)
+- `GEMINI_API_KEY`, `GEMINI_MODEL`, and `GEMINI_EMBEDDING_MODEL` for AI/RAG features
+
+### AI/RAG Notes
+DumpIt indexes saved resources by fetching link content server-side, chunking readable text, creating Gemini embeddings, and storing vectors in Firestore `resource_chunks`.
+
+The dashboard's **AI Search** tab supports:
+- `My Dump`: private resources owned by the signed-in user
+- `Shared`: public resources shared by other users
+- `All`: the user's private resources plus shared public resources
+
+Create the Firestore vector indexes described in [docs/deployment.md](docs/deployment.md) before relying on AI search in production.
 
 For detailed Firebase setup steps, see [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
 

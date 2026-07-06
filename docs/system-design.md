@@ -7,6 +7,26 @@ This document describes the high-level architecture of DumpIt:
 - **Firebase**: Firestore (data store), Firebase Auth
 - **Optional external services**: Gemini AI, link preview service
 
+## Current AI/RAG Architecture
+DumpIt now indexes saved links into a permission-aware RAG layer:
+
+- Resource save/update -> fetch URL text -> extract readable text -> chunk text -> create Gemini embeddings -> store `resource_chunks`
+- Ask DumpIt -> embed user question -> Firestore vector search -> filter authorized chunks -> generate Gemini answer with citations
+- Authenticated API calls send a Firebase ID token; server routes verify the token and derive `uid`
+
+```mermaid
+flowchart TD
+    Resource["Saved Resource"] --> Extract["Fetch URL + Extract Text"]
+    Extract --> Chunk["Chunk Text"]
+    Chunk --> Embed["Gemini Embeddings"]
+    Embed --> Vector["Firestore resource_chunks"]
+    Question["User Question"] --> QueryEmbed["Embed Query"]
+    QueryEmbed --> Search["Vector Search"]
+    Vector --> Search
+    Search --> Authz["Permission Filter"]
+    Authz --> Answer["Gemini Answer + Citations"]
+```
+
 ## Components
 - **Client**: UI components for Dashboard, AddResource, etc.
 - **Server**: Next.js app routes under `app/api/` (collections, resources, enrich, users, etc.)
@@ -15,7 +35,7 @@ This document describes the high-level architecture of DumpIt:
 ## Data Flows
 - User creates resource on client → POST /api/resources → Server writes to Firestore
 - Enrichment: client triggers POST /api/enrich → server uses `link-preview-js` or fallback parse
-- Permissions: Client sends auth ID token (TODO: verify server-side)
+- Permissions: Client sends Firebase ID token; server verifies it and derives `uid`
 
 ---
 
@@ -206,7 +226,7 @@ erDiagram
 ## Open Concerns & Future Improvements
 
 ### Security
-- **Authentication/Authorization**: Ensure server verifies ID tokens before writing data
+- **Authentication/Authorization**: Server verifies Firebase ID tokens before private reads/writes
 - Implement rate limiting for public endpoints (e.g., `/api/enrich`)
 - Add CORS configuration for production
 
