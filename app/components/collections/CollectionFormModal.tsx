@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { X, Loader2 } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
+import { FormEvent, useState } from 'react'
 import type { Collection } from '../../contexts/CollectionsContext'
 
 interface CollectionFormModalProps {
@@ -11,14 +11,14 @@ interface CollectionFormModalProps {
 }
 
 const COLORS = [
-  '#3B82F6', // blue
-  '#10B981', // green
-  '#F59E0B', // amber
-  '#EF4444', // red
-  '#8B5CF6', // violet
-  '#EC4899', // pink
-  '#6366F1', // indigo
-  '#14B8A6', // teal
+  '#2563EB',
+  '#0F766E',
+  '#16A34A',
+  '#CA8A04',
+  '#DC2626',
+  '#7C3AED',
+  '#DB2777',
+  '#475569',
 ]
 
 export function CollectionFormModal({ collection, onClose, onSubmit }: CollectionFormModalProps) {
@@ -28,8 +28,8 @@ export function CollectionFormModal({ collection, onClose, onSubmit }: Collectio
   const [isShared, setIsShared] = useState(collection?.is_shared || false)
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
     if (!name.trim()) return
 
     setLoading(true)
@@ -41,101 +41,109 @@ export function CollectionFormModal({ collection, onClose, onSubmit }: Collectio
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full">
-        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-            {collection ? 'Edit Collection' : 'New Collection'}
-          </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+      <div className="app-panel w-full max-w-md overflow-hidden shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+          <div>
+            <h2 className="text-lg font-bold text-slate-950 dark:text-white">
+              {collection ? 'Edit collection' : 'New collection'}
+            </h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Group related sources for faster review.</p>
+          </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            title="Close"
           >
-            <X className="w-6 h-6" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 p-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Name *
-            </label>
+            <label htmlFor="collection-name" className="app-label">Name</label>
             <input
+              id="collection-name"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              onChange={(event) => setName(event.target.value)}
+              className="app-input mt-2"
               placeholder="Collection name"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Description
-            </label>
+            <label htmlFor="collection-description" className="app-label">Description</label>
             <textarea
+              id="collection-description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+              onChange={(event) => setDescription(event.target.value)}
+              rows={3}
+              className="app-input mt-2 resize-y"
               placeholder="Optional description"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Color
-            </label>
-            <div className="flex gap-2">
-              {COLORS.map((c) => (
+            <span className="app-label">Color</span>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {COLORS.map((item) => (
                 <button
-                  key={c}
+                  key={item}
                   type="button"
-                  onClick={() => setColor(c)}
-                  className={`w-8 h-8 rounded-full border-2 transition-transform ${
-                    color === c ? 'border-gray-900 dark:border-white scale-110' : 'border-transparent'
+                  onClick={() => setColor(item)}
+                  className={`h-9 w-9 rounded-lg border-2 transition-transform ${
+                    color === item ? 'border-slate-950 ring-2 ring-blue-200 dark:border-white dark:ring-blue-900' : 'border-transparent'
                   }`}
-                  style={{ backgroundColor: c }}
+                  style={{ backgroundColor: item }}
+                  aria-label={`Use color ${item}`}
                 />
               ))}
             </div>
           </div>
 
-          <div>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isShared}
-                onChange={(e) => setIsShared(e.target.checked)}
-                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Share this collection publicly
-              </span>
-            </label>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-bold text-slate-950 dark:text-white">Share this collection</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  Shared collections can help other users discover useful public sources.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsShared((value) => !value)}
+                className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
+                  isShared ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
+                }`}
+                aria-pressed={isShared}
+                aria-label="Toggle collection sharing"
+              >
+                <span
+                  className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                    isShared ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : collection ? (
-                'Save Changes'
-              ) : (
-                'Create Collection'
-              )}
+              {loading && <Loader2 className="h-5 w-5 animate-spin" />}
+              {collection ? 'Save changes' : 'Create collection'}
             </button>
           </div>
         </form>

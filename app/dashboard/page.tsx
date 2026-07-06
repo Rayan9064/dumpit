@@ -16,7 +16,7 @@ type Page = 'dashboard' | 'add' | 'shared' | 'ai' | 'profile'
 export default function DashboardRoute() {
   const { user, loading } = useAuth()
   const router = useRouter()
-  const [currentPage, setCurrentPage] = useState<Page>('dashboard')
+  const [currentPage, setCurrentPage] = useState<Page>('ai')
 
   useEffect(() => {
     // If not authenticated, redirect to login

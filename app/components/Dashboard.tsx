@@ -1,179 +1,137 @@
 'use client'
 
-import { Edit, ExternalLink, FolderPlus, Globe, Loader2, Lock, MoreHorizontal, Search, Trash2 } from 'lucide-react';
-import { Tooltip } from 'react-tooltip';
-import { useEffect, useMemo, useState, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useCollections } from '../contexts/CollectionsContext';
-import { authFetch } from '../lib/authFetch';
-import { CollectionsSidebar } from './collections/CollectionsSidebar';
-import { ResourceCollectionManager } from './collections/ResourceCollectionManager';
-import { EditResource } from './EditResource';
+import { Edit, ExternalLink, FolderPlus, Globe, Loader2, Lock, MoreHorizontal, Search, Trash2 } from 'lucide-react'
+import { Tooltip } from 'react-tooltip'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import { useCollections } from '../contexts/CollectionsContext'
+import { authFetch } from '../lib/authFetch'
+import { CollectionsSidebar } from './collections/CollectionsSidebar'
+import { ResourceCollectionManager } from './collections/ResourceCollectionManager'
+import { EditResource } from './EditResource'
 
-// Helper function to safely format dates
 function formatDate(dateValue: any): string {
-  if (!dateValue) return '';
-
+  if (!dateValue) return ''
   try {
-    // Handle Firestore Timestamp objects
-    if (dateValue && typeof dateValue.toDate === 'function') {
-      return dateValue.toDate().toLocaleDateString();
-    }
-
-    // Handle string dates or timestamps
-    const date = new Date(dateValue);
-    return isNaN(date.getTime()) ? '' : date.toLocaleDateString();
-  } catch (e) {
-    console.error('Error formatting date:', e);
-    return '';
+    if (dateValue && typeof dateValue.toDate === 'function') return dateValue.toDate().toLocaleDateString()
+    const date = new Date(dateValue)
+    return isNaN(date.getTime()) ? '' : date.toLocaleDateString()
+  } catch {
+    return ''
   }
 }
 
 interface Resource {
-  id: string;
-  user_id: string;
-  title: string;
-  link: string;
-  note?: string;
-  tag: string;
-  is_public: boolean;
-  created_at: Date | string | { toDate: () => Date };
-  collection_ids?: string[];
+  id: string
+  user_id: string
+  title: string
+  link: string
+  note?: string
+  tag: string
+  is_public: boolean
+  index_status?: 'pending' | 'indexed' | 'failed' | 'skipped'
+  created_at: Date | string | { toDate: () => Date }
+  collection_ids?: string[]
+}
+
+const statusStyles: Record<string, string> = {
+  indexed: 'app-chip-success',
+  pending: 'app-chip-warning',
+  failed: 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300',
+  skipped: '',
 }
 
 export function Dashboard() {
-  const [openMenuResourceId, setOpenMenuResourceId] = useState<string | null>(null);
-  const handleMenuOpen = (resourceId: string) => {
-    setOpenMenuResourceId(resourceId);
-  };
-
-  const handleMenuClose = () => {
-    setOpenMenuResourceId(null);
-  };
-  const { user } = useAuth();
-  const {
-    collections,
-    addResourceToCollection,
-    removeResourceFromCollection,
-  } = useCollections();
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [filteredResources, setFilteredResources] = useState<Resource[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState('all');
-  const [tags, setTags] = useState<string[]>([]);
-  const [editingResource, setEditingResource] = useState<Resource | null>(null);
-  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
-  const [managerResource, setManagerResource] = useState<Resource | null>(null);
-  const hasInitialFetchRef = useRef(false);
+  const { user } = useAuth()
+  const { collections, addResourceToCollection, removeResourceFromCollection } = useCollections()
+  const [resources, setResources] = useState<Resource[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedTag, setSelectedTag] = useState('all')
+  const [editingResource, setEditingResource] = useState<Resource | null>(null)
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null)
+  const [managerResource, setManagerResource] = useState<Resource | null>(null)
+  const [openMenuResourceId, setOpenMenuResourceId] = useState<string | null>(null)
+  const hasInitialFetchRef = useRef(false)
 
   useEffect(() => {
     if (user && !hasInitialFetchRef.current) {
-      hasInitialFetchRef.current = true;
-      loadResources(null);
+      hasInitialFetchRef.current = true
+      loadResources(null)
     }
-  }, [user]);
+  }, [user])
 
   useEffect(() => {
     if (hasInitialFetchRef.current && selectedCollectionId !== null) {
-      loadResources(selectedCollectionId);
+      loadResources(selectedCollectionId)
     }
-  }, [selectedCollectionId]);
+  }, [selectedCollectionId])
 
   useEffect(() => {
-    filterResources();
-  }, [searchQuery, selectedTag, resources]);
-
-  useEffect(() => {
-    setSelectedTag('all');
-  }, [selectedCollectionId]);
+    setSelectedTag('all')
+  }, [selectedCollectionId])
 
   const loadResources = async (collectionId: string | null = selectedCollectionId) => {
-    if (!user) return;
-    setLoading(true);
+    if (!user) return
+    setLoading(true)
     try {
-      const queryParams = new URLSearchParams();
-      if (collectionId) {
-        queryParams.set('collectionId', collectionId);
-      }
-
-      const url = queryParams.toString() ? `/api/resources?${queryParams.toString()}` : '/api/resources';
-      const response = await authFetch(user, url);
-
-      if (!response.ok) {
-        throw new Error('Failed to load resources');
-      }
-
-      const data = await response.json();
-      const resourcesData = data.resources as Resource[];
-      setResources(resourcesData);
-
-      // Extract unique tags
-      const uniqueTags = [...new Set(resourcesData.map((r: Resource) => r.tag))];
-      setTags(uniqueTags);
+      const queryParams = new URLSearchParams()
+      if (collectionId) queryParams.set('collectionId', collectionId)
+      const url = queryParams.toString() ? `/api/resources?${queryParams.toString()}` : '/api/resources'
+      const response = await authFetch(user, url)
+      if (!response.ok) throw new Error('Failed to load resources')
+      const data = await response.json()
+      setResources(data.resources || [])
     } catch (error) {
-      console.error('Error loading resources:', error);
+      console.error('Error loading resources:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const filterResources = () => {
-    let filtered = [...resources];
-
-    // If a collection is selected, only show resources that belong to it
+  const filteredResources = useMemo(() => {
+    let filtered = [...resources]
     if (selectedCollectionId) {
-      filtered = filtered.filter(r =>
-        (r.collection_ids || []).includes(selectedCollectionId)
-      );
+      filtered = filtered.filter((resource) => (resource.collection_ids || []).includes(selectedCollectionId))
     }
-
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        r =>
-          r.title.toLowerCase().includes(query) ||
-          r.note?.toLowerCase().includes(query) ||
-          r.link.toLowerCase().includes(query)
-      );
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter((resource) =>
+        resource.title.toLowerCase().includes(query) ||
+        resource.note?.toLowerCase().includes(query) ||
+        resource.link.toLowerCase().includes(query)
+      )
     }
-
     if (selectedTag !== 'all') {
-      filtered = filtered.filter(r => r.tag === selectedTag);
+      filtered = filtered.filter((resource) => resource.tag === selectedTag)
     }
+    return filtered
+  }, [resources, selectedCollectionId, searchQuery, selectedTag])
 
-    setFilteredResources(filtered);
-  };
+  const tags = useMemo(() => [...new Set(resources.map((resource) => resource.tag).filter(Boolean))], [resources])
+  const activeCollection = useMemo(() => selectedCollectionId ? collections.find((collection) => collection.id === selectedCollectionId) : null, [selectedCollectionId, collections])
+  const indexedCount = resources.filter((resource) => resource.index_status === 'indexed').length
+  const publicCount = resources.filter((resource) => resource.is_public).length
 
   const deleteResource = async (id: string) => {
-    if (!user) return;
-    if (!confirm('Are you sure you want to delete this resource?')) return;
+    if (!user) return
+    if (!confirm('Delete this resource? This also removes its indexed chunks.')) return
 
     try {
-      const response = await authFetch(user, `/api/resources?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete resource');
-      }
-
-      loadResources();
+      const response = await authFetch(user, `/api/resources?id=${id}`, { method: 'DELETE' })
+      if (!response.ok) throw new Error('Failed to delete resource')
+      loadResources()
     } catch (error) {
-      console.error('Error deleting resource:', error);
+      console.error('Error deleting resource:', error)
     }
-  };
-
-  const activeCollection = useMemo(() => (
-    selectedCollectionId ? collections.find((collection) => collection.id === selectedCollectionId) : null
-  ), [selectedCollectionId, collections]);
+  }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
-    );
+    )
   }
 
   return (
@@ -182,8 +140,8 @@ export function Dashboard() {
         <EditResource
           resource={editingResource}
           onSuccess={() => {
-            setEditingResource(null);
-            loadResources();
+            setEditingResource(null)
+            loadResources()
           }}
           onCancel={() => setEditingResource(null)}
         />
@@ -196,167 +154,139 @@ export function Dashboard() {
           collectionIds={managerResource.collection_ids || []}
           collections={collections}
           onClose={() => setManagerResource(null)}
-          onApply={async (newCollectionIds) => {
-            if (!managerResource) return;
-            const resourceId = managerResource.id;
-            // Find collections to add and remove
-            const prevIds = managerResource.collection_ids || [];
-            const toAdd = newCollectionIds.filter((id) => !prevIds.includes(id));
-            const toRemove = prevIds.filter((id) => !newCollectionIds.includes(id));
-            // Batch add/remove
+          onApply={async (added, removed) => {
+            const resourceId = managerResource.id
             await Promise.all([
-              ...toAdd.map((id) =>
-                addResourceToCollection(id, resourceId)
-              ),
-              ...toRemove.map((id) =>
-                removeResourceFromCollection(id, resourceId)
-              ),
-            ]);
-            // Update local state
-            setResources((prev) =>
-              prev.map((resource) => {
-                if (resource.id !== resourceId) return resource;
-                return {
-                  ...resource,
-                  collection_ids: newCollectionIds,
-                };
-              })
-            );
-            setManagerResource((prev) =>
-              prev ? { ...prev, collection_ids: newCollectionIds } : prev
-            );
+              ...added.map((id) => addResourceToCollection(id, resourceId)),
+              ...removed.map((id) => removeResourceFromCollection(id, resourceId)),
+            ])
+            const nextCollectionIds = [
+              ...(managerResource.collection_ids || []).filter((id) => !removed.includes(id)),
+              ...added,
+            ]
+            setResources((prev) => prev.map((resource) => resource.id === resourceId ? { ...resource, collection_ids: nextCollectionIds } : resource))
+            setManagerResource(null)
           }}
         />
       )}
 
-      <div className="overflow-x-hidden">
-        <div className="pb-6">
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">My Dashboard</h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{resources.length} resources{activeCollection ? ` in "${activeCollection.name}"` : ' total'}</p>
-        </div>
-
-        <div className="lg:flex lg:items-start lg:gap-8">
-          <div className="lg:shrink-0">
-            <CollectionsSidebar
-              activeCollectionId={selectedCollectionId}
-              onSelect={(collectionId) =>
-                setSelectedCollectionId(collectionId)
-              }
-            />
+      <div className="space-y-6">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <span className="app-chip mb-3">Resource library</span>
+            <h1 className="text-3xl font-bold tracking-normal text-slate-950 dark:text-white">
+              {activeCollection ? activeCollection.name : 'Your vault'}
+            </h1>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              Search, organize, and inspect the resources that power Ask DumpIt.
+            </p>
           </div>
+          <div className="grid grid-cols-3 gap-2 sm:min-w-[360px]">
+            <div className="app-muted-panel p-3">
+              <div className="text-xl font-bold text-slate-950 dark:text-white">{resources.length}</div>
+              <div className="text-xs text-slate-500">Resources</div>
+            </div>
+            <div className="app-muted-panel p-3">
+              <div className="text-xl font-bold text-slate-950 dark:text-white">{indexedCount}</div>
+              <div className="text-xs text-slate-500">Indexed</div>
+            </div>
+            <div className="app-muted-panel p-3">
+              <div className="text-xl font-bold text-slate-950 dark:text-white">{publicCount}</div>
+              <div className="text-xs text-slate-500">Public</div>
+            </div>
+          </div>
+        </header>
 
-          <main className="min-w-0 flex-1">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 mb-6">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
+        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+          <CollectionsSidebar activeCollectionId={selectedCollectionId} onSelect={setSelectedCollectionId} />
+
+          <main className="min-w-0 space-y-4">
+            <div className="app-panel p-3">
+              <div className="flex flex-col gap-3 md:flex-row">
+                <div className="relative flex-1">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
-                    placeholder="Search resources..."
+                    placeholder="Search title, note, or URL..."
                     value={searchQuery}
-                    onChange={(e) =>
-                      setSearchQuery(e.target.value)
-                    }
-                    className="w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-slate-50 dark:bg-gray-700 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    className="app-input pl-9"
                   />
                 </div>
-
-                <div className="w-40 shrink-0">
-                  <select
-                    value={selectedTag}
-                    onChange={(e) =>
-                      setSelectedTag(e.target.value)
-                    }
-                    className="w-full pl-2 pr-2 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white"
-                  >
-                    <option value="all">All Tags</option>
-                    {tags.map(tag => (
-                      <option key={tag} value={tag}>{tag}</option>
-                    ))}
-                  </select>
-                </div>
+                <select value={selectedTag} onChange={(event) => setSelectedTag(event.target.value)} className="app-input md:w-44">
+                  <option value="all">All tags</option>
+                  {tags.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
+                </select>
               </div>
             </div>
 
             {filteredResources.length === 0 ? (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No resources found</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {resources.length === 0
-                    ? "Start by adding your first resource!"
-                    : "Try adjusting your search or filter"}
+              <div className="app-panel p-10 text-center">
+                <Search className="mx-auto mb-3 h-10 w-10 text-slate-400" />
+                <h3 className="text-lg font-bold text-slate-950 dark:text-white">No resources found</h3>
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                  {resources.length === 0 ? 'Capture your first link to start building an AI-searchable vault.' : 'Try a different search or tag filter.'}
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
                 {filteredResources.map((resource) => {
                   const assignedCollections = (resource.collection_ids || [])
-                    .map((id) =>
-                      collections.find((collection) => collection.id === id)
-                    )
-                    .filter((collection): collection is typeof collections[0] =>
-                      Boolean(collection)
-                    )
-                    .slice(0, 3);
-                  const totalAssignments = resource.collection_ids?.length ?? 0;
-                  const remainingCount =
-                    totalAssignments - assignedCollections.length;
+                    .map((id) => collections.find((collection) => collection.id === id))
+                    .filter((collection): collection is typeof collections[0] => Boolean(collection))
+                    .slice(0, 2)
+                  const remainingCount = (resource.collection_ids?.length ?? 0) - assignedCollections.length
+                  const status = resource.index_status || 'pending'
+
                   return (
-                    <article
-                      key={resource.id}
-                      className="min-w-0 min-h-[180px] bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-150 relative"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-[11px] font-medium">
-                            {resource.tag}
+                    <article key={resource.id} className="app-panel p-4 transition hover:border-slate-300 dark:hover:border-slate-700">
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="app-chip">{resource.tag}</span>
+                          <span className={`app-chip ${statusStyles[status] || ''}`}>{status}</span>
+                          <span className={`app-chip ${resource.is_public ? 'app-chip-success' : ''}`}>
+                            {resource.is_public ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                            {resource.is_public ? 'Public' : 'Private'}
                           </span>
-                          {resource.is_public ? (
-                            <Globe className="w-4 h-4 text-green-600" />
-                          ) : (
-                            <Lock className="w-4 h-4 text-gray-400" />
-                          )}
                         </div>
                         <div className="relative">
                           <button
-                            onClick={() => handleMenuOpen(resource.id)}
-                            className="text-gray-400 hover:text-blue-600 p-1 rounded-full focus:outline-none"
+                            onClick={() => setOpenMenuResourceId(openMenuResourceId === resource.id ? null : resource.id)}
+                            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                             title="More actions"
                           >
-                            <MoreHorizontal className="w-5 h-5" />
+                            <MoreHorizontal className="h-5 w-5" />
                           </button>
                           {openMenuResourceId === resource.id && (
-                            <div className="absolute right-0 z-20 mt-2 w-40 rounded-lg bg-white dark:bg-gray-800 shadow-lg border border-slate-200 dark:border-gray-700 py-1">
-                              <button onClick={() => { setEditingResource(resource); handleMenuClose(); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-700 dark:text-gray-200 hover:bg-slate-100 dark:hover:bg-gray-700"><Edit className="w-4 h-4" /> Edit</button>
-                              <button onClick={() => { setManagerResource(resource); handleMenuClose(); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-700 dark:text-gray-200 hover:bg-slate-100 dark:hover:bg-gray-700"><FolderPlus className="w-4 h-4" /> Collections</button>
-                              <button onClick={() => { deleteResource(resource.id); handleMenuClose(); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"><Trash2 className="w-4 h-4" /> Delete</button>
+                            <div className="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                              <button onClick={() => { setEditingResource(resource); setOpenMenuResourceId(null) }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"><Edit className="h-4 w-4" /> Edit</button>
+                              <button onClick={() => { setManagerResource(resource); setOpenMenuResourceId(null) }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"><FolderPlus className="h-4 w-4" /> Collections</button>
+                              <button onClick={() => { deleteResource(resource.id); setOpenMenuResourceId(null) }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/30"><Trash2 className="h-4 w-4" /> Delete</button>
                             </div>
                           )}
                         </div>
                       </div>
 
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white my-3 line-clamp-2">{resource.title}</h3>
+                      <h3 className="line-clamp-2 text-lg font-bold text-slate-950 dark:text-white">{resource.title}</h3>
+                      {resource.note && <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{resource.note}</p>}
 
-                      {resource.note && (
-                        <p className="text-sm text-slate-600 dark:text-gray-300 mb-4 line-clamp-3">{resource.note}</p>
-                      )}
-
-                      <div className="flex items-center justify-between">
-                        <a href={resource.link} target="_blank" rel="noopener noreferrer" data-tooltip-id="dashboard-tooltip" data-tooltip-content={resource.link} className="text-blue-600 hover:text-blue-700 text-sm font-medium inline-flex items-center gap-2"><ExternalLink className="w-4 h-4" /> Visit Link</a>
-                        <div className="flex items-center gap-2">
-                          {assignedCollections.map((collection) => (
-                            <span key={collection.id} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-white" style={{ backgroundColor: collection.color || '#2563eb' }}>{collection.icon || '🗂️'} {collection.name}</span>
-                          ))}
-                          {remainingCount > 0 && <span className="text-xs text-slate-500 dark:text-gray-400">+{remainingCount}</span>}
-                        </div>
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
+                        {assignedCollections.map((collection) => (
+                          <span key={collection.id} className="app-chip" style={{ borderColor: collection.color || undefined }}>
+                            {collection.icon || 'Folder'} {collection.name}
+                          </span>
+                        ))}
+                        {remainingCount > 0 && <span className="text-xs text-slate-500">+{remainingCount} more</span>}
                       </div>
 
-                      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">{formatDate(resource.created_at)}</div>
+                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800">
+                        <span>{formatDate(resource.created_at)}</span>
+                        <a href={resource.link} target="_blank" rel="noopener noreferrer" data-tooltip-id="dashboard-tooltip" data-tooltip-content={resource.link} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/40">
+                          Open <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      </div>
                     </article>
-                  );
+                  )
                 })}
               </div>
             )}
@@ -366,5 +296,5 @@ export function Dashboard() {
 
       <Tooltip id="dashboard-tooltip" />
     </>
-  );
+  )
 }

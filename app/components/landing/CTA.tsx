@@ -1,56 +1,57 @@
 'use client'
 
-import { Button } from "../ui/button";
-import { ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "../../contexts/AuthContext";
+import { ArrowRight, LibraryBig, Share2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '../../contexts/AuthContext'
 
 const CTA = () => {
-  const router = useRouter();
-  const { user } = useAuth();
-
-  const handleGetStarted = () => {
-    if (user) {
-      router.push('/dashboard');
-    } else {
-      router.push('/login');
-    }
-  };
+  const router = useRouter()
+  const { user } = useAuth()
 
   return (
-    <section className="py-24 relative overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-radial opacity-50" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-500/30 to-blue-600/30 rounded-full blur-[150px] opacity-30" />
-
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-in-up">
-          <h2 className="text-5xl md:text-6xl font-bold">
-            Ready to reclaim your{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-              digital life?
-            </span>
+    <section id="discover" className="bg-slate-950 py-20 text-white">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[1fr_0.9fr] lg:px-8">
+        <div>
+          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+            <Share2 className="h-3.5 w-3.5" />
+            Shared knowledge
+          </span>
+          <h2 className="text-3xl font-bold tracking-normal sm:text-4xl">
+            Build your own vault, then learn from what others share.
           </h2>
-
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Join early users reshaping how we organize the internet. Start dumping smarter today.
+          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
+            Keep personal resources private, publish useful links when they are worth sharing, and query both surfaces from one AI workspace.
           </p>
+          <button
+            onClick={() => router.push(user ? '/dashboard' : '/login?signup=true')}
+            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-slate-100"
+          >
+            Open DumpIt
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button
-              variant="hero"
-              size="lg"
-              className="group"
-              onClick={handleGetStarted}
-            >
-              Start Dumping Smarter
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
+        <div className="rounded-lg border border-white/10 bg-white/[0.04] p-5">
+          <div className="mb-4 flex items-center gap-3">
+            <LibraryBig className="h-5 w-5 text-blue-300" />
+            <div className="font-semibold">Shared Dump preview</div>
+          </div>
+          <div className="space-y-3">
+            {['RAG UX citation patterns', 'Firebase vector search notes', 'Next.js auth boundary checklist'].map((item, index) => (
+              <div key={item} className="rounded-lg border border-white/10 bg-white/[0.05] p-3">
+                <div className="text-sm font-semibold">{item}</div>
+                <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
+                  <span>[{index + 1}]</span>
+                  <span>Public source</span>
+                  <span>Saved by community</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default CTA;
+export default CTA

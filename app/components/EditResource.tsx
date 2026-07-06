@@ -1,23 +1,23 @@
 'use client'
 
-import { Globe, Loader2, Lock, Save, X } from 'lucide-react';
-import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { jsonAuthFetch } from '../lib/authFetch';
+import { Globe, Loader2, Lock, Save, X } from 'lucide-react'
+import { FormEvent, useState } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import { jsonAuthFetch } from '../lib/authFetch'
 
 interface Resource {
-  id: string;
-  title: string;
-  link: string;
-  tag: string;
-  note?: string;
-  is_public: boolean;
+  id: string
+  title: string
+  link: string
+  tag: string
+  note?: string
+  is_public: boolean
 }
 
 interface EditResourceProps {
-  resource: Resource;
-  onSuccess: () => void;
-  onCancel: () => void;
+  resource: Resource
+  onSuccess: () => void
+  onCancel: () => void
 }
 
 const TAGS = [
@@ -31,25 +31,25 @@ const TAGS = [
   'Podcast',
   'Newsletter',
   'Other',
-];
+]
 
 export function EditResource({ resource, onSuccess, onCancel }: EditResourceProps) {
-  const { user } = useAuth();
-  const [title, setTitle] = useState(resource.title);
-  const [link, setLink] = useState(resource.link);
-  const [note, setNote] = useState(resource.note || '');
-  const [tag, setTag] = useState(resource.tag);
-  const [isPublic, setIsPublic] = useState(resource.is_public);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { user } = useAuth()
+  const [title, setTitle] = useState(resource.title)
+  const [link, setLink] = useState(resource.link)
+  const [note, setNote] = useState(resource.note || '')
+  const [tag, setTag] = useState(resource.tag)
+  const [isPublic, setIsPublic] = useState(resource.is_public)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    setLoading(true)
+    setError('')
 
     try {
-      if (!user) return;
+      if (!user) return
       const response = await jsonAuthFetch(user, '/api/resources', {
         method: 'PUT',
         body: JSON.stringify({
@@ -60,145 +60,120 @@ export function EditResource({ resource, onSuccess, onCancel }: EditResourceProp
           tag,
           is_public: isPublic,
         }),
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update resource');
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update resource')
       }
 
-      onSuccess();
-    } catch (err: any) {
-      setError(err.message || 'Failed to update resource');
+      onSuccess()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update resource')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Edit Resource</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+      <div className="app-panel w-full max-w-xl overflow-hidden shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+          <div>
+            <h2 className="text-xl font-bold text-slate-950 dark:text-white">Edit resource</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Changes can affect future AI indexing and citations.</p>
+          </div>
           <button
             onClick={onCancel}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            title="Close"
           >
-            <X className="w-6 h-6" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form onSubmit={handleSubmit} className="max-h-[78vh] space-y-4 overflow-y-auto p-5">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Title *
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              required
-            />
+            <label htmlFor="edit-title" className="app-label">Title</label>
+            <input id="edit-title" type="text" value={title} onChange={(event) => setTitle(event.target.value)} className="app-input mt-2" required />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Link *
-            </label>
-            <input
-              type="url"
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              required
-            />
+            <label htmlFor="edit-link" className="app-label">Link</label>
+            <input id="edit-link" type="url" value={link} onChange={(event) => setLink(event.target.value)} className="app-input mt-2" required />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Note
-            </label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={3}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-            />
+            <label htmlFor="edit-note" className="app-label">Note</label>
+            <textarea id="edit-note" value={note} onChange={(event) => setNote(event.target.value)} rows={4} className="app-input mt-2 resize-y" />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Tag
-            </label>
-            <select
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              {TAGS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="edit-tag" className="app-label">Tag</label>
+              <select id="edit-tag" value={tag} onChange={(event) => setTag(event.target.value)} className="app-input mt-2">
+                {TAGS.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <span className="app-label">Visibility</span>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPublic(false)}
+                  className={`flex min-h-11 items-center justify-center gap-2 rounded-lg border text-sm font-semibold ${
+                    !isPublic
+                      ? 'border-slate-400 bg-slate-100 text-slate-950 dark:border-slate-600 dark:bg-slate-800 dark:text-white'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <Lock className="h-4 w-4" />
+                  Private
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPublic(true)}
+                  className={`flex min-h-11 items-center justify-center gap-2 rounded-lg border text-sm font-semibold ${
+                    isPublic
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <Globe className="h-4 w-4" />
+                  Public
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isPublic}
-                onChange={(e) => setIsPublic(e.target.checked)}
-                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                {isPublic ? (
-                  <>
-                    <Globe className="w-4 h-4 text-green-600" />
-                    Public
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4 h-4 text-gray-400" />
-                    Private
-                  </>
-                )}
-              </span>
-            </label>
-          </div>
-
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <Save className="w-5 h-5" />
-                  Save Changes
-                </>
-              )}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
+              Save changes
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }

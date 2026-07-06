@@ -2,15 +2,15 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 disabled:pointer-events-none disabled:opacity-50 dark:focus-visible:ring-blue-950",
   {
     variants: {
       variant: {
-        default: "bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500",
-        hero: "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40",
-        glass: "bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20",
-        outline: "border border-gray-300 bg-transparent hover:bg-gray-100 text-gray-700",
-        ghost: "hover:bg-gray-100 text-gray-700",
+        default: "bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200",
+        hero: "bg-blue-600 text-white shadow-sm hover:bg-blue-700",
+        glass: "border border-slate-200 bg-white text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800",
+        outline: "border border-slate-300 bg-transparent text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800",
+        ghost: "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800",
         destructive: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",
       },
       size: {

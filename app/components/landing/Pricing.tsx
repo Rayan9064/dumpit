@@ -1,106 +1,46 @@
-import { Button } from "../ui/button";
-import { Card } from "../ui/card";
-import { Check } from "lucide-react";
-import Link from "../ui/Link";
+import { CheckCircle2, ShieldCheck } from 'lucide-react'
 
-const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    description: "All the basics—forever, for everyone.",
-    features: [
-      "Unlimited saves",
-      "Basic organization",
-      "Mobile & desktop sync",
-      "Public collections",
-      "Community support",
-    ],
-    cta: "Get Started",
-    popular: false,
-  },
-  {
-    name: "Pro",
-    price: "$4.99",
-    period: "/month",
-    description: "Unlimited storage, advanced sharing, and AI-powered features.",
-    features: [
-      "Everything in Free",
-      "Unlimited storage",
-      "AI summaries & tags",
-      "Advanced search",
-      "Priority support",
-      "Custom branding",
-    ],
-    cta: "Upgrade to Pro",
-    popular: true,
-  },
-];
+const points = [
+  'No billing wall while the product is in beta',
+  'Private resources stay scoped to your authenticated account',
+  'AI answers show sources instead of asking for blind trust',
+]
 
 const Pricing = () => {
   return (
-    <section className="py-24 relative">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Simple,{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-              Transparent Pricing
-            </span>
+    <section id="trust" className="border-b border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-slate-950">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+        <div>
+          <span className="app-chip app-chip-success mb-4">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Trust model
+          </span>
+          <h2 className="text-3xl font-bold tracking-normal text-slate-950 dark:text-white sm:text-4xl">
+            AI that shows its work.
           </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Start for free, upgrade when you need more
+          <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">
+            DumpIt is designed for verification: answers are tied back to saved links, public/shared content is clearly marked, and private retrieval depends on authenticated ownership.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {plans.map((plan, index) => (
-            <Card
-              key={index}
-              className={`relative p-8 bg-slate-800/50 border-slate-700/50 ${
-                plan.popular ? "border-blue-500/50 shadow-lg shadow-blue-500/10" : ""
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="px-4 py-1 bg-blue-500 text-white text-sm font-medium rounded-full">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-5xl font-bold text-white">{plan.price}</span>
-                  {plan.period && <span className="text-gray-400">{plan.period}</span>}
-                </div>
-                <p className="text-gray-400 mt-2">{plan.description}</p>
+        <div className="app-panel p-6">
+          <div className="mb-5 text-sm font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Early access</div>
+          <div className="text-4xl font-bold text-slate-950 dark:text-white">Free while in beta</div>
+          <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            The current product focus is a reliable AI knowledge workflow, not paid plans.
+          </p>
+          <div className="mt-6 space-y-3">
+            {points.map((point) => (
+              <div key={point} className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-200">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
+                {point}
               </div>
-
-              <ul className="space-y-4 mb-8">
-                {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-center gap-3 text-gray-300">
-                    <Check className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <Link href="/dashboard" className="block">
-                <Button
-                  variant={plan.popular ? "hero" : "glass"}
-                  size="lg"
-                  className="w-full"
-                >
-                  {plan.cta}
-                </Button>
-              </Link>
-            </Card>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default Pricing;
+export default Pricing
