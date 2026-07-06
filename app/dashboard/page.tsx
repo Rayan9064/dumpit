@@ -7,10 +7,11 @@ import { CollectionsProvider } from '@/contexts/CollectionsContext'
 import { Layout } from '@/components/Layout'
 import { Dashboard } from '@/components/Dashboard'
 import { AddResource } from '@/components/AddResource'
+import { AskDumpit } from '@/components/AskDumpit'
 import { SharedDump } from '@/components/SharedDump'
 import { Profile } from '@/components/Profile'
 
-type Page = 'dashboard' | 'add' | 'shared' | 'profile'
+type Page = 'dashboard' | 'add' | 'shared' | 'ai' | 'profile'
 
 export default function DashboardRoute() {
   const { user, loading } = useAuth()
@@ -36,6 +37,7 @@ export default function DashboardRoute() {
         {currentPage === 'dashboard' && <Dashboard />}
         {currentPage === 'add' && <AddResource onSuccess={() => setCurrentPage('dashboard')} />}
         {currentPage === 'shared' && <SharedDump />}
+        {currentPage === 'ai' && <AskDumpit />}
         {currentPage === 'profile' && <Profile />}
       </Layout>
     </CollectionsProvider>
