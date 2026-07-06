@@ -12,6 +12,7 @@ dist
 .next
 out
 build
+tsconfig.tsbuildinfo
 *.local
 
 .vscode/*

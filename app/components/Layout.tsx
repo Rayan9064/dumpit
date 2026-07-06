@@ -1,14 +1,14 @@
 'use client'
 
-import { LayoutDashboard, LogOut, Moon, Plus, Share2, Sun, User, Menu, X } from 'lucide-react';
+import { Bot, LayoutDashboard, LogOut, Moon, Plus, Share2, Sun, User, Menu, X } from 'lucide-react';
 import { ReactNode, useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface LayoutProps {
   children: ReactNode;
-  currentPage: 'dashboard' | 'add' | 'shared' | 'profile';
-  onNavigate: (page: 'dashboard' | 'add' | 'shared' | 'profile') => void;
+  currentPage: 'dashboard' | 'add' | 'shared' | 'ai' | 'profile';
+  onNavigate: (page: 'dashboard' | 'add' | 'shared' | 'ai' | 'profile') => void;
 }
 
 export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
@@ -41,6 +41,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'add', label: 'Add Resource', icon: Plus },
     { id: 'shared', label: 'Shared Dump', icon: Share2 },
+    { id: 'ai', label: 'AI Search', icon: Bot },
     { id: 'profile', label: 'Profile', icon: User },
   ] as const;
 

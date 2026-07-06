@@ -11,6 +11,7 @@ import {
   signInWithPopup
 } from 'firebase/auth';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { authFetch, jsonAuthFetch } from '../lib/authFetch';
 import { auth } from '../lib/firebase';
 
 interface AuthContextType {
@@ -23,6 +24,17 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const normalizeUsername = (value?: string | null) => {
+  const fallback = `user_${Date.now().toString().slice(-6)}`;
+  const normalized = (value || fallback)
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, '_')
+    .replace(/_+/g, '_')
+    .slice(0, 20);
+
+  return normalized.length >= 3 ? normalized : fallback;
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -43,11 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const user = userCredential.user;
 
       // Create user profile via secure API route
-      const response = await fetch('/api/user-profile', {
+      const response = await jsonAuthFetch(user, '/api/user-profile', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          uid: user.uid,
           username,
           email,
           share_by_default: false,
@@ -84,12 +94,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const additionalInfo = getAdditionalUserInfo(result);
       if (additionalInfo?.isNewUser) {
         // Create profile for new Google users
-        const response = await fetch('/api/user-profile', {
+        const response = await jsonAuthFetch(user, '/api/user-profile', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            uid: user.uid,
-            username: user.displayName || user.email?.split('@')[0] || 'User',
+            username: normalizeUsername(user.displayName || user.email?.split('@')[0]),
             email: user.email,
             share_by_default: false,
           }),
@@ -101,15 +109,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } else {
         // Existing user - check if profile exists, create if not
-        const checkResponse = await fetch(`/api/user-profile?uid=${user.uid}`);
+        const checkResponse = await authFetch(user, '/api/user-profile');
         if (!checkResponse.ok) {
           // Profile doesn't exist, create it
-          const createResponse = await fetch('/api/user-profile', {
+          const createResponse = await jsonAuthFetch(user, '/api/user-profile', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              uid: user.uid,
-              username: user.displayName || user.email?.split('@')[0] || 'User',
+              username: normalizeUsername(user.displayName || user.email?.split('@')[0]),
               email: user.email,
               share_by_default: false,
             }),

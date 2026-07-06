@@ -1,51 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { isAuthError, requireAuth, unauthorizedResponse } from '../_utils/auth';
+import { getServerFirestore } from '../_utils/firebaseAdmin';
+import { indexResource } from '../_utils/resourceIndexer';
 
-// Lazy initialization of Firebase Admin
-let db: any = null;
-
-const initializeFirebaseAdmin = () => {
-  if (!db) {
-    if (!getApps().length) {
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-
-      if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !privateKey) {
-        throw new Error('Missing Firebase Admin SDK environment variables');
-      }
-
-      initializeApp({
-        credential: cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: privateKey,
-        }),
-      });
-    }
-    db = getFirestore();
-  }
-  return db;
-};
-
-// GET /api/public-resources?userId=<userId> - Get public resources from other users
+// GET /api/public-resources - Get public resources from other users
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Missing userId parameter' },
-        { status: 400 }
-      );
-    }
-
-    const db = initializeFirebaseAdmin();
+    const authUser = await requireAuth(request);
+    const db = getServerFirestore();
 
     // Get all public resources except current user's
     const publicResourcesQuery = await db.collection('resources')
       .where('is_public', '==', true)
-      .where('user_id', '!=', userId)
+      .where('user_id', '!=', authUser.uid)
       .orderBy('user_id')
       .orderBy('created_at', 'desc')
       .get();
@@ -61,6 +28,10 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error fetching public resources:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -72,17 +43,18 @@ export async function GET(request: NextRequest) {
 // POST /api/public-resources - Save a public resource to user's collection
 export async function POST(request: NextRequest) {
   try {
-    const { userId, resourceId } = await request.json();
+    const authUser = await requireAuth(request);
+    const { resourceId } = await request.json();
 
     // Validate required fields
-    if (!userId || !resourceId) {
+    if (!resourceId) {
       return NextResponse.json(
-        { error: 'Missing required fields: userId, resourceId' },
+        { error: 'Missing required field: resourceId' },
         { status: 400 }
       );
     }
 
-    const db = initializeFirebaseAdmin();
+    const db = getServerFirestore();
 
     // Get the original public resource
     const originalResource = await db.collection('resources').doc(resourceId).get();
@@ -95,10 +67,16 @@ export async function POST(request: NextRequest) {
     }
 
     const resourceData = originalResource.data();
+    if (!resourceData?.is_public || resourceData.user_id === authUser.uid) {
+      return NextResponse.json(
+        { error: 'Resource not found' },
+        { status: 404 }
+      );
+    }
 
     // Check if user already has this resource saved (by link)
     const existingResourceQuery = await db.collection('resources')
-      .where('user_id', '==', userId)
+      .where('user_id', '==', authUser.uid)
       .where('link', '==', resourceData.link)
       .get();
 
@@ -111,23 +89,34 @@ export async function POST(request: NextRequest) {
 
     // Save the resource to user's collection
     const newResourceData = {
-      user_id: userId,
+      user_id: authUser.uid,
       title: resourceData.title,
       link: resourceData.link,
       note: resourceData.note,
       tag: resourceData.tag,
       is_public: false, // Always save as private
+      collection_ids: [],
+      index_status: 'pending',
+      index_error: null,
       created_at: new Date(),
+      updated_at: new Date(),
     };
 
-    await db.collection('resources').add(newResourceData);
+    const docRef = await db.collection('resources').add(newResourceData);
+    const indexing = await indexResource({ resourceId: docRef.id, uid: authUser.uid });
 
     return NextResponse.json({
       success: true,
-      message: 'Resource saved to your collection'
+      message: 'Resource saved to your collection',
+      resourceId: docRef.id,
+      indexing,
     });
 
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error saving public resource:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FieldValue } from 'firebase-admin/firestore';
+import { isAuthError, requireAuth, unauthorizedResponse } from '../_utils/auth';
 import { getServerFirestore } from '../_utils/firebaseAdmin';
 
 const COLLECTION_SUBPATH = 'collections';
@@ -18,7 +20,6 @@ const buildCollectionData = (raw: any) => ({
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const uid = searchParams.get('uid');
     const sharedOnly = searchParams.get('shared') === 'true';
 
     const db = getServerFirestore();
@@ -37,11 +38,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, collections });
     }
 
-    if (!uid) {
-      return NextResponse.json({ error: 'Missing uid parameter' }, { status: 400 });
-    }
+    const authUser = await requireAuth(request);
 
-    const collectionsRef = db.collection('users').doc(uid).collection(COLLECTION_SUBPATH);
+    const collectionsRef = db.collection('users').doc(authUser.uid).collection(COLLECTION_SUBPATH);
     const snapshot = await collectionsRef.orderBy('sort_order', 'asc').get();
 
     const collections = snapshot.docs.map((doc) => (
@@ -50,6 +49,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, collections });
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error fetching collections:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -57,14 +60,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { uid, name, description, icon, color, is_shared, sort_order } = await request.json();
+    const authUser = await requireAuth(request);
+    const { name, description, icon, color, is_shared, sort_order } = await request.json();
 
-    if (!uid || !name) {
-      return NextResponse.json({ error: 'Missing required fields: uid, name' }, { status: 400 });
+    if (!name) {
+      return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 });
     }
 
     const db = getServerFirestore();
-    const collectionsRef = db.collection('users').doc(uid).collection(COLLECTION_SUBPATH);
+    const collectionsRef = db.collection('users').doc(authUser.uid).collection(COLLECTION_SUBPATH);
     const now = new Date();
 
     const docRef = collectionsRef.doc();
@@ -86,6 +90,10 @@ export async function POST(request: NextRequest) {
       collection: buildCollectionData({ id: docRef.id, ...collectionData }),
     });
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error creating collection:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -93,14 +101,16 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { uid, collectionId, name, description, icon, color, is_shared, sort_order } = await request.json();
+    const authUser = await requireAuth(request);
+    const { collectionId, id, name, description, icon, color, is_shared, sort_order } = await request.json();
+    const targetCollectionId = collectionId || id;
 
-    if (!uid || !collectionId) {
-      return NextResponse.json({ error: 'Missing required fields: uid, collectionId' }, { status: 400 });
+    if (!targetCollectionId) {
+      return NextResponse.json({ error: 'Missing required field: collectionId' }, { status: 400 });
     }
 
     const db = getServerFirestore();
-    const docRef = db.collection('users').doc(uid).collection(COLLECTION_SUBPATH).doc(collectionId);
+    const docRef = db.collection('users').doc(authUser.uid).collection(COLLECTION_SUBPATH).doc(targetCollectionId);
 
     const updateData: Record<string, any> = {
       updated_at: new Date(),
@@ -122,29 +132,72 @@ export async function PUT(request: NextRequest) {
       collection: buildCollectionData({ id: updatedDoc.id, ...updatedDoc.data() })
     });
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error updating collection:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const authUser = await requireAuth(request);
+    const { orderedIds } = await request.json();
+
+    if (!Array.isArray(orderedIds)) {
+      return NextResponse.json({ error: 'orderedIds must be an array' }, { status: 400 });
+    }
+
+    const db = getServerFirestore();
+    const batch = db.batch();
+    const now = new Date();
+
+    orderedIds.forEach((collectionId, index) => {
+      if (typeof collectionId !== 'string') return;
+      const docRef = db.collection('users').doc(authUser.uid).collection(COLLECTION_SUBPATH).doc(collectionId);
+      batch.set(docRef, {
+        sort_order: index,
+        updated_at: now,
+      }, { merge: true });
+    });
+
+    await batch.commit();
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
+    console.error('Error reordering collections:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
+    const authUser = await requireAuth(request);
     const { searchParams } = new URL(request.url);
-    const uid = searchParams.get('uid');
-    const collectionId = searchParams.get('collectionId');
+    const collectionId = searchParams.get('collectionId') || searchParams.get('id');
 
-    if (!uid || !collectionId) {
-      return NextResponse.json({ error: 'Missing uid or collectionId parameter' }, { status: 400 });
+    if (!collectionId) {
+      return NextResponse.json({ error: 'Missing collectionId parameter' }, { status: 400 });
     }
 
     const db = getServerFirestore();
-    const docRef = db.collection('users').doc(uid).collection(COLLECTION_SUBPATH).doc(collectionId);
+    const docRef = db.collection('users').doc(authUser.uid).collection(COLLECTION_SUBPATH).doc(collectionId);
     const resourcesSnapshot = await docRef.collection('resources').get();
 
     const batch = db.batch();
 
     resourcesSnapshot.forEach((resourceDoc) => {
       batch.delete(resourceDoc.ref);
+      batch.set(db.collection('resources').doc(resourceDoc.id), {
+        collection_ids: FieldValue.arrayRemove(collectionId),
+        updated_at: new Date(),
+      }, { merge: true });
     });
 
     batch.delete(docRef);
@@ -153,6 +206,10 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (isAuthError(error)) {
+      return unauthorizedResponse();
+    }
+
     console.error('Error deleting collection:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

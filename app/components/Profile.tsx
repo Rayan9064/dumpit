@@ -3,6 +3,7 @@
 import { CheckCircle, Globe, Loader2, Save, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { authFetch, jsonAuthFetch } from '../lib/authFetch';
 
 interface UserProfile {
   username: string;
@@ -32,7 +33,7 @@ export function Profile() {
     if (!user) return;
     setLoading(true);
     try {
-      const response = await fetch(`/api/user-profile?uid=${user.uid}`);
+      const response = await authFetch(user, '/api/user-profile');
       if (!response.ok) {
         throw new Error('Failed to load profile');
       }
@@ -54,11 +55,9 @@ export function Profile() {
     setMessage(null);
 
     try {
-      const response = await fetch('/api/user-profile', {
+      const response = await jsonAuthFetch(user, '/api/user-profile', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          uid: user.uid,
           username,
           share_by_default: shareByDefault,
         }),

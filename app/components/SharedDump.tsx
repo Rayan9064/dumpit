@@ -4,6 +4,7 @@ import { CheckCircle, ExternalLink, Filter, Loader2, Plus, Search } from 'lucide
 import { Tooltip } from 'react-tooltip';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { authFetch, jsonAuthFetch } from '../lib/authFetch';
 
 // Helper function to safely format dates
 function formatDate(dateValue: any): string {
@@ -60,7 +61,8 @@ export function SharedDump() {
   const loadPublicResources = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/public-resources?userId=${user?.uid || ''}`);
+      if (!user) return;
+      const response = await authFetch(user, '/api/public-resources');
 
       if (!response.ok) {
         throw new Error('Failed to load public resources');
@@ -79,9 +81,9 @@ export function SharedDump() {
   };
 
   const loadUserResources = async () => {
-    if (!user) return;
+      if (!user) return;
     try {
-      const response = await fetch(`/api/resources?uid=${user.uid}`);
+      const response = await authFetch(user, '/api/resources');
       if (!response.ok) return;
       const data = await response.json();
       const userResourceLinks = new Set<string>((data.resources || []).map((r: Resource) => r.link));
@@ -116,16 +118,10 @@ export function SharedDump() {
     setSavingId(resource.id);
 
     try {
-      const response = await fetch('/api/resources', {
+      const response = await jsonAuthFetch(user, '/api/public-resources', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          uid: user.uid,
-          title: resource.title,
-          link: resource.link,
-          note: resource.note || '',
-          tag: resource.tag,
-          is_public: false,
+          resourceId: resource.id,
         }),
       });
 
