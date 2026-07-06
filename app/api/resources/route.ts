@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isAuthError, requireAuth, unauthorizedResponse } from '../_utils/auth';
 import { getServerFirestore } from '../_utils/firebaseAdmin';
 import { getPreviewFromUrl } from '../_utils/linkPreview';
+import { indexResource } from '../_utils/resourceIndexer';
 
 // GET /api/resources - Get the authenticated user's resources
 export async function GET(request: NextRequest) {
@@ -97,6 +98,8 @@ export async function POST(request: NextRequest) {
       tag: enrichedTag || 'Article',
       is_public: is_public ?? false,
       collection_ids: normalizedCollectionIds,
+      index_status: 'pending',
+      index_error: null,
       created_at: now,
       updated_at: now,
     };
@@ -144,11 +147,14 @@ export async function POST(request: NextRequest) {
       });
     });
 
+    const indexing = await indexResource({ resourceId: resourceRef.id, uid: authUser.uid });
+
     return NextResponse.json({
       success: true,
       message: 'Resource created successfully',
       resourceId: resourceRef.id,
       createdCollectionId,
+      indexing,
     });
 
   } catch (error) {
@@ -258,9 +264,21 @@ export async function PUT(request: NextRequest) {
       }
     });
 
+    let indexing: Awaited<ReturnType<typeof indexResource>> | null = null;
+    if (
+      link !== undefined ||
+      title !== undefined ||
+      note !== undefined ||
+      tag !== undefined ||
+      is_public !== undefined
+    ) {
+      indexing = await indexResource({ resourceId: id, uid: authUser.uid });
+    }
+
     return NextResponse.json({
       success: true,
-      message: 'Resource updated successfully'
+      message: 'Resource updated successfully',
+      indexing,
     });
 
   } catch (error) {
@@ -305,6 +323,9 @@ export async function DELETE(request: NextRequest) {
     }
 
     const collectionIds: string[] = Array.isArray(data.collection_ids) ? data.collection_ids : [];
+    const chunksSnapshot = await db.collection('resource_chunks')
+      .where('resource_id', '==', id)
+      .get();
 
     await db.runTransaction(async (transaction) => {
       if (userId && collectionIds.length > 0) {
@@ -319,6 +340,10 @@ export async function DELETE(request: NextRequest) {
           transaction.delete(membershipRef);
         });
       }
+
+      chunksSnapshot.docs.forEach((chunkDoc) => {
+        transaction.delete(chunkDoc.ref);
+      });
 
       transaction.delete(resourceRef);
     });

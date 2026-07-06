@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAuthError, requireAuth, unauthorizedResponse } from '../_utils/auth';
 import { getServerFirestore } from '../_utils/firebaseAdmin';
+import { indexResource } from '../_utils/resourceIndexer';
 
 // GET /api/public-resources - Get public resources from other users
 export async function GET(request: NextRequest) {
@@ -94,15 +95,21 @@ export async function POST(request: NextRequest) {
       note: resourceData.note,
       tag: resourceData.tag,
       is_public: false, // Always save as private
+      collection_ids: [],
+      index_status: 'pending',
+      index_error: null,
       created_at: new Date(),
       updated_at: new Date(),
     };
 
-    await db.collection('resources').add(newResourceData);
+    const docRef = await db.collection('resources').add(newResourceData);
+    const indexing = await indexResource({ resourceId: docRef.id, uid: authUser.uid });
 
     return NextResponse.json({
       success: true,
-      message: 'Resource saved to your collection'
+      message: 'Resource saved to your collection',
+      resourceId: docRef.id,
+      indexing,
     });
 
   } catch (error) {
