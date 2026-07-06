@@ -12,7 +12,7 @@ import {
 } from 'firebase/auth';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { authFetch, jsonAuthFetch } from '../lib/authFetch';
-import { auth } from '../lib/firebase';
+import { auth, isFirebaseClientConfigured } from '../lib/firebase';
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -24,6 +24,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const firebaseConfigError = new Error('Firebase client configuration is missing.');
 
 const normalizeUsername = (value?: string | null) => {
   const fallback = `user_${Date.now().toString().slice(-6)}`;
@@ -41,6 +42,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
@@ -51,6 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, username: string) => {
     try {
+      if (!auth || !isFirebaseClientConfigured) {
+        throw firebaseConfigError;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
@@ -77,6 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      if (!auth || !isFirebaseClientConfigured) {
+        throw firebaseConfigError;
+      }
+
       await signInWithEmailAndPassword(auth, email, password);
       return { error: null };
     } catch (error) {
@@ -86,6 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
+      if (!auth || !isFirebaseClientConfigured) {
+        throw firebaseConfigError;
+      }
+
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
@@ -138,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!auth) return;
     await firebaseSignOut(auth);
   };
 
