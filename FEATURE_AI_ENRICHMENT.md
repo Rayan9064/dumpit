@@ -127,8 +127,8 @@ URL Input → Validation → Enrichment Hook
 
 ### Environment Variables Required
 ```env
-VITE_GEMINI_API_KEY=your-gemini-api-key-here
-VITE_GEMINI_MODEL=gemini-1.0
+GEMINI_API_KEY=your-gemini-api-key-here
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 ### Notes
@@ -141,21 +141,17 @@ VITE_GEMINI_MODEL=gemini-1.0
 ### How to obtain and configure a Gemini API key
 
 1. Visit the Google Cloud or Google AI console where Gemini/API keys are managed and create an API key for the Gemini model you intend to use.
-2. Add the key to your local `.env` (or `.env.local`) file. This project references `VITE_GEMINI_API_KEY` in code comments; some docs use `GEMINI_API_KEY`. The `.env.example` includes both variants. Example:
+2. Add the key to your local `.env` (or `.env.local`) file. Keep Gemini keys server-side only; do not expose them with a `NEXT_PUBLIC_` or `VITE_` prefix. Example:
 
 ```env
-# Client (if enabled):
-VITE_GEMINI_API_KEY=your_gemini_api_key
-VITE_GEMINI_MODEL=gemini-2.5-pro
-
-# Server (preferred for secure calls):
 GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-2.5-pro
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 ```
 
 Notes:
-- Client-side Gemini calls are disabled by default in the codebase to avoid exposing keys in the browser. If you need to enable AI calls from the client, be aware of the security risk—prefer server-side proxying for production.
-- If you enable server-side usage, place `GEMINI_API_KEY` in server environment variables and make requests from server API routes.
+- Client-side Gemini calls are disabled to avoid exposing keys in the browser.
+- Place `GEMINI_API_KEY` in server environment variables and make requests from server API routes.
 
 ## 🧪 Testing Checklist
 

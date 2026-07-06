@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx",
+    "secret-scan": "node scripts/secret-scan.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
