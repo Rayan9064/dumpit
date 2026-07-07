@@ -1,93 +1,96 @@
 # Deployment Guide
 
-## Overview
-DumpIt is deployed as a Next.js application on Vercel with Firebase (Firestore + Auth) as the backend. This guide covers deployment setup, environment variables, and configuration.
+DumpIt deploys as a Next.js app on Vercel with Firebase Auth, Firestore, Firebase Admin SDK, and Gemini for AI/RAG.
 
-## Prerequisites
-- Node.js 18+ installed
-- Firebase project created
-- Vercel account (for production deployment)
-- Git repository connected to Vercel
+## Required Services
+
+- Vercel project connected to the GitHub repository.
+- Firebase project with Authentication and Firestore enabled.
+- Firebase Admin service account for server-side API routes.
+- Google AI Studio / Gemini API key for embeddings and answer generation.
+- Firestore vector indexes for `resource_chunks`.
 
 ## Environment Variables
 
-### Required Environment Variables
-Create a `.env.local` file in the project root with the following variables:
+Set these locally in `.env.local` and in Vercel Project Settings -> Environment Variables.
 
 ```bash
-# Firebase Client SDK Configuration (Public - used in browser)
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+# Firebase Client SDK Configuration (public browser config)
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
 
-# Firebase Admin SDK (Server-side - KEEP SECRET)
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your_project.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour_Private_Key_Here\n-----END PRIVATE KEY-----\n"
+# Firebase Admin SDK (server-only)
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 
-# Optional: Gemini AI API Key (for AI-powered features)
-GEMINI_API_KEY=your_gemini_api_key_here
+# Gemini AI (server-only)
+GEMINI_API_KEY=
 GEMINI_MODEL=gemini-2.5-flash
 GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 ```
 
-### Environment Variable Notes
-- **NEXT_PUBLIC_*** variables are exposed to the browser and should only contain public Firebase config
-- **FIREBASE_PRIVATE_KEY** must be kept secret and should never be committed to version control
-- The private key should include `\n` characters for line breaks (as shown above)
-- Gemini variables are server-side only. Do not use `NEXT_PUBLIC_` for Gemini keys.
-- For Vercel deployment, add these in the Vercel dashboard under Project Settings → Environment Variables
+Notes:
+
+- `NEXT_PUBLIC_*` values are safe browser config for the Firebase Web SDK.
+- `FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`, and `FIREBASE_PROJECT_ID` are server secrets for Firebase Admin.
+- `GEMINI_API_KEY` must be an AI Studio / Gemini API key, not a Firebase Web API key.
+- Do not prefix Gemini keys with `Bearer`, and do not wrap the value in quotes in Vercel.
+- Use `GEMINI_MODEL=gemini-2.5-flash` for v1. `gemini-2.5-pro` can return `429 RESOURCE_EXHAUSTED` on the free tier.
+- Redeploy Vercel after changing environment variables.
 
 ## Firebase Setup
 
-### 1. Create Firebase Project
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Create a new project or select existing one
-3. Enable **Firestore Database** (production mode)
-4. Enable **Authentication** with Email/Password provider
+1. Create or select a Firebase project.
+2. Enable Firestore Database.
+3. Enable Authentication.
+4. Enable Email/Password and Google sign-in providers if both are desired.
+5. Generate a Firebase Admin service account key:
+   - Firebase Console -> Project Settings -> Service Accounts
+   - Generate new private key
+   - Map JSON fields to env vars:
+     - `project_id` -> `FIREBASE_PROJECT_ID`
+     - `client_email` -> `FIREBASE_CLIENT_EMAIL`
+     - `private_key` -> `FIREBASE_PRIVATE_KEY`
 
-### 2. Firestore Security Rules
-Apply the following security rules in Firebase Console → Firestore Database → Rules:
+## Firestore Security Rules
+
+Server APIs use Firebase Admin SDK and verify Firebase ID tokens. Client-side direct access should remain constrained.
 
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
-    
-    // Helper function to check if user owns the resource
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-    
-    // Resources collection
+
     match /resources/{resourceId} {
-      // Anyone can read public resources
       allow read: if resource.data.is_public == true || isOwner(resource.data.user_id);
-      // Only authenticated users can create resources
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.user_id;
-      // Only owner can update/delete
       allow update, delete: if isOwner(resource.data.user_id);
     }
-    
-    // Users collection
+
+    match /resource_chunks/{chunkId} {
+      allow read: if resource.data.is_public == true || isOwner(resource.data.user_id);
+      allow write: if false;
+    }
+
     match /users/{userId} {
-      // Users can read their own profile
-      allow read: if isOwner(userId);
-      // Users can create/update their own profile
-      allow create, update: if isOwner(userId);
-      
-      // User's collections subcollection
+      allow read, create, update: if isOwner(userId);
+
       match /collections/{collectionId} {
         allow read, write: if isOwner(userId);
-        
-        // Collection resources (membership)
+
         match /resources/{resourceId} {
           allow read, write: if isOwner(userId);
         }
@@ -97,201 +100,179 @@ service cloud.firestore {
 }
 ```
 
-### 3. Firestore Indexes
-Create composite indexes for efficient queries:
+## Firestore Indexes
 
-1. **Resources by user and creation time:**
-   - Collection: `resources`
-   - Fields: `user_id` (Ascending), `created_at` (Descending)
+### Standard Composite Indexes
 
-2. **Shared collections:**
-   - Collection Group: `collections`
-   - Fields: `is_shared` (Ascending), `sort_order` (Ascending)
+Create the standard indexes Firestore asks for in the Firebase Console or with `gcloud` when query errors provide a command.
 
-3. **RAG vector search:**
-   - Collection: `resource_chunks`
-   - Vector field: `embedding`
-   - Dimensions: `768`
-   - Distance measure: cosine
-   - Filters used by the app:
-     - `user_id == <uid>`
-     - `is_public == true` with `user_id != <uid>`
+Expected query shapes include:
 
-For Firestore vector search, run the app once and use the Firebase/Google Cloud index suggestion generated by the first failed vector query if the exact CLI command differs by project edition.
+- `resources`: `user_id` plus `created_at`
+- `resources`: public resource discovery filters
+- collection group `collections`: `is_shared` plus `sort_order`
 
-You can create these in Firebase Console → Firestore Database → Indexes, or they will be auto-suggested when you run queries that need them.
+### Vector Indexes for RAG
 
-### 4. Get Firebase Admin SDK Credentials
-1. Go to Firebase Console → Project Settings → Service Accounts
-2. Click "Generate New Private Key"
-3. Download the JSON file
-4. Extract the following values for your `.env.local`:
-   - `project_id` → `FIREBASE_PROJECT_ID`
-   - `client_email` → `FIREBASE_CLIENT_EMAIL`
-   - `private_key` → `FIREBASE_PRIVATE_KEY` (keep the `\n` characters)
+DumpIt stores embeddings in `resource_chunks.embedding` with 768 dimensions. Firestore vector search requires separate indexes for each filter combination.
+
+Private search (`My Dump`) uses:
+
+```text
+user_id == currentUser
+nearest embedding
+```
+
+Create the private vector index:
+
+```bash
+gcloud firestore indexes composite create \
+  --project=YOUR_PROJECT_ID \
+  --collection-group=resource_chunks \
+  --query-scope=COLLECTION \
+  --field-config=order=ASCENDING,field-path=user_id \
+  --field-config=vector-config='{"dimension":"768","flat": "{}"}',field-path=embedding
+```
+
+Shared search (`Shared` and part of `All`) uses:
+
+```text
+is_public == true
+user_id != currentUser
+nearest embedding
+```
+
+Create the shared vector index:
+
+```bash
+gcloud firestore indexes composite create \
+  --project=YOUR_PROJECT_ID \
+  --collection-group=resource_chunks \
+  --query-scope=COLLECTION \
+  --field-config=order=ASCENDING,field-path=is_public \
+  --field-config=order=ASCENDING,field-path=user_id \
+  --field-config=vector-config='{"dimension":"768","flat": "{}"}',field-path=embedding
+```
+
+Monitor index operations:
+
+```bash
+gcloud firestore operations list --project=YOUR_PROJECT_ID
+```
+
+The index is usable after the operation reports `state: SUCCESSFUL` and the index response shows `state: READY`.
 
 ## Vercel Deployment
 
-### Initial Setup
-1. **Connect Repository:**
-   ```bash
-   # Push your code to GitHub
-   git push origin main
-   ```
+1. Import the GitHub repository into Vercel.
+2. Add all required environment variables for Production, Preview, and Development as needed.
+3. Deploy from `main`.
+4. After any environment variable change, redeploy the latest production deployment.
 
-2. **Import to Vercel:**
-   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
-   - Click "Add New Project"
-   - Import your GitHub repository
-   - Vercel will auto-detect Next.js configuration
+Default build settings:
 
-3. **Configure Environment Variables:**
-   - In Vercel dashboard → Project Settings → Environment Variables
-   - Add all variables from your `.env.local`
-   - Set them for Production, Preview, and Development environments
+- Build command: `npm run build`
+- Install command: `npm install`
+- Output directory: `.next`
 
-4. **Deploy:**
-   - Click "Deploy"
-   - Vercel will build and deploy automatically
+## RAG Verification
 
-### Continuous Deployment
-- Every push to `main` branch triggers a production deployment
-- Pull requests create preview deployments automatically
-- Preview URLs are generated for each PR
+1. Save a normal public web page in DumpIt.
+2. Open Resources and confirm `index_status` becomes `indexed`.
+3. Ask a specific question in `My Dump`, for example:
 
-### Build Configuration
-Vercel uses these default settings (no changes needed):
-- **Build Command:** `npm run build` or `next build`
-- **Output Directory:** `.next`
-- **Install Command:** `npm install`
-- **Development Command:** `npm run dev`
+```text
+What does my Firebase Authentication resource explain?
+```
 
-## Local Development
+4. Test `Shared`.
+5. Test `All`.
 
-### Setup
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Rayan9064/dumpit.git
-   cd dumpit
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create `.env.local` with your Firebase credentials (see above)
-
-4. Run development server:
-   ```bash
-   npm run dev
-   ```
-
-5. Open [http://localhost:3000](http://localhost:3000)
-
-### Using Firebase Emulator (Optional)
-For local development without affecting production data:
-
-1. Install Firebase CLI:
-   ```bash
-   npm install -g firebase-tools
-   ```
-
-2. Initialize emulators:
-   ```bash
-   firebase init emulators
-   ```
-   Select: Firestore, Authentication
-
-3. Start emulators:
-   ```bash
-   firebase emulators:start
-   ```
-
-4. Update `.env.local` to point to emulators:
-   ```bash
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=localhost
-   FIRESTORE_EMULATOR_HOST=localhost:8080
-   FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
-   ```
-
-See `docs/testing.md` for more details on emulator usage.
-
-## Production Checklist
-
-Before deploying to production, ensure:
-
-- [ ] All environment variables are set in Vercel
-- [ ] Firebase security rules are configured
-- [ ] Firestore indexes are created
-- [ ] Firestore vector index exists for `resource_chunks.embedding`
-- [ ] `GEMINI_API_KEY`, `GEMINI_MODEL`, and `GEMINI_EMBEDDING_MODEL` are configured in Vercel
-- [ ] Firebase Authentication is enabled
-- [ ] `.env.local` is in `.gitignore` (never commit secrets!)
-- [ ] Build succeeds locally: `npm run build`
-- [ ] No console errors in production build
-- [ ] Test authentication flow
-- [ ] Test resource creation and retrieval
-- [ ] Save a resource and confirm `index_status` becomes `indexed` or `skipped`
-- [ ] Test Ask DumpIt in `My Dump`, `Shared`, and `All` modes
+If a resource remains `pending`, `failed`, or `skipped`, Ask DumpIt cannot use it.
 
 ## Troubleshooting
 
-### Build Failures
-- **Error: Missing environment variables**
-  - Ensure all `NEXT_PUBLIC_*` and `FIREBASE_*` variables are set in Vercel
-  
-- **Error: Firebase Admin initialization failed**
-  - Check `FIREBASE_PRIVATE_KEY` formatting (must include `\n` for newlines)
-  - Verify `FIREBASE_CLIENT_EMAIL` and `FIREBASE_PROJECT_ID` are correct
+### Gemini: API key not valid
 
-### Runtime Errors
-- **401 Unauthorized errors**
-  - Verify Firebase security rules allow the operation
-  - Check that ID token is being sent with requests
-  
-- **Firestore permission denied**
-  - Review security rules in Firebase Console
-  - Ensure user is authenticated before making requests
+Symptoms:
 
-### Performance Issues
-- **Slow queries**
-  - Check if composite indexes are created
-  - Review Firestore usage in Firebase Console → Usage tab
-  
-- **High costs**
-  - Monitor Firestore reads/writes in Firebase Console
-  - Consider caching frequently accessed data
-  - Implement pagination for large collections
+```text
+API_KEY_INVALID
+API key not valid. Please pass a valid API key.
+```
 
-## Monitoring & Logs
+Fix:
 
-### Vercel Logs
-- View deployment logs: Vercel Dashboard → Deployments → [Select deployment]
-- View runtime logs: Vercel Dashboard → Logs
+- Create a key in Google AI Studio / Gemini API.
+- Set it as `GEMINI_API_KEY`.
+- Do not use `NEXT_PUBLIC_FIREBASE_API_KEY`.
+- Redeploy Vercel.
 
-### Firebase Monitoring
-- Firestore usage: Firebase Console → Firestore Database → Usage
-- Authentication: Firebase Console → Authentication → Users
-- Performance: Firebase Console → Performance (if enabled)
+### Gemini: quota exceeded
 
-## Rollback Procedure
+Symptoms:
 
-If a deployment causes issues:
+```text
+429 RESOURCE_EXHAUSTED
+model: gemini-2.5-pro
+```
 
-1. **Via Vercel Dashboard:**
-   - Go to Deployments
-   - Find the last working deployment
-   - Click "..." → "Promote to Production"
+Fix:
 
-2. **Via Git:**
-   ```bash
-   git revert HEAD
-   git push origin main
-   ```
+- Set `GEMINI_MODEL=gemini-2.5-flash`.
+- Redeploy Vercel.
+- Use billing/quota only if you intentionally want Pro models.
 
-## Additional Resources
-- [Next.js Deployment Documentation](https://nextjs.org/docs/deployment)
-- [Vercel Documentation](https://vercel.com/docs)
-- [Firebase Documentation](https://firebase.google.com/docs)
-- [Firestore Security Rules](https://firebase.google.com/docs/firestore/security/get-started)
+### Firestore: missing vector index
+
+Symptoms:
+
+```text
+FAILED_PRECONDITION: Missing vector index configuration
+```
+
+Fix:
+
+- Run the exact `gcloud firestore indexes composite create ...` command from the error.
+- For DumpIt production, create both vector indexes listed above.
+- Wait for `READY`.
+
+### Ask DumpIt returns no indexed resources
+
+Symptoms:
+
+```text
+I could not find indexed resources for that question yet.
+```
+
+Fix:
+
+- Confirm the target resource has `index_status=indexed`.
+- Ask a specific semantic question instead of a single keyword.
+- Check whether the source page blocks server fetches or hides text behind login/client-side rendering.
+
+### Firebase Admin initialization failed
+
+Fix:
+
+- Confirm `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, and `FIREBASE_PRIVATE_KEY`.
+- Preserve private key newlines as `\n` in hosted env vars.
+- Do not expose Admin credentials as `NEXT_PUBLIC_*`.
+
+## Production Checklist
+
+- [ ] Firebase Auth enabled.
+- [ ] Firestore enabled.
+- [ ] Firebase Admin env vars configured in Vercel.
+- [ ] Gemini env vars configured in Vercel.
+- [ ] `GEMINI_MODEL=gemini-2.5-flash`.
+- [ ] Standard Firestore composite indexes created.
+- [ ] Private vector index is `READY`.
+- [ ] Shared vector index is `READY`.
+- [ ] Vercel redeployed after env var changes.
+- [ ] `npm run secret-scan` passes.
+- [ ] `npm run typecheck` passes.
+- [ ] `npm test -- --run` passes.
+- [ ] `npm run build` passes.
+- [ ] A saved resource reaches `index_status=indexed`.
+- [ ] Ask DumpIt works in `My Dump`, `Shared`, and `All`.
