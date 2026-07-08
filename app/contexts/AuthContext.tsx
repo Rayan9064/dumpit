@@ -56,6 +56,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      const syncToken = async () => {
+        try {
+          const token = await user.getIdToken();
+          document.dispatchEvent(new CustomEvent('DUMPIT_EXTENSION_AUTH', { detail: { token } }));
+        } catch (e) {
+          console.error('Error syncing token for extension:', e);
+        }
+      };
+      syncToken();
+      // Periodically sync token
+      const interval = setInterval(syncToken, 5 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
   const signUp = async (email: string, password: string, username: string) => {
     try {
       if (!auth || !isFirebaseClientConfigured) {
