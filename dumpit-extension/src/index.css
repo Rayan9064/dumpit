@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans m-0 p-0 text-slate-800 dark:text-stone-100;
+  }
+}
+
+.input-field {
+  @apply w-full px-3 py-2 border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:text-white transition-all duration-200;
+}
+
+.btn-primary {
+  @apply w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-700 hover:bg-brand-800 dark:bg-stone-700 dark:hover:bg-stone-600 text-white font-medium rounded-lg text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-[0.98];
+}
+
+.btn-secondary {
+  @apply w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800 text-slate-700 dark:text-stone-200 font-medium rounded-lg text-sm transition-all duration-200 disabled:opacity-50 active:scale-[0.98];
+}
+
+.label-text {
+  @apply block text-xs font-semibold text-stone-500 dark:text-stone-400 mb-1.5 uppercase tracking-wider;
+}

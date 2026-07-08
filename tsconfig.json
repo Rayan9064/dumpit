@@ -44,7 +44,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "dumpit-extension/popup.js"  ],
   "exclude": [
     "node_modules"
   ]
