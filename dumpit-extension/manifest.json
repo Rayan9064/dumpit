@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Dumpit",
+  "version": "1.0",
+  "description": "AI knowledge vault",
+  "action": {
+    "default_popup": "dumpit.html",
+    "default_icon": "128.png"
+  }
+}
