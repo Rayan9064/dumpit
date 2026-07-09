@@ -1,16 +1,15 @@
 'use client'
 
-import { Bot, CheckCircle2, Eye, EyeOff, Loader2, LogIn, ShieldCheck, UserPlus } from 'lucide-react'
+import { Bot, CheckCircle2, Loader2, ShieldCheck } from 'lucide-react'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 
-interface AuthProps {
-  defaultIsLogin?: boolean
-}
+// interface AuthProps {
+//   defaultIsLogin?: boolean
+// }
 
-const usernameRegex = /^[a-z0-9_-]{3,20}$/
+// const usernameRegex = /^[a-z0-9_-]{3,20}$/
 
 const getFriendlyErrorMessage = (errorCode: string): string => {
   switch (errorCode) {
@@ -37,98 +36,98 @@ const getFriendlyErrorMessage = (errorCode: string): string => {
   }
 }
 
-export function Auth({ defaultIsLogin = true }: AuthProps) {
-  const [isLogin, setIsLogin] = useState(defaultIsLogin)
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [username, setUsername] = useState('')
-  const [loading, setLoading] = useState(false)
+export function Auth() {
+//   const [isLogin, setIsLogin] = useState(defaultIsLogin)
+//   const [showPassword, setShowPassword] = useState(false)
+//   const [email, setEmail] = useState('')
+//   const [password, setPassword] = useState('')
+//   const [username, setUsername] = useState('')
+//   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
-  const [usernameError, setUsernameError] = useState('')
-  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([])
-  const searchParams = useSearchParams()
-  const { signIn, signUp, signInWithGoogle } = useAuth()
+//   const [usernameError, setUsernameError] = useState('')
+//   const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([])
+//   const searchParams = useSearchParams()
+  const { signInWithGoogle } = useAuth()
 
-  useEffect(() => {
-    const signupParam = searchParams?.get('signup')
-    if (signupParam === 'true') setIsLogin(false)
-    if (signupParam === 'false') setIsLogin(true)
-  }, [searchParams])
+//   useEffect(() => {
+//     const signupParam = searchParams?.get('signup')
+//     if (signupParam === 'true') setIsLogin(false)
+//     if (signupParam === 'false') setIsLogin(true)
+//   }, [searchParams])
 
-  const checkUsernameUniqueness = async (value: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`/api/check-username?username=${encodeURIComponent(value)}`)
-      const data = await response.json()
-      return data.available
-    } catch (err) {
-      console.error('Error checking username:', err)
-      return false
-    }
-  }
+//   const checkUsernameUniqueness = async (value: string): Promise<boolean> => {
+//     try {
+//       const response = await fetch(`/api/check-username?username=${encodeURIComponent(value)}`)
+//       const data = await response.json()
+//       return data.available
+//     } catch (err) {
+//       console.error('Error checking username:', err)
+//       return false
+//     }
+//   }
 
-  const generateUsernameSuggestions = (base: string): string[] => {
-    const timestamp = Date.now().toString().slice(-4)
-    const random = Math.floor(Math.random() * 1000)
-    return [
-      `${base}${timestamp}`,
-      `${base}_${random}`,
-      `${base}-${random}`,
-      `the_${base}`,
-      `${base}_ai`,
-    ].slice(0, 5)
-  }
+//   const generateUsernameSuggestions = (base: string): string[] => {
+//     const timestamp = Date.now().toString().slice(-4)
+//     const random = Math.floor(Math.random() * 1000)
+//     return [
+//       `${base}${timestamp}`,
+//       `${base}_${random}`,
+//       `${base}-${random}`,
+//       `the_${base}`,
+//       `${base}_ai`,
+//     ].slice(0, 5)
+//   }
 
-  const handleUsernameChange = async (value: string) => {
-    setUsername(value)
-    setUsernameError('')
-    setUsernameSuggestions([])
+//   const handleUsernameChange = async (value: string) => {
+//     setUsername(value)
+//     setUsernameError('')
+//     setUsernameSuggestions([])
 
-    if (value.trim() === '') return
+//     if (value.trim() === '') return
 
-    if (!usernameRegex.test(value)) {
-      setUsernameError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.')
-      return
-    }
+//     if (!usernameRegex.test(value)) {
+//       setUsernameError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens only.')
+//       return
+//     }
 
-    const isAvailable = await checkUsernameUniqueness(value)
-    if (!isAvailable) {
-      setUsernameError('This username is already taken.')
-      setUsernameSuggestions(generateUsernameSuggestions(value))
-    }
-  }
+//     const isAvailable = await checkUsernameUniqueness(value)
+//     if (!isAvailable) {
+//       setUsernameError('This username is already taken.')
+//       setUsernameSuggestions(generateUsernameSuggestions(value))
+//     }
+//   }
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    setError('')
-    setLoading(true)
+//   const handleSubmit = async (event: React.FormEvent) => {
+//     event.preventDefault()
+//     setError('')
+//     setLoading(true)
 
-    try {
-      if (isLogin) {
-        const { error: signInError } = await signIn(email, password)
-        if (signInError) setError(getFriendlyErrorMessage(signInError.code || ''))
-      } else {
-        if (!usernameRegex.test(username)) {
-          setError('Please enter a valid username.')
-          return
-        }
+//     try {
+//       if (isLogin) {
+//         const { error: signInError } = await signIn(email, password)
+//         if (signInError) setError(getFriendlyErrorMessage(signInError.code || ''))
+//       } else {
+//         if (!usernameRegex.test(username)) {
+//           setError('Please enter a valid username.')
+//           return
+//         }
 
-        const isAvailable = await checkUsernameUniqueness(username)
-        if (!isAvailable) {
-          setError('Username is already taken. Please choose another.')
-          return
-        }
+//         const isAvailable = await checkUsernameUniqueness(username)
+//         if (!isAvailable) {
+//           setError('Username is already taken. Please choose another.')
+//           return
+//         }
 
-        const { error: signUpError } = await signUp(email, password, username)
-        if (signUpError) setError(getFriendlyErrorMessage(signUpError.code || ''))
-      }
-    } catch {
-      setError('An unexpected error occurred. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+//         const { error: signUpError } = await signUp(email, password, username)
+//         if (signUpError) setError(getFriendlyErrorMessage(signUpError.code || ''))
+//       }
+//     } catch {
+//       setError('An unexpected error occurred. Please try again.')
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
 
   const handleGoogleSignIn = async () => {
     setError('')
@@ -140,7 +139,7 @@ export function Auth({ defaultIsLogin = true }: AuthProps) {
     } catch {
       setError('An unexpected error occurred. Please try again.')
     } finally {
-      setGoogleLoading(false)
+      setGoogleLoading(false);
     }
   }
 
@@ -172,28 +171,11 @@ export function Auth({ defaultIsLogin = true }: AuthProps) {
           <p className="text-sm text-slate-500 dark:text-slate-400">AI knowledge vault for saved links</p>
         </div>
 
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-950 dark:text-white">{isLogin ? 'Welcome back' : 'Create your vault'}</h2>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-950 dark:text-white">Sign In to DumpIt</h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {isLogin ? 'Continue to your AI knowledge workspace.' : 'Start saving links and asking better questions.'}
+            Continue to your AI knowledge workspace.
           </p>
-        </div>
-
-        <div className="mb-6 grid grid-cols-2 rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-950">
-          <button
-            type="button"
-            onClick={() => setIsLogin(true)}
-            className={`rounded-md px-4 py-2 text-sm font-semibold transition-colors ${isLogin ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'}`}
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsLogin(false)}
-            className={`rounded-md px-4 py-2 text-sm font-semibold transition-colors ${!isLogin ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'}`}
-          >
-            Sign Up
-          </button>
         </div>
 
         {error && (
@@ -202,103 +184,12 @@ export function Auth({ defaultIsLogin = true }: AuthProps) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div>
-              <label htmlFor="username" className="app-label">Username</label>
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(event) => handleUsernameChange(event.target.value.toLowerCase())}
-                className="app-input"
-                placeholder="choose_a_username"
-                required={!isLogin}
-              />
-              {usernameError && <p className="mt-1 text-sm text-red-600 dark:text-red-300">{usernameError}</p>}
-              {usernameSuggestions.length > 0 && (
-                <div className="mt-2">
-                  <p className="mb-1 text-sm text-slate-600 dark:text-slate-300">Try these instead:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {usernameSuggestions.map((suggestion) => (
-                      <button
-                        key={suggestion}
-                        type="button"
-                        onClick={() => handleUsernameChange(suggestion)}
-                        className="rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300"
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="email" className="app-label">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="app-input"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="app-label">Password</label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                autoComplete="current-password"
-                className="app-input pr-12"
-                placeholder="Password"
-                required
-              />
-              <button
-                type="button"
-                tabIndex={-1}
-                onClick={(event) => {
-                  event.preventDefault()
-                  setShowPassword(!showPassword)
-                }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                aria-pressed={showPassword}
-              >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading || googleLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : isLogin ? <><LogIn className="h-5 w-5" /> Sign In</> : <><UserPlus className="h-5 w-5" /> Create Account</>}
-          </button>
-        </form>
-
-        <div className="mt-6">
-          <div className="relative flex items-center">
-            <div className="flex-grow border-t border-slate-200 dark:border-slate-800" />
-            <span className="mx-4 flex-shrink text-sm text-slate-500 dark:text-slate-400">or continue with</span>
-            <div className="flex-grow border-t border-slate-200 dark:border-slate-800" />
-          </div>
-
+        <div className="space-y-4">
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={loading || googleLoading}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800"
+            disabled={googleLoading}
+            className="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3.5 font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             {googleLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
