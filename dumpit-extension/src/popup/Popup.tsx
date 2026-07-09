@@ -248,7 +248,7 @@ export default function Popup() {
   if (!user) {
     return (
       <div className="w-[380px] min-h-[450px] bg-stone-50 dark:bg-stone-900 p-4 flex items-center justify-center">
-        <LoginView onSuccess={() => {}} />
+        <LoginView />
       </div>
     );
   }
