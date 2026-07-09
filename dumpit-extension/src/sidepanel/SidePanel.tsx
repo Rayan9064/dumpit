@@ -282,7 +282,7 @@ export default function SidePanel() {
   if (!user) {
     return (
       <div className="min-h-screen bg-stone-50 dark:bg-stone-900 p-6 flex items-center justify-center">
-        <LoginView onSuccess={() => {}} />
+        <LoginView />
       </div>
     );
   }
