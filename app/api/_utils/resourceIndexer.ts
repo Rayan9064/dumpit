@@ -10,6 +10,7 @@ interface ResourceData {
   tag?: string;
   user_id?: string;
   is_public?: boolean;
+  captured_text?: string | null;
 }
 
 export interface IndexResourceOptions {
@@ -64,10 +65,22 @@ export const indexResource = async ({ resourceId, uid }: IndexResourceOptions) =
   }, { merge: true });
 
   try {
-    const extracted = await fetchReadableText(resource.link);
-    const combinedText = [resource.title, resource.note, extracted.title, extracted.text]
-      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-      .join('\n\n');
+    let combinedText = '';
+    let extractedTitle = '';
+
+    if (resource.captured_text) {
+      combinedText = [resource.title, resource.note, resource.captured_text]
+        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        .join('\n\n');
+      extractedTitle = resource.title || '';
+    } else {
+      const extracted = await fetchReadableText(resource.link);
+      combinedText = [resource.title, resource.note, extracted.title, extracted.text]
+        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        .join('\n\n');
+      extractedTitle = extracted.title || '';
+    }
+
     const chunks = chunkText(combinedText || buildFallbackText(resource));
 
     if (chunks.length === 0) {
@@ -89,7 +102,7 @@ export const indexResource = async ({ resourceId, uid }: IndexResourceOptions) =
         resource_id: resourceId,
         user_id: uid,
         is_public: Boolean(resource.is_public),
-        title: resource.title || extracted.title || 'Untitled',
+        title: resource.title || extractedTitle || 'Untitled',
         source_url: resource.link,
         tag: resource.tag || 'Article',
         chunk_text: chunk,

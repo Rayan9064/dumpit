@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   try {
     const authUser = await requireAuth(request);
     const body = await request.json();
-    const { title, link, note, tag, is_public, collection_ids, new_collection } = body;
+    const { title, link, note, tag, is_public, collection_ids, new_collection, captured_text } = body;
 
     // Validate required fields
     if (!link) {
@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
       tag: enrichedTag || 'Article',
       is_public: is_public ?? false,
       collection_ids: normalizedCollectionIds,
+      captured_text: captured_text || null,
       index_status: 'pending',
       index_error: null,
       created_at: now,
