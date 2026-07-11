@@ -27,15 +27,14 @@ export function ShareModal({ isOpen, onClose, resourceTitle, resourceNote, resou
   };
 
   const handleLinkedInShare = () => {
-    const linkedInTitle = `Just discovered: "${resourceTitle}"`;
-    const linkedInSummary = `${resourceNote ? `${resourceNote.substring(0, 150)}...` : 'Worth checking out!'}\n\nShared via DumpIt ${userHandle}`;
-    const url = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(linkedInTitle + '\n\n' + linkedInSummary + '\n\n' + publicLink)}`;
+    // LinkedIn offsite share dialog: pre-filling text is deprecated by LinkedIn, but it will pull site preview
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicLink)}`;
     window.open(url, '_blank');
   };
 
   const handleFacebookShare = () => {
-    const facebookText = `Check out this resource I found: "${resourceTitle}"\n\n${resourceNote ? `${resourceNote.substring(0, 100)}...` : ''}\n\n${publicLink}\n\nShared via DumpIt ${userHandle}`;
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(publicLink)}&quote=${encodeURIComponent(facebookText)}`;
+    // Facebook sharer: quote pre-filling is deprecated by Facebook, but it will pull site preview
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(publicLink)}`;
     window.open(url, '_blank');
   };
 
