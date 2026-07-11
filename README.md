@@ -61,6 +61,10 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Chrome Extension
+
+DumpIt includes a Chrome extension for one-click capturing, side panel search, and text selection clipping. For details on local installation and configuration, see the [Extension README](dumpit-extension/README.md).
+
 ## Environment Variables
 
 Use Firebase variables for Firebase only, and Gemini variables for AI only. Do not reuse Firebase keys as Gemini keys.
