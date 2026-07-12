@@ -40,9 +40,27 @@ export function AddResource({ onSuccess }: AddResourceProps) {
   const lastEnrichedLinkRef = useRef<string>('')
   const [showShareModal, setShowShareModal] = useState(false)
   const [sharedResourceData, setSharedResourceData] = useState<{ title: string; note?: string; link: string }>({ title: '', note: '', link: '' })
+  const [username, setUsername] = useState('')
 
   useEffect(() => {
-    if (user) fetchCollections().catch(() => {})
+    if (user) {
+      fetchCollections().catch(() => {})
+      
+      const loadProfile = async () => {
+        try {
+          const response = await fetch('/api/user-profile')
+          if (response.ok) {
+            const data = await response.json()
+            if (data.profile?.username) {
+              setUsername(data.profile.username)
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to load profile in AddResource:', e)
+        }
+      }
+      loadProfile()
+    }
   }, [user, fetchCollections])
 
   const enrichResource = async () => {
@@ -330,6 +348,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
         resourceTitle={sharedResourceData.title}
         resourceNote={sharedResourceData.note}
         resourceLink={sharedResourceData.link}
+        username={username}
       />
     </div>
   )

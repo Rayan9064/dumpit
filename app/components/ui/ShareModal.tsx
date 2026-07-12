@@ -9,15 +9,18 @@ interface ShareModalProps {
   resourceTitle: string;
   resourceNote?: string;
   resourceLink: string;
+  username?: string;
 }
 
-export function ShareModal({ isOpen, onClose, resourceTitle, resourceNote, resourceLink }: ShareModalProps) {
+export function ShareModal({ isOpen, onClose, resourceTitle, resourceNote, resourceLink, username }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
 
-  // Use the actual resource link if available, fallback to the platform URL
-  const publicLink = resourceLink || `https://dumpit-three.vercel.app/`;
+  // Point to the user's public profile page if username is available, otherwise fallback to the resource's direct URL or the homepage
+  const publicLink = username 
+    ? `https://dumpit-three.vercel.app/u/${username.toLowerCase()}`
+    : (resourceLink || `https://dumpit-three.vercel.app/`);
   const userHandle = '@DumpItApp';
 
   const handleTwitterShare = () => {

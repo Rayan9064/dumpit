@@ -7,11 +7,44 @@ import { indexResource } from '../_utils/resourceIndexer';
 // GET /api/resources - Get the authenticated user's resources
 export async function GET(request: NextRequest) {
   try {
-    const authUser = await requireAuth(request);
     const { searchParams } = new URL(request.url);
-    const collectionId = searchParams.get('collectionId');
+    const username = searchParams.get('username');
+    const isPublicParam = searchParams.get('public') === 'true';
 
     const db = getServerFirestore();
+
+    if (username && isPublicParam) {
+      const usernameQuery = await db.collection('users')
+        .where('username', '==', username.toLowerCase())
+        .get();
+
+      if (usernameQuery.empty) {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 404 }
+        );
+      }
+
+      const targetUid = usernameQuery.docs[0].id;
+      const resourcesQuery = await db.collection('resources')
+        .where('user_id', '==', targetUid)
+        .where('is_public', '==', true)
+        .orderBy('created_at', 'desc')
+        .get();
+
+      const resources = resourcesQuery.docs.map((doc: any) => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      return NextResponse.json({
+        success: true,
+        resources
+      });
+    }
+
+    const authUser = await requireAuth(request);
+    const collectionId = searchParams.get('collectionId');
 
     let query: FirebaseFirestore.Query = db.collection('resources')
       .where('user_id', '==', authUser.uid);
