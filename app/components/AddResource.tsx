@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useCollections } from '../contexts/CollectionsContext'
 import { jsonAuthFetch } from '../lib/authFetch'
+import { ShareModal } from './ui/ShareModal'
 
 interface AddResourceProps {
   onSuccess: () => void
@@ -37,6 +38,8 @@ export function AddResource({ onSuccess }: AddResourceProps) {
   const [selectedCollectionId, setSelectedCollectionId] = useState('none')
   const [newCollectionName, setNewCollectionName] = useState('')
   const lastEnrichedLinkRef = useRef<string>('')
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [sharedResourceData, setSharedResourceData] = useState<{ title: string; note?: string; link: string }>({ title: '', note: '', link: '' })
 
   useEffect(() => {
     if (user) fetchCollections().catch(() => {})
@@ -106,6 +109,8 @@ export function AddResource({ onSuccess }: AddResourceProps) {
       }
 
       const data = await response.json()
+      setSharedResourceData({ title, note, link })
+
       setTitle('')
       setLink('')
       setNote('')
@@ -116,12 +121,17 @@ export function AddResource({ onSuccess }: AddResourceProps) {
       lastEnrichedLinkRef.current = ''
 
       refreshCollections().catch(() => {})
-      onSuccess()
+      setShowShareModal(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add resource')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleShareModalClose = () => {
+    setShowShareModal(false)
+    onSuccess()
   }
 
   return (
@@ -313,6 +323,14 @@ export function AddResource({ onSuccess }: AddResourceProps) {
           </button>
         </aside>
       </form>
+
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={handleShareModalClose}
+        resourceTitle={sharedResourceData.title}
+        resourceNote={sharedResourceData.note}
+        resourceLink={sharedResourceData.link}
+      />
     </div>
   )
 }
