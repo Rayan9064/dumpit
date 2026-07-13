@@ -2,6 +2,7 @@
 
 import { CheckCircle2, ExternalLink, Filter, Globe2, Loader2, Plus, Search, Users } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '../contexts/AuthContext'
 import { authFetch, jsonAuthFetch } from '../lib/authFetch'
 
@@ -39,10 +40,28 @@ interface Resource {
 
 export function SharedDump() {
   const { user } = useAuth()
+  const router = useRouter()
   const [resources, setResources] = useState<Resource[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTag, setSelectedTag] = useState('all')
+  const [userSearchInput, setUserSearchInput] = useState('')
+  const [searchUserError, setSearchUserError] = useState('')
+
+  const handleUserSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const cleaned = userSearchInput.trim().replace(/^@/, '').toLowerCase()
+    if (!cleaned) return
+    
+    const usernameRegex = /^[a-z0-9_-]{3,20}$/
+    if (!usernameRegex.test(cleaned)) {
+      setSearchUserError('Username must be 3-20 characters, lowercase letters, numbers, underscores, or hyphens.')
+      return
+    }
+
+    setSearchUserError('')
+    router.push(`/u/${cleaned}`)
+  }
   const [savedResources, setSavedResources] = useState<Set<string>>(new Set())
   const [savingId, setSavingId] = useState<string | null>(null)
   const [error, setError] = useState('')
@@ -158,6 +177,38 @@ export function SharedDump() {
         </div>
       </header>
 
+      <section className="app-panel p-5 border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+        <h2 className="text-base font-bold text-slate-950 dark:text-white flex items-center gap-2 mb-1.5">
+          <Users className="h-4.5 w-4.5 text-blue-600 dark:text-blue-400" />
+          Browse a Contributor's Library
+        </h2>
+        <p className="text-xs text-slate-555 dark:text-slate-400 mb-4">
+          Enter a user's unique username to explore all of their publicly shared links and bookmarks.
+        </p>
+        <form onSubmit={handleUserSearchSubmit} className="flex gap-2 max-w-md">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-450 dark:text-slate-500">@</span>
+            <input
+              type="text"
+              placeholder="username"
+              value={userSearchInput}
+              onChange={(e) => setUserSearchInput(e.target.value)}
+              className="app-input pl-7 text-sm"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="inline-flex min-h-10 items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 px-4 text-xs font-bold text-white transition-colors"
+          >
+            Browse
+          </button>
+        </form>
+        {searchUserError && (
+          <p className="text-xs text-red-650 dark:text-red-400 mt-2 font-semibold">{searchUserError}</p>
+        )}
+      </section>
+
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
           {error}
@@ -254,10 +305,23 @@ export function SharedDump() {
                     <span className="truncate">{resource.link}</span>
                   </a>
                   <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                    <span className="inline-flex min-w-0 items-center gap-1">
-                      <Users className="h-3.5 w-3.5 shrink-0" />
-                      <span className="truncate">{resource.username || 'Anonymous'}</span>
-                    </span>
+                    {resource.username ? (
+                      <a
+                        href={`/u/${resource.username.toLowerCase()}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-w-0 items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 font-semibold transition-colors"
+                        title={`View @${resource.username}'s public library`}
+                      >
+                        <Users className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">@{resource.username}</span>
+                      </a>
+                    ) : (
+                      <span className="inline-flex min-w-0 items-center gap-1 font-medium">
+                        <Users className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">Anonymous</span>
+                      </span>
+                    )}
                     <span>{formatDate(resource.created_at)}</span>
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle2, Globe, Loader2, Save, ShieldCheck, User } from 'lucide-react'
+import { CheckCircle2, Globe, Loader2, Save, ShieldCheck, User, Copy, ExternalLink, Share2 } from 'lucide-react'
 import { ReactNode, useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { authFetch, jsonAuthFetch } from '../lib/authFetch'
@@ -22,6 +22,19 @@ export function Profile() {
   const [username, setUsername] = useState('')
   const [shareByDefault, setShareByDefault] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  const handleCopyLink = async () => {
+    if (!profile?.username) return
+    const link = `https://dumpit-three.vercel.app/u/${profile.username.toLowerCase()}`
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy link:', err)
+    }
+  }
 
   useEffect(() => {
     if (user) {
@@ -181,6 +194,39 @@ export function Profile() {
               <p>Shared resources are opt-in and can be cited by other users in shared search modes.</p>
             </div>
           </section>
+
+          {profile?.username && (
+            <section className="app-panel p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-950 dark:text-white">
+                <Share2 className="h-4 w-4 text-blue-600" />
+                Public Library Link
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                Anyone can view your publicly shared resources by visiting your personal link.
+              </p>
+              <div className="app-muted-panel p-2 mb-3 truncate text-xs text-slate-600 dark:text-slate-300 select-all font-mono">
+                https://dumpit-three.vercel.app/u/{profile.username.toLowerCase()}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={handleCopyLink}
+                  className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 dark:border-slate-850 dark:hover:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  {copied ? 'Copied!' : 'Copy Link'}
+                </button>
+                <a
+                  href={`/u/${profile.username.toLowerCase()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-750 text-xs font-bold text-white transition-colors"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  View Library
+                </a>
+              </div>
+            </section>
+          )}
 
           {profile && (
             <section className="app-panel p-4">
