@@ -43,7 +43,7 @@ export const fetchReadableText = async (url: string): Promise<ExtractedContent> 
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'DumpItBot/1.0 (+https://dumpit-three.vercel.app)',
+        'User-Agent': `DumpItBot/1.0 (+${process.env.NEXT_PUBLIC_APP_URL || 'https://dumpit-three.vercel.app'})`,
         Accept: 'text/html,text/plain;q=0.9,*/*;q=0.1',
       },
       redirect: 'follow',

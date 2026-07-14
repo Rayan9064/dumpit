@@ -23,12 +23,12 @@ export function Profile() {
   const [shareByDefault, setShareByDefault] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [copied, setCopied] = useState(false)
+  const [shareUrl, setShareUrl] = useState('')
 
   const handleCopyLink = async () => {
-    if (!profile?.username) return
-    const link = `https://dumpit-three.vercel.app/u/${profile.username.toLowerCase()}`
+    if (!shareUrl) return
     try {
-      await navigator.clipboard.writeText(link)
+      await navigator.clipboard.writeText(shareUrl)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
@@ -41,6 +41,15 @@ export function Profile() {
       loadProfile()
     }
   }, [user])
+
+  useEffect(() => {
+    if (profile?.username) {
+      const origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://dumpit-three.vercel.app')
+      setShareUrl(`${origin}/u/${profile.username.toLowerCase()}`)
+    } else {
+      setShareUrl('')
+    }
+  }, [profile])
 
   const loadProfile = async () => {
     if (!user) return
@@ -204,8 +213,8 @@ export function Profile() {
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
                 Anyone can view your publicly shared resources by visiting your personal link.
               </p>
-              <div className="app-muted-panel p-2 mb-3 truncate text-xs text-slate-600 dark:text-slate-300 select-all font-mono">
-                https://dumpit-three.vercel.app/u/{profile.username.toLowerCase()}
+              <div className="app-muted-panel p-2 mb-3 truncate text-xs text-slate-600 dark:text-slate-350 select-all font-mono">
+                {shareUrl || `.../u/${profile.username.toLowerCase()}`}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <button

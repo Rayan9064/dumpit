@@ -1,7 +1,7 @@
 'use client'
 
 import { Copy, Facebook, Linkedin, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -14,13 +14,23 @@ interface ShareModalProps {
 
 export function ShareModal({ isOpen, onClose, resourceTitle, resourceNote, resourceLink, username }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
+  const [baseUrl, setBaseUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setBaseUrl(window.location.origin);
+    } else {
+      setBaseUrl(process.env.NEXT_PUBLIC_APP_URL || 'https://dumpit-three.vercel.app');
+    }
+  }, []);
 
   if (!isOpen) return null;
 
+  const resolvedBaseUrl = baseUrl || 'https://dumpit-three.vercel.app';
   // Point to the user's public profile page if username is available, otherwise fallback to the resource's direct URL or the homepage
   const publicLink = username 
-    ? `https://dumpit-three.vercel.app/u/${username.toLowerCase()}`
-    : (resourceLink || `https://dumpit-three.vercel.app/`);
+    ? `${resolvedBaseUrl}/u/${username.toLowerCase()}`
+    : (resourceLink || `${resolvedBaseUrl}/`);
   const userHandle = '@DumpItApp';
 
   const handleTwitterShare = () => {
