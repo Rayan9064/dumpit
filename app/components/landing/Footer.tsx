@@ -17,6 +17,15 @@ const Footer = () => {
           </p>
         </div>
 
+        <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-slate-500 dark:text-slate-400">
+          <Link href="/privacy" className="hover:text-slate-900 dark:hover:text-white transition">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:text-slate-900 dark:hover:text-white transition">
+            Terms of Service
+          </Link>
+        </div>
+
         <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
           <a href="https://github.com/Rayan9064/dumpit" aria-label="GitHub" className="rounded-lg p-2 hover:bg-slate-100 hover:text-slate-950 dark:hover:bg-slate-800 dark:hover:text-white">
             <Github className="h-5 w-5" />
