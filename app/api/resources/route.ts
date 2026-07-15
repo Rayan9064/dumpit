@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isAuthError, requireAuth, unauthorizedResponse } from '../_utils/auth';
 import { getServerFirestore } from '../_utils/firebaseAdmin';
 import { getPreviewFromUrl } from '../_utils/linkPreview';
+import { checkAuthenticatedRateLimit, checkPublicRateLimit } from '../_utils/rateLimit';
 import { indexResource } from '../_utils/resourceIndexer';
 
 // GET /api/resources - Get the authenticated user's resources
@@ -14,6 +15,9 @@ export async function GET(request: NextRequest) {
     const db = getServerFirestore();
 
     if (username && isPublicParam) {
+      // Rate limit: 20 public requests per minute per IP
+      const rateLimitResponse = await checkPublicRateLimit(request);
+      if (rateLimitResponse) return rateLimitResponse;
       const usernameQuery = await db.collection('users')
         .where('username', '==', username.toLowerCase())
         .get();
@@ -44,6 +48,11 @@ export async function GET(request: NextRequest) {
     }
 
     const authUser = await requireAuth(request);
+
+    // Rate limit: 60 authenticated requests per minute per user
+    const authRateLimitResponse = await checkAuthenticatedRateLimit(request, authUser.uid);
+    if (authRateLimitResponse) return authRateLimitResponse;
+
     const collectionId = searchParams.get('collectionId');
 
     let query: FirebaseFirestore.Query = db.collection('resources')
