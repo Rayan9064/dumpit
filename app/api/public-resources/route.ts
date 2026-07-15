@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isAuthError, requireAuth, unauthorizedResponse } from '../_utils/auth';
 import { getServerFirestore } from '../_utils/firebaseAdmin';
 import { indexResource } from '../_utils/resourceIndexer';
+import { checkAuthenticatedRateLimit } from '../_utils/rateLimit';
 
 // GET /api/public-resources - Get public resources from other users
 export async function GET(request: NextRequest) {
   try {
     const authUser = await requireAuth(request);
+
+    // Rate limit: 60 authenticated requests per minute per user
+    const rateLimitResponse = await checkAuthenticatedRateLimit(request, authUser.uid);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const db = getServerFirestore();
 
     // Get all public resources except current user's

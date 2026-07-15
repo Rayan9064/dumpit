@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { buildAnswerContext, normalizeSearchMode, searchResourceChunks } from '../../_utils/aiSearch';
 import { isAuthError, requireAuth, unauthorizedResponse } from '../../_utils/auth';
 import { generateAnswer } from '../../_utils/gemini';
+import { checkAiRateLimit } from '../../_utils/rateLimit';
 
 export async function POST(request: NextRequest) {
   try {
     const authUser = await requireAuth(request);
+
+    // Rate limit: 10 AI queries per minute per authenticated user
+    const rateLimitResponse = await checkAiRateLimit(request, authUser.uid);
+    if (rateLimitResponse) return rateLimitResponse;
     const { question, mode, limit } = await request.json();
 
     if (!question || typeof question !== 'string') {
