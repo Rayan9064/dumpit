@@ -67,7 +67,10 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
         </nav>
 
         <div className="mt-auto space-y-2 border-t border-slate-200 pt-4 dark:border-slate-800">
-          <ThemeToggle variant="row" />
+          <div className="flex items-center justify-between rounded-lg px-3 py-2.5">
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">Theme</span>
+            <ThemeToggle variant="pill" />
+          </div>
           <button
             onClick={signOut}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-300 dark:hover:bg-red-950/30 dark:hover:text-red-300"

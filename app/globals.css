@@ -18,7 +18,31 @@
   * {
     @apply border-slate-200 dark:border-slate-800;
   }
+
+  /* ── View Transition: animated theme toggle ────────────────────────────── */
+  /* Disable the default cross-fade so our clip-path runs cleanly */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  /* When the JS sets data-theme-vt="active", animate the new state */
+  [data-theme-vt='active']::view-transition-new(root) {
+    clip-path: var(--vt-clip-to, circle(100% at 50% 50%));
+    animation: vt-clip-reveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes vt-clip-reveal {
+    from {
+      clip-path: var(--vt-clip-from, circle(0px at 50% 50%));
+    }
+    to {
+      clip-path: var(--vt-clip-to, circle(100% at 50% 50%));
+    }
+  }
 }
+
 
 @layer components {
   .app-surface {

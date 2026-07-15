@@ -13,7 +13,7 @@ export function LegalNav() {
           <span className="text-base font-bold text-slate-900 dark:text-white">DumpIt</span>
         </Link>
         <div className="flex items-center gap-2">
-          <ThemeToggle variant="pill" />
+          <ThemeToggle variant="icon" />
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"

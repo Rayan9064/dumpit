@@ -2,6 +2,7 @@
 
 import { ArrowRight, Bot, CheckCircle2, Database, ExternalLink, Lock, Search, Sparkles } from 'lucide-react'
 import Link from '../ui/Link'
+import { ThemeToggle } from '../ui/ThemeToggle'
 
 const sources = [
   { label: 'Firebase Auth guide', type: 'Private', tag: 'Docs' },
@@ -25,13 +26,16 @@ const Hero = () => {
             <a href="#trust" className="hover:text-slate-950 dark:hover:text-white">Trust</a>
             <a href="#discover" className="hover:text-slate-950 dark:hover:text-white">Discover</a>
           </nav>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-          >
-            Open app
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle variant="icon" />
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            >
+              Open app
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </header>
 
         <div className="grid flex-1 items-center gap-10 py-14 lg:grid-cols-[0.88fr_1.12fr] lg:py-20">
