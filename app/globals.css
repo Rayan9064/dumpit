@@ -5,18 +5,30 @@
 @layer base {
   :root {
     color-scheme: light;
+    /* Font vars wired from next/font in layout.tsx */
+    --font-heading: var(--font-space-grotesk);
+    --font-body: var(--font-inter);
   }
 
   html {
     scroll-behavior: smooth;
+    /* Space Grotesk default via Tailwind fontFamily.sans */
   }
 
   body {
-    @apply bg-stone-50 text-slate-950 antialiased dark:bg-slate-950 dark:text-slate-50;
+    @apply bg-zinc-50 text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-50;
+    /* Inter for body text — readable long-form */
+    font-family: var(--font-inter, var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif);
+  }
+
+  /* Headings: Space Grotesk with tighter tracking */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-space-grotesk, ui-sans-serif, system-ui, sans-serif);
+    @apply tracking-tight;
   }
 
   * {
-    @apply border-slate-200 dark:border-slate-800;
+    @apply border-zinc-200 dark:border-zinc-800;
   }
 
   /* ── View Transition: animated theme toggle ────────────────────────────── */
@@ -46,27 +58,30 @@
 
 @layer components {
   .app-surface {
-    @apply border border-slate-200/80 bg-white/90 shadow-sm shadow-slate-200/60 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/20;
+    @apply border border-zinc-200/80 bg-white/90 shadow-sm shadow-zinc-200/60 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80 dark:shadow-black/20;
   }
 
   .app-panel {
-    @apply rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+    @apply rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900;
   }
 
   .app-muted-panel {
-    @apply rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60;
+    @apply rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/60;
   }
 
   .app-input {
-    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-50 dark:focus:border-blue-500 dark:focus:ring-blue-950;
+    @apply w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-950 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:focus:border-blue-500 dark:focus:ring-blue-950;
+    font-family: var(--font-inter, ui-sans-serif, system-ui, sans-serif);
   }
 
   .app-label {
-    @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200;
+    @apply mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-200;
   }
 
   .app-chip {
-    @apply inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300;
+    @apply inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300;
+    font-family: var(--font-space-grotesk, ui-sans-serif, system-ui, sans-serif);
+    @apply tracking-wide;
   }
 
   .app-chip-ai {
@@ -83,6 +98,11 @@
 
   .app-focus {
     @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 dark:focus-visible:ring-blue-950;
+  }
+
+  /* Inter utility for body text sections */
+  .font-inter {
+    font-family: var(--font-inter, ui-sans-serif, system-ui, sans-serif);
   }
 }
 
@@ -139,20 +159,20 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d4d4d8;  /* zinc-300 */
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #a1a1aa;  /* zinc-400 */
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #475569;
+  background: #3f3f46;  /* zinc-700 */
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: #52525b;  /* zinc-600 */
 }
 
 /* Gradient radial background */

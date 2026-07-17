@@ -4,6 +4,14 @@ export default {
   darkMode:'class',
   theme: {
     extend: {
+      fontFamily: {
+        // Space Grotesk — geometric, developer-centric headings
+        sans: ['var(--font-space-grotesk)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // Inter — legible UI body text
+        inter: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // Fallback mono
+        mono: ['ui-monospace', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+      },
       keyframes: {
         'fade-in': {
           '0%': { opacity: '0' },
