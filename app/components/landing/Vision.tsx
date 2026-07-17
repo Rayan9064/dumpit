@@ -1,60 +1,44 @@
-import { Archive, Brain, FileSearch, MessageSquareQuote } from 'lucide-react'
-
-const steps = [
-  {
-    icon: Archive,
-    title: 'Capture the useful link',
-    text: 'Save articles, docs, videos, tools, or notes into a private vault with optional collections.',
-  },
-  {
-    icon: Brain,
-    title: 'Let DumpIt index it',
-    text: 'Readable text is extracted, chunked, embedded, and prepared for semantic search.',
-  },
-  {
-    icon: FileSearch,
-    title: 'Search by meaning',
-    text: 'Ask naturally instead of remembering exact titles, URLs, or tags.',
-  },
-  {
-    icon: MessageSquareQuote,
-    title: 'Verify with sources',
-    text: 'Answers include citations and source cards so users can inspect the underlying resource.',
-  },
+// Social Proof Bar — replaces old Vision section
+const avatars = [
+  { initials: 'RK', color: 'bg-blue-500' },
+  { initials: 'AS', color: 'bg-violet-500' },
+  { initials: 'MJ', color: 'bg-emerald-500' },
+  { initials: 'PT', color: 'bg-amber-500' },
+  { initials: 'DN', color: 'bg-rose-500' },
 ]
 
-const Vision = () => {
+const SocialProof = () => {
   return (
-    <section id="workflow" className="border-b border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-slate-950">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl">
-          <span className="app-chip app-chip-ai mb-4">How it works</span>
-          <h2 className="text-3xl font-bold tracking-normal text-slate-950 dark:text-white sm:text-4xl">
-            From saved link to cited answer.
-          </h2>
-          <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">
-            DumpIt keeps the familiar resource workflow, then adds a retrieval layer that makes saved knowledge usable again.
-          </p>
+    <section className="border-b border-slate-200 bg-white py-10 dark:border-slate-800 dark:bg-slate-950">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:flex-row sm:px-6 lg:px-8">
+        {/* Avatar stack + user count */}
+        <div className="flex items-center gap-3">
+          <div className="flex -space-x-2.5">
+            {avatars.map((a) => (
+              <div
+                key={a.initials}
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold text-white ring-2 ring-white dark:ring-slate-950 ${a.color}`}
+              >
+                {a.initials}
+              </div>
+            ))}
+          </div>
+          <div className="text-sm font-medium text-slate-600 dark:text-slate-300">
+            <span className="font-bold text-slate-950 dark:text-white">200+ developers</span> and knowledge workers already saving smarter
+          </div>
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, index) => {
-            const Icon = step.icon
-            return (
-              <article key={step.title} className="app-panel p-5">
-                <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div className="mb-2 text-xs font-bold uppercase tracking-wide text-blue-600">Step {index + 1}</div>
-                <h3 className="text-base font-bold text-slate-950 dark:text-white">{step.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{step.text}</p>
-              </article>
-            )
-          })}
-        </div>
+        {/* Founding offer pill */}
+        <a
+          href="#pricing"
+          className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/70"
+        >
+          <span className="h-2 w-2 animate-pulse rounded-full bg-blue-500" />
+          First 500 founding members get 50% off Pro — forever
+        </a>
       </div>
     </section>
   )
 }
 
-export default Vision
+export default SocialProof
