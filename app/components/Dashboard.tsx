@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit, ExternalLink, FolderPlus, Globe, Loader2, Lock, MoreHorizontal, Search, Trash2, Sparkles } from 'lucide-react'
+import { Edit, ExternalLink, FolderPlus, Globe, Lock, MoreHorizontal, Search, Trash2, Sparkles } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
@@ -9,6 +9,7 @@ import { authFetch } from '../lib/authFetch'
 import { CollectionsSidebar } from './collections/CollectionsSidebar'
 import { ResourceCollectionManager } from './collections/ResourceCollectionManager'
 import { EditResource } from './EditResource'
+import { ResourceSkeleton } from './ui/ResourceSkeleton'
 
 function formatDate(dateValue: any): string {
   if (!dateValue) return ''
@@ -126,13 +127,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    )
-  }
+  // We render inline skeletons inside the feed area below rather than block the entire dashboard UI
 
   return (
     <>
@@ -220,7 +215,13 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
               </div>
             </div>
 
-            {resources.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <ResourceSkeleton key={idx} />
+                ))}
+              </div>
+            ) : resources.length === 0 ? (
               <div className="app-panel p-8 md:p-10 space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
