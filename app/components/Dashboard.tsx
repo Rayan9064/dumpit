@@ -52,6 +52,8 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null)
   const [managerResource, setManagerResource] = useState<Resource | null>(null)
   const [openMenuResourceId, setOpenMenuResourceId] = useState<string | null>(null)
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
+  const [loadingMore, setLoadingMore] = useState(false)
   const hasInitialFetchRef = useRef(false)
 
   useEffect(() => {
@@ -77,15 +79,36 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
     try {
       const queryParams = new URLSearchParams()
       if (collectionId) queryParams.set('collectionId', collectionId)
-      const url = queryParams.toString() ? `/api/resources?${queryParams.toString()}` : '/api/resources'
-      const response = await authFetch(user, url)
+      queryParams.set('limit', '20')
+      const response = await authFetch(user, `/api/resources?${queryParams.toString()}`)
       if (!response.ok) throw new Error('Failed to load resources')
       const data = await response.json()
       setResources(data.resources || [])
+      setNextCursor(data.nextCursor || null)
     } catch (error) {
       console.error('Error loading resources:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadMore = async () => {
+    if (!user || !nextCursor || loadingMore) return
+    setLoadingMore(true)
+    try {
+      const queryParams = new URLSearchParams()
+      if (selectedCollectionId) queryParams.set('collectionId', selectedCollectionId)
+      queryParams.set('cursor', nextCursor)
+      queryParams.set('limit', '20')
+      const response = await authFetch(user, `/api/resources?${queryParams.toString()}`)
+      if (!response.ok) throw new Error('Failed to load more resources')
+      const data = await response.json()
+      setResources((prev) => [...prev, ...(data.resources || [])])
+      setNextCursor(data.nextCursor || null)
+    } catch (error) {
+      console.error('Error loading more resources:', error)
+    } finally {
+      setLoadingMore(false)
     }
   }
 
@@ -335,7 +358,8 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              <>
+                <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
                 {filteredResources.map((resource) => {
                   const assignedCollections = (resource.collection_ids || [])
                     .map((id) => collections.find((collection) => collection.id === id))
@@ -395,7 +419,26 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                   )
                 })}
               </div>
-            )}
+              {nextCursor && (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 disabled:opacity-50"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                        Loading more...
+                      </>
+                    ) : (
+                      'Load More'
+                    )}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
           </main>
         </div>
       </div>
