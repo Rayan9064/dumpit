@@ -41,6 +41,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
   const [showShareModal, setShowShareModal] = useState(false)
   const [sharedResourceData, setSharedResourceData] = useState<{ title: string; note?: string; link: string }>({ title: '', note: '', link: '' })
   const [username, setUsername] = useState('')
+  const [resourceType, setResourceType] = useState<'link' | 'note'>('link')
 
   useEffect(() => {
     if (user) {
@@ -102,9 +103,9 @@ export function AddResource({ onSuccess }: AddResourceProps) {
     try {
       const payload: any = {
         title,
-        link,
+        link: resourceType === 'link' ? link : '',
         note,
-        tag,
+        tag: resourceType === 'note' ? 'Note' : tag,
         is_public: isPublic,
       }
 
@@ -127,7 +128,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
       }
 
       const data = await response.json()
-      setSharedResourceData({ title, note, link })
+      setSharedResourceData({ title, note, link: resourceType === 'link' ? link : '' })
 
       setTitle('')
       setLink('')
@@ -174,66 +175,99 @@ export function AddResource({ onSuccess }: AddResourceProps) {
         </div>
       )}
 
+      {/* Tabs */}
+      <div className="flex border-b border-slate-200 dark:border-slate-800">
+        <button
+          type="button"
+          onClick={() => { setResourceType('link'); setTag('Article'); }}
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all -mb-px ${
+            resourceType === 'link'
+              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+              : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+          }`}
+        >
+          Save Link
+        </button>
+        <button
+          type="button"
+          onClick={() => { setResourceType('note'); setTag('Note'); }}
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all -mb-px ${
+            resourceType === 'note'
+              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+              : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+          }`}
+        >
+          Create Note
+        </button>
+      </div>
+
       <form onSubmit={handleSubmit} className="grid gap-6 xl:grid-cols-[1fr_340px]">
         <section className="app-panel p-5">
           <div className="space-y-5">
-            <div>
-              <label htmlFor="resource-link" className="app-label">Link</label>
-              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                <div className="relative flex-1">
-                  <Link2 className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                  <input
-                    id="resource-link"
-                    type="url"
-                    value={link}
-                    onChange={(event) => {
-                      const nextLink = event.target.value
-                      setLink(nextLink)
-                      if (nextLink !== lastEnrichedLinkRef.current && lastEnrichedLinkRef.current !== '') {
-                        setTitle('')
-                        setNote('')
-                        setTag('Article')
-                      }
-                    }}
-                    className="app-input pl-10"
-                    placeholder="https://example.com/useful-resource"
-                    required
-                  />
+            {resourceType === 'link' && (
+              <div>
+                <label htmlFor="resource-link" className="app-label">Link</label>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                  <div className="relative flex-1">
+                    <Link2 className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <input
+                      id="resource-link"
+                      type="url"
+                      value={link}
+                      onChange={(event) => {
+                        const nextLink = event.target.value
+                        setLink(nextLink)
+                        if (nextLink !== lastEnrichedLinkRef.current && lastEnrichedLinkRef.current !== '') {
+                          setTitle('')
+                          setNote('')
+                          setTag('Article')
+                        }
+                      }}
+                      className="app-input pl-10"
+                      placeholder="https://example.com/useful-resource"
+                      required={resourceType === 'link'}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={enrichResource}
+                    disabled={!link || enriching}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:bg-blue-950"
+                  >
+                    {enriching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+                    AI enrich
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={enrichResource}
-                  disabled={!link || enriching}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:bg-blue-950"
-                >
-                  {enriching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-                  AI enrich
-                </button>
               </div>
-            </div>
+            )}
 
             <div>
-              <label htmlFor="resource-title" className="app-label">Title</label>
+              <label htmlFor="resource-title" className="app-label">
+                {resourceType === 'link' ? 'Title' : 'Title / Subject'}
+              </label>
               <input
                 id="resource-title"
                 type="text"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 className="app-input mt-2"
-                placeholder="Name this source"
+                placeholder={resourceType === 'link' ? 'Name this source' : 'Brief summary or topic'}
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="resource-note" className="app-label">Note</label>
+              <label htmlFor="resource-note" className="app-label">
+                {resourceType === 'link' ? 'Note' : 'Content / Body'}
+              </label>
               <textarea
                 id="resource-note"
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
                 rows={5}
                 className="app-input mt-2 min-h-32 resize-y"
-                placeholder="What should future-you remember about this source?"
+                placeholder={resourceType === 'link' ? 'What should future-you remember about this source?' : 'Type your note content or code snippets here...'}
+                required={resourceType === 'note'}
               />
             </div>
           </div>
