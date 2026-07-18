@@ -13,6 +13,7 @@ import {
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { authFetch, jsonAuthFetch } from '../lib/authFetch';
 import { auth, isFirebaseClientConfigured } from '../lib/firebase';
+import { identifyUser, resetTelemetry, trackEvent, trackError } from '../lib/telemetry';
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -51,6 +52,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
+      if (u) {
+        identifyUser(u.uid, u.email || undefined, u.displayName || undefined);
+        trackEvent('user_session_restored');
+      } else {
+        resetTelemetry();
+      }
     });
 
     return () => unsubscribe();
@@ -97,8 +104,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(errorData.error || 'Failed to create user profile');
       }
 
+      trackEvent('user_signup', { email, username });
       return { error: null };
     } catch (error) {
+      trackError(error, { action: 'signup', email });
       return { error };
     }
   };
@@ -110,8 +119,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       await signInWithEmailAndPassword(auth, email, password);
+      trackEvent('user_login', { method: 'email' });
       return { error: null };
     } catch (error) {
+      trackError(error, { action: 'login_email', email });
       return { error };
     }
   };
@@ -143,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Failed to create user profile');
         }
+        trackEvent('user_signup', { email: user.email, method: 'google' });
       } else {
         // Existing user - check if profile exists, create if not
         const checkResponse = await authFetch(user, '/api/user-profile');

@@ -40,10 +40,10 @@ export const indexResource = async ({ resourceId, uid }: IndexResourceOptions) =
     throw new Error('Resource not found');
   }
 
-  if (!resource.link) {
+  if (!resource.link && !resource.note && !resource.captured_text) {
     await resourceRef.set({
       index_status: 'skipped',
-      index_error: 'Missing link',
+      index_error: 'Missing content (link, note, and captured_text are all empty)',
       updated_at: new Date(),
     }, { merge: true });
     return { status: 'skipped', chunksIndexed: 0 };
@@ -73,12 +73,15 @@ export const indexResource = async ({ resourceId, uid }: IndexResourceOptions) =
         .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
         .join('\n\n');
       extractedTitle = resource.title || '';
-    } else {
+    } else if (resource.link) {
       const extracted = await fetchReadableText(resource.link);
       combinedText = [resource.title, resource.note, extracted.title, extracted.text]
         .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
         .join('\n\n');
       extractedTitle = extracted.title || '';
+    } else {
+      combinedText = buildFallbackText(resource);
+      extractedTitle = resource.title || 'Note';
     }
 
     const chunks = chunkText(combinedText || buildFallbackText(resource));

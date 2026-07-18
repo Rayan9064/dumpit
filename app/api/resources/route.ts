@@ -95,25 +95,43 @@ export async function POST(request: NextRequest) {
     const { title, link, note, tag, is_public, collection_ids, new_collection, captured_text } = body;
 
     // Validate required fields
-    if (!link) {
+    if (!link && !note && !title && !captured_text) {
       return NextResponse.json(
-        { error: 'Missing required field: link' },
+        { error: 'Missing content: at least a link, title, note, or text is required.' },
         { status: 400 }
       );
     }
 
-    // Validate link format
-    if (!link.startsWith('http://') && !link.startsWith('https://')) {
+    // Validate link format if link is provided
+    if (link && !link.startsWith('http://') && !link.startsWith('https://')) {
       return NextResponse.json(
         { error: 'Link must start with http:// or https://' },
         { status: 400 }
       );
     }
 
+    const db = getServerFirestore();
+
+    // Duplicate resource detection
+    if (link) {
+      const duplicateQuery = await db.collection('resources')
+        .where('user_id', '==', authUser.uid)
+        .where('link', '==', link)
+        .limit(1)
+        .get();
+
+      if (!duplicateQuery.empty) {
+        return NextResponse.json(
+          { error: 'Duplicate resource: this link has already been saved to your vault.' },
+          { status: 409 }
+        );
+      }
+    }
+
     // If title or tag is missing, attempt to auto-enrich from link
-    let enrichedTitle = title;
-    let enrichedTag = tag;
-    if (!enrichedTitle || !enrichedTag) {
+    let enrichedTitle = title || '';
+    let enrichedTag = tag || '';
+    if (link && (!enrichedTitle || !enrichedTag)) {
       try {
         const metadata = await getPreviewFromUrl(link);
         if (!enrichedTitle && metadata.title) enrichedTitle = metadata.title;
@@ -122,8 +140,12 @@ export async function POST(request: NextRequest) {
         console.warn('Failed to enrich link:', err);
       }
     }
-
-    const db = getServerFirestore();
+    if (!enrichedTitle) {
+      enrichedTitle = link ? 'Untitled Link' : 'Untitled Note';
+    }
+    if (!enrichedTag) {
+      enrichedTag = link ? 'Article' : 'Note';
+    }
 
     const normalizedCollectionIds: string[] = Array.isArray(collection_ids)
       ? collection_ids.filter((id: unknown): id is string => typeof id === 'string' && id.trim().length > 0)
@@ -135,9 +157,9 @@ export async function POST(request: NextRequest) {
     const resourceData = {
       user_id: authUser.uid,
       title: enrichedTitle,
-      link,
+      link: link || null,
       note: note || null,
-      tag: enrichedTag || 'Article',
+      tag: enrichedTag || 'Note',
       is_public: is_public ?? false,
       collection_ids: normalizedCollectionIds,
       captured_text: captured_text || null,

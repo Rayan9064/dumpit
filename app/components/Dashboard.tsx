@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit, ExternalLink, FolderPlus, Globe, Loader2, Lock, MoreHorizontal, Search, Trash2 } from 'lucide-react'
+import { Edit, ExternalLink, FolderPlus, Globe, Loader2, Lock, MoreHorizontal, Search, Trash2, Sparkles } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
@@ -41,7 +41,7 @@ const statusStyles: Record<string, string> = {
   skipped: '',
 }
 
-export function Dashboard() {
+export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'add' | 'shared' | 'ai' | 'profile') => void }) {
   const { user } = useAuth()
   const { collections, addResourceToCollection, removeResourceFromCollection } = useCollections()
   const [resources, setResources] = useState<Resource[]>([])
@@ -220,12 +220,118 @@ export function Dashboard() {
               </div>
             </div>
 
-            {filteredResources.length === 0 ? (
+            {resources.length === 0 ? (
+              <div className="app-panel p-8 md:p-10 space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                    <Sparkles className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-950 dark:text-white">Welcome to your DumpIt vault! 🚀</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Let's set up your AI knowledge vault in 3 easy steps.</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-900/50 flex flex-col justify-between">
+                    <div>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">1</div>
+                      <h4 className="mt-3 font-semibold text-slate-900 dark:text-white">Capture a Source</h4>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Save your first bookmark or write a text-only note in the dashboard.</p>
+                    </div>
+                    {onNavigate && (
+                      <button onClick={() => onNavigate('add')} className="mt-4 text-left text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                        Go to Capture &rarr;
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-900/50 flex flex-col justify-between">
+                    <div>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">2</div>
+                      <h4 className="mt-3 font-semibold text-slate-900 dark:text-white">Ask AI Search</h4>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Query your sources semantic-style to get instant citations and answers.</p>
+                    </div>
+                    {onNavigate && (
+                      <button onClick={() => onNavigate('ai')} className="mt-4 text-left text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                        Ask DumpIt &rarr;
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-900/50 flex flex-col justify-between">
+                    <div>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">3</div>
+                      <h4 className="mt-3 font-semibold text-slate-900 dark:text-white">Configure Profile</h4>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Make selected resources public and share your reading list with others.</p>
+                    </div>
+                    {onNavigate && (
+                      <button onClick={() => onNavigate('profile')} className="mt-4 text-left text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                        View Profile Settings &rarr;
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-200 pt-6 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-sm text-slate-600 dark:text-slate-300">
+                    Want to see it in action first? Get started instantly with demo data.
+                  </div>
+                  <button
+                    onClick={async () => {
+                      setLoading(true);
+                      try {
+                        const samples = [
+                          {
+                            title: 'Introducing AlphaFold 3',
+                            link: 'https://www.deepmind.com/blog/introducing-alphafold-3',
+                            note: 'Google DeepMind\'s biological structure prediction model that predicts molecular interactions.',
+                            tag: 'Article',
+                          },
+                          {
+                            title: 'Next.js App Router Documentation',
+                            link: 'https://nextjs.org/docs',
+                            note: 'Complete framework reference for built-in caching, React server components, and styling.',
+                            tag: 'Documentation',
+                          },
+                          {
+                            title: 'Welcome to my DumpIt Notes',
+                            link: '',
+                            note: 'This is a custom plain text note resource saved directly into my AI knowledge vault! I can save thoughts, book highlights, and code snippets here.',
+                            tag: 'Note',
+                          }
+                        ];
+
+                        for (const sample of samples) {
+                          await fetch('/api/resources', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${await user?.getIdToken()}`,
+                            },
+                            body: JSON.stringify(sample),
+                          });
+                        }
+                        await loadResources(null);
+                      } catch (err) {
+                        console.error('Failed to import samples:', err);
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-blue-700 transition"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Import Demo Content
+                  </button>
+                </div>
+              </div>
+            ) : filteredResources.length === 0 ? (
               <div className="app-panel p-10 text-center">
                 <Search className="mx-auto mb-3 h-10 w-10 text-slate-400" />
                 <h3 className="text-lg font-bold text-slate-950 dark:text-white">No resources found</h3>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                  {resources.length === 0 ? 'Capture your first link to start building an AI-searchable vault.' : 'Try a different search or tag filter.'}
+                  Try a different search or tag filter.
                 </p>
               </div>
             ) : (

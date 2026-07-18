@@ -34,7 +34,7 @@ export default function DashboardRoute() {
   return (
     <CollectionsProvider fetchOnMount={true}>
       <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
-        {currentPage === 'dashboard' && <Dashboard />}
+        {currentPage === 'dashboard' && <Dashboard onNavigate={setCurrentPage} />}
         {currentPage === 'add' && <AddResource onSuccess={() => setCurrentPage('dashboard')} />}
         {currentPage === 'shared' && <SharedDump />}
         {currentPage === 'ai' && <AskDumpit />}
