@@ -11,6 +11,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const username = searchParams.get('username');
     const isPublicParam = searchParams.get('public') === 'true';
+    const cursor = searchParams.get('cursor');
+    const limitParam = searchParams.get('limit');
+    const limit = limitParam ? Math.min(parseInt(limitParam, 10), 100) : 20;
 
     const db = getServerFirestore();
 
@@ -30,20 +33,33 @@ export async function GET(request: NextRequest) {
       }
 
       const targetUid = usernameQuery.docs[0].id;
-      const resourcesQuery = await db.collection('resources')
+      let query: FirebaseFirestore.Query = db.collection('resources')
         .where('user_id', '==', targetUid)
         .where('is_public', '==', true)
-        .orderBy('created_at', 'desc')
-        .get();
+        .orderBy('created_at', 'desc');
+
+      if (cursor) {
+        const cursorDoc = await db.collection('resources').doc(cursor).get();
+        if (cursorDoc.exists) {
+          query = query.startAfter(cursorDoc);
+        }
+      }
+
+      query = query.limit(limit);
+      const resourcesQuery = await query.get();
 
       const resources = resourcesQuery.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data()
       }));
 
+      const lastDoc = resourcesQuery.docs[resourcesQuery.docs.length - 1];
+      const nextCursor = resourcesQuery.docs.length === limit ? lastDoc?.id : null;
+
       return NextResponse.json({
         success: true,
-        resources
+        resources,
+        nextCursor
       });
     }
 
@@ -62,16 +78,30 @@ export async function GET(request: NextRequest) {
       query = query.where('collection_ids', 'array-contains', collectionId);
     }
 
-    const resourcesQuery = await query.orderBy('created_at', 'desc').get();
+    query = query.orderBy('created_at', 'desc');
+
+    if (cursor) {
+      const cursorDoc = await db.collection('resources').doc(cursor).get();
+      if (cursorDoc.exists) {
+        query = query.startAfter(cursorDoc);
+      }
+    }
+
+    query = query.limit(limit);
+    const resourcesQuery = await query.get();
 
     const resources = resourcesQuery.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));
 
+    const lastDoc = resourcesQuery.docs[resourcesQuery.docs.length - 1];
+    const nextCursor = resourcesQuery.docs.length === limit ? lastDoc?.id : null;
+
     return NextResponse.json({
       success: true,
-      resources
+      resources,
+      nextCursor
     });
 
   } catch (error) {
