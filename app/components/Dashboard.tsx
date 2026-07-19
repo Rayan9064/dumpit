@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit, ExternalLink, FolderPlus, Globe, Lock, MoreHorizontal, Search, Trash2, Sparkles } from 'lucide-react'
+import { Edit, ExternalLink, FolderPlus, Globe, Loader2, Lock, MoreHorizontal, Search, Trash2, Sparkles } from 'lucide-react'
 import { Tooltip } from 'react-tooltip'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
