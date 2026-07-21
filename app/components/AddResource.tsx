@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle2, FolderPlus, Globe, Link2, Loader2, Lock, Plus, Sparkles } from 'lucide-react'
+import { CheckCircle2, FileText, FolderPlus, Globe, Link2, Loader2, Lock, Plus, Sparkles, Upload } from 'lucide-react'
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useCollections } from '../contexts/CollectionsContext'
@@ -21,6 +21,8 @@ const TAGS = [
   'Book',
   'Podcast',
   'Newsletter',
+  'PDF',
+  'Note',
   'Other',
 ]
 
@@ -41,7 +43,8 @@ export function AddResource({ onSuccess }: AddResourceProps) {
   const [showShareModal, setShowShareModal] = useState(false)
   const [sharedResourceData, setSharedResourceData] = useState<{ title: string; note?: string; link: string }>({ title: '', note: '', link: '' })
   const [username, setUsername] = useState('')
-  const [resourceType, setResourceType] = useState<'link' | 'note'>('link')
+  const [resourceType, setResourceType] = useState<'link' | 'note' | 'pdf'>('link')
+  const [pdfFile, setPdfFile] = useState<File | null>(null)
 
   useEffect(() => {
     if (user) {
@@ -101,6 +104,46 @@ export function AddResource({ onSuccess }: AddResourceProps) {
     setError('')
 
     try {
+      if (resourceType === 'pdf') {
+        if (!pdfFile) {
+          throw new Error('Please select a PDF file to upload.')
+        }
+
+        const formData = new FormData()
+        formData.append('file', pdfFile)
+        if (title) formData.append('title', title)
+        if (note) formData.append('note', note)
+        formData.append('is_public', isPublic ? 'true' : 'false')
+
+        const normalizedCollectionIds = selectedCollectionId && selectedCollectionId !== 'none' && selectedCollectionId !== 'new'
+          ? [selectedCollectionId]
+          : []
+        formData.append('collection_ids', JSON.stringify(normalizedCollectionIds))
+
+        const idToken = await user.getIdToken()
+        const response = await fetch('/api/resources/pdf', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: formData,
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to process PDF upload')
+        }
+
+        setSharedResourceData({ title: title || pdfFile.name, note, link: '' })
+        setTitle('')
+        setNote('')
+        setPdfFile(null)
+        setIsPublic(false)
+        refreshCollections().catch(() => {})
+        setShowShareModal(true)
+        return
+      }
+
       const payload: any = {
         title,
         link: resourceType === 'link' ? link : '',
@@ -160,12 +203,12 @@ export function AddResource({ onSuccess }: AddResourceProps) {
           <span className="app-chip app-chip-ai mb-3">Capture</span>
           <h1 className="text-3xl font-bold tracking-normal text-slate-950 dark:text-white">Save a source for AI search</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Add a link once. DumpIt stores the resource, queues indexing, and makes the source available to Ask DumpIt according to its visibility.
+            Add links, notes, or PDFs. DumpIt indexes the content and makes it available to Ask DumpIt according to its visibility.
           </p>
         </div>
         <div className="app-muted-panel flex items-center gap-3 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
           <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-          Indexed resources can be cited in answers.
+          Indexed sources are cited in AI search answers.
         </div>
       </header>
 
@@ -198,6 +241,17 @@ export function AddResource({ onSuccess }: AddResourceProps) {
           }`}
         >
           Create Note
+        </button>
+        <button
+          type="button"
+          onClick={() => { setResourceType('pdf'); setTag('PDF'); }}
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all -mb-px flex items-center gap-1.5 ${
+            resourceType === 'pdf'
+              ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+              : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+          }`}
+        >
+          <FileText className="h-4 w-4" /> Upload PDF
         </button>
       </div>
 
@@ -241,9 +295,55 @@ export function AddResource({ onSuccess }: AddResourceProps) {
               </div>
             )}
 
+            {resourceType === 'pdf' && (
+              <div>
+                <label className="app-label">PDF File (Max 10MB)</label>
+                <div className="mt-2">
+                  <label
+                    htmlFor="pdf-file-upload"
+                    className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:bg-slate-900"
+                  >
+                    <Upload className="mb-2 h-8 w-8 text-blue-600 dark:text-blue-400" />
+                    {pdfFile ? (
+                      <div>
+                        <p className="text-sm font-bold text-slate-900 dark:text-white">{pdfFile.name}</p>
+                        <p className="mt-1 text-xs text-slate-500">{(pdfFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Click to select or drag and drop a PDF</p>
+                        <p className="mt-1 text-xs text-slate-500">Documents up to 10MB will be parsed and indexed for AI search.</p>
+                      </div>
+                    )}
+                    <input
+                      id="pdf-file-upload"
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          if (file.size > 10 * 1024 * 1024) {
+                            setError('PDF size cannot exceed 10MB')
+                            setPdfFile(null)
+                            return
+                          }
+                          setError('')
+                          setPdfFile(file)
+                          if (!title) {
+                            setTitle(file.name.replace(/\.pdf$/i, ''))
+                          }
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
+
             <div>
               <label htmlFor="resource-title" className="app-label">
-                {resourceType === 'link' ? 'Title' : 'Title / Subject'}
+                {resourceType === 'pdf' ? 'Title (Optional - auto-generated from file)' : resourceType === 'link' ? 'Title' : 'Title / Subject'}
               </label>
               <input
                 id="resource-title"
@@ -251,22 +351,28 @@ export function AddResource({ onSuccess }: AddResourceProps) {
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 className="app-input mt-2"
-                placeholder={resourceType === 'link' ? 'Name this source' : 'Brief summary or topic'}
-                required
+                placeholder={resourceType === 'pdf' ? 'Name of this document' : resourceType === 'link' ? 'Name this source' : 'Brief summary or topic'}
+                required={resourceType !== 'pdf'}
               />
             </div>
 
             <div>
               <label htmlFor="resource-note" className="app-label">
-                {resourceType === 'link' ? 'Note' : 'Content / Body'}
+                {resourceType === 'pdf' ? 'Note / Description (Optional)' : resourceType === 'link' ? 'Note' : 'Content / Body'}
               </label>
               <textarea
                 id="resource-note"
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
-                rows={5}
-                className="app-input mt-2 min-h-32 resize-y"
-                placeholder={resourceType === 'link' ? 'What should future-you remember about this source?' : 'Type your note content or code snippets here...'}
+                rows={4}
+                className="app-input mt-2 min-h-28 resize-y"
+                placeholder={
+                  resourceType === 'pdf'
+                    ? 'Add any personal notes about this document...'
+                    : resourceType === 'link'
+                    ? 'What should future-you remember about this source?'
+                    : 'Type your note content or code snippets here...'
+                }
                 required={resourceType === 'note'}
               />
             </div>
@@ -367,11 +473,11 @@ export function AddResource({ onSuccess }: AddResourceProps) {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (resourceType === 'pdf' && !pdfFile)}
             className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
-            Save resource
+            {resourceType === 'pdf' ? 'Upload and index PDF' : 'Save resource'}
           </button>
         </aside>
       </form>

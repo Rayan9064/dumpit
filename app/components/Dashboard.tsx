@@ -373,7 +373,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                     <article key={resource.id} className="app-panel p-4 transition hover:border-slate-300 dark:hover:border-slate-700">
                       <div className="mb-3 flex items-start justify-between gap-3">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="app-chip">{resource.tag}</span>
+                          <span className={`app-chip ${resource.tag === 'PDF' ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300' : ''}`}>{resource.tag}</span>
                           <span className={`app-chip ${statusStyles[status] || ''}`}>{status}</span>
                           <span className={`app-chip ${resource.is_public ? 'app-chip-success' : ''}`}>
                             {resource.is_public ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
@@ -412,9 +412,15 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
 
                       <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800">
                         <span>{formatDate(resource.created_at)}</span>
-                        <a href={resource.link} target="_blank" rel="noopener noreferrer" data-tooltip-id="dashboard-tooltip" data-tooltip-content={resource.link} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/40">
-                          Open <ExternalLink className="h-3.5 w-3.5" />
-                        </a>
+                        {resource.link ? (
+                          <a href={resource.link} target="_blank" rel="noopener noreferrer" data-tooltip-id="dashboard-tooltip" data-tooltip-content={resource.link} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/40">
+                            Open <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
+                        ) : (
+                          <span className="font-medium text-slate-400">
+                            {resource.tag === 'PDF' ? 'PDF Document' : 'Text Note'}
+                          </span>
+                        )}
                       </div>
                     </article>
                   )
