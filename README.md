@@ -1,53 +1,64 @@
-# DumpIt
+# DumpIt — Your AI Second Brain
 
-DumpIt is an AI knowledge vault for saved links. Save useful resources, organize them into collections, and ask questions across your private dump plus public shared resources with cited source cards.
+DumpIt is an AI-powered knowledge vault for saved links, plain-text notes, and PDF documents. Save useful resources, organize them into collections, and ask questions across your private vault plus public shared resources with cited source cards.
 
-Built with Next.js 14, TypeScript, Tailwind CSS, Firebase Auth, Firestore, Firebase Admin SDK, and Gemini.
+Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, **Firebase Auth & Firestore**, **Firebase Admin SDK**, **Google Gemini AI (RAG & Embeddings)**, **@sentry/nextjs**, and **@upstash/ratelimit**.
+
+---
 
 ## Features
 
-- Firebase authentication with email/password and Google sign-in.
-- Private resource library with tags, notes, collections, search, and visibility controls.
-- Shared Dump for discovering public resources from other users.
-- URL capture and metadata enrichment.
-- Server-side RAG indexing for saved links:
-  - fetch URL content
-  - extract readable text
-  - chunk text
-  - create Gemini embeddings
-  - store chunks in Firestore `resource_chunks`
-- Ask DumpIt AI search modes:
-  - `My Dump`: your indexed resources
-  - `Shared`: public resources from other users
-  - `All`: your resources plus shared public resources
-- Answers include citations and source cards when matching indexed chunks exist.
+- **Multi-Format Capture:**
+  - **Links:** Auto-enrichment of titles, descriptions, and tags via web scraping.
+  - **Notes:** Plain-text ideas, code snippets, and structured thoughts.
+  - **PDF Documents:** Fast in-memory text extraction for PDF uploads up to 10MB.
+- **AI Search & RAG (Ask DumpIt):**
+  - `My Dump`: Query your private indexed vault.
+  - `Shared`: Discover public resources saved by the community.
+  - `All`: Search across your vault plus community shared resources.
+  - Answers include exact citations and source cards.
+- **Organization & Curation:**
+  - Collections, tags, search filtering, and custom public profiles (`/u/[username]`).
+  - Cursor-based pagination on dashboard for high performance at scale.
+  - Skeleton shimmer card loading states.
+  - Duplicate resource detection.
+- **Enterprise Infrastructure & Performance:**
+  - Sentry exception monitoring across Client, Server, and Edge runtimes.
+  - Upstash Redis API rate limiting (60 req/min auth, 20 req/min public).
+  - PostHog telemetry & product analytics.
+  - Dynamic SEO generation via Next.js `robots.ts` and dynamic `sitemap.ts`.
+  - Browser extension support (Chrome Extension).
+
+---
 
 ## How RAG Works
 
-Saving a link creates a `resources` document, but AI search depends on indexing. The server fetches the saved URL, extracts readable page text, chunks it, embeds each chunk with Gemini, and writes vectorized chunks to Firestore.
+Saving a resource creates a `resources` document in Firestore. AI search relies on server-side background indexing:
+
+1. **Extraction:**
+   - **For Links:** Fetches page content and extracts readable text.
+   - **For PDFs:** Parses PDF binary in memory via `pdf-parse` and extracts plain text into `captured_text`.
+   - **For Notes:** Uses the note content directly.
+2. **Chunking & Embedding:**
+   - Splits text into contextual chunks.
+   - Generates 768-dimensional vector embeddings using Google's Gemini Embedding API.
+3. **Storage & Search:**
+   - Stores vectorized chunks in Firestore `resource_chunks`.
+   - Executes vector similarity searches against user queries.
 
 ```mermaid
 flowchart TD
-    URL["Saved URL"] --> Fetch["Server fetches page"]
-    Fetch --> Extract["Extract readable text"]
-    Extract --> Chunk["Chunk text"]
-    Chunk --> Embed["Gemini embedding"]
+    Input["Link / Note / PDF"] --> Extract["Extract Text (Fetch / pdf-parse)"]
+    Extract --> Chunk["Chunk Text"]
+    Chunk --> Embed["Gemini Embedding (768d)"]
     Embed --> Store["Firestore resource_chunks"]
-    Ask["User question"] --> QueryEmbed["Gemini query embedding"]
-    QueryEmbed --> Vector["Firestore vector search"]
+    Ask["User Question"] --> QueryEmbed["Gemini Query Embedding"]
+    QueryEmbed --> Vector["Firestore Vector Search"]
     Store --> Vector
-    Vector --> Answer["Gemini answer with citations"]
+    Vector --> Answer["Gemini Answer with Citations"]
 ```
 
-A saved resource is useful to Ask DumpIt only after `index_status` becomes `indexed`.
-
-Indexing can fail or be skipped when:
-
-- the page blocks server-side fetches
-- content is behind login
-- content is rendered only by client-side JavaScript
-- the page has little readable text
-- Gemini or Firestore configuration is missing
+---
 
 ## Quick Start
 
@@ -61,13 +72,17 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+---
+
 ## Chrome Extension
 
-DumpIt includes a Chrome extension for one-click capturing, side panel search, and text selection clipping. For details on local installation and configuration, see the [Extension README](dumpit-extension/README.md).
+DumpIt includes a Chrome extension for one-click link capturing, side-panel search, and text selection clipping. For setup instructions, see the [Extension README](dumpit-extension/README.md).
+
+---
 
 ## Environment Variables
 
-Use Firebase variables for Firebase only, and Gemini variables for AI only. Do not reuse Firebase keys as Gemini keys.
+Configure your environment variables in `.env.local` (and in Vercel for production deployments):
 
 ```env
 # Firebase Client SDK (browser-safe)
@@ -88,34 +103,34 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY----
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-2.5-flash
 GEMINI_EMBEDDING_MODEL=gemini-embedding-001
+
+# App URL & SEO
+NEXT_PUBLIC_APP_URL=https://dumpit-three.vercel.app
+
+# Monitoring & Rate Limiting (Optional)
+NEXT_PUBLIC_SENTRY_DSN=
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=
 ```
 
-Important:
-
-- `GEMINI_API_KEY` must come from Google AI Studio / Gemini API.
-- `NEXT_PUBLIC_FIREBASE_API_KEY` is the Firebase Web SDK key and is not valid for Gemini.
-- Keep `GEMINI_MODEL=gemini-2.5-flash` for v1. `gemini-2.5-pro` may have no free-tier quota and can return 429 errors.
-- Set Gemini variables in Vercel without quotes or `Bearer`.
-- Redeploy Vercel after changing environment variables.
+---
 
 ## Firestore Vector Indexes
 
-Ask DumpIt requires Firestore vector indexes for the query shapes used by the app.
-
-Create the private search index:
+Ask DumpIt requires Firestore vector indexes for semantic search:
 
 ```bash
+# Private search index
 gcloud firestore indexes composite create \
   --project=YOUR_PROJECT_ID \
   --collection-group=resource_chunks \
   --query-scope=COLLECTION \
   --field-config=order=ASCENDING,field-path=user_id \
   --field-config=vector-config='{"dimension":"768","flat": "{}"}',field-path=embedding
-```
 
-Create the shared/all search index:
-
-```bash
+# Shared / All search index
 gcloud firestore indexes composite create \
   --project=YOUR_PROJECT_ID \
   --collection-group=resource_chunks \
@@ -125,38 +140,18 @@ gcloud firestore indexes composite create \
   --field-config=vector-config='{"dimension":"768","flat": "{}"}',field-path=embedding
 ```
 
-Monitor index creation:
-
-```bash
-gcloud firestore operations list --project=YOUR_PROJECT_ID
-```
-
-Wait for `state: SUCCESSFUL` and `state: READY` before testing AI search.
+---
 
 ## Commands
 
 ```bash
-npm run dev
-npm run typecheck
-npm test -- --run
-npm run build
-npm run secret-scan
+npm run dev        # Run Next.js dev server
+npm run typecheck  # TypeScript type checking
+npm run build      # Build production bundle
+npm test           # Run Vitest unit tests
 ```
 
-## Deployment
-
-See [docs/deployment.md](docs/deployment.md) for the Vercel, Firebase, Gemini, and Firestore index runbook.
-
-Production checklist:
-
-- Firebase Auth enabled.
-- Firestore enabled.
-- Firebase Admin service account variables set in Vercel.
-- Gemini API key from AI Studio set as `GEMINI_API_KEY`.
-- `GEMINI_MODEL=gemini-2.5-flash`.
-- Both Firestore vector indexes are `READY`.
-- Save a resource and confirm it becomes `indexed`.
-- Test Ask DumpIt in `My Dump`, then `Shared`, then `All`.
+---
 
 ## Documentation
 
