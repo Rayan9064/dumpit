@@ -1,44 +1,38 @@
-// Social Proof Bar — replaces old Vision section
-const avatars = [
-  { initials: 'RK', color: 'bg-blue-500' },
-  { initials: 'AS', color: 'bg-violet-500' },
-  { initials: 'MJ', color: 'bg-emerald-500' },
-  { initials: 'PT', color: 'bg-amber-500' },
-  { initials: 'DN', color: 'bg-rose-500' },
-]
+// FounderNote — replaces old Social Proof / Vision section
+// Honest "why I'm building this" note. No fabricated stats or avatars.
 
-const SocialProof = () => {
+const FounderNote = () => {
   return (
-    <section className="border-b border-slate-200 bg-white py-10 dark:border-slate-800 dark:bg-slate-950">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:flex-row sm:px-6 lg:px-8">
-        {/* Avatar stack + user count */}
-        <div className="flex items-center gap-3">
-          <div className="flex -space-x-2.5">
-            {avatars.map((a) => (
-              <div
-                key={a.initials}
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold text-white ring-2 ring-white dark:ring-slate-950 ${a.color}`}
-              >
-                {a.initials}
-              </div>
-            ))}
+    <section className="border-b border-slate-200 bg-white py-14 dark:border-slate-800 dark:bg-slate-950">
+      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-2xl border border-slate-200 bg-stone-50 p-8 dark:border-slate-800 dark:bg-slate-900/60">
+          {/* Author row */}
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+              R
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white">Rayan</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">Building DumpIt</div>
+            </div>
           </div>
-          <div className="text-sm font-medium text-slate-600 dark:text-slate-300">
-            <span className="font-bold text-slate-950 dark:text-white">200+ developers</span> and knowledge workers already saving smarter
-          </div>
-        </div>
 
-        {/* Founding offer pill */}
-        <a
-          href="#pricing"
-          className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/70"
-        >
-          <span className="h-2 w-2 animate-pulse rounded-full bg-blue-500" />
-          First 500 founding members get 50% off Pro — forever
-        </a>
+          {/* Founder note body — REPLACE THE PLACEHOLDER BELOW WITH YOUR ACTUAL TEXT */}
+          <blockquote className="text-base leading-8 text-slate-700 dark:text-slate-300">
+            <p>
+              I&apos;m building DumpIt because I kept losing things I&apos;d already learned — a link I read last month, a note I wrote last week, a PDF I forgot I even saved. Most tools just dump your stuff in a folder and leave you to search for it later.
+            </p>
+            <p className="mt-4">
+              What I actually want is a second brain — for me and my team — that doesn&apos;t just store things but understands them. Something where you can save anything digital, ask questions across all of it, share what&apos;s useful, and keep the rest private. And eventually, not just a place to retrieve knowledge but a system that can act on it.
+            </p>
+            <p className="mt-4">
+              It&apos;s early. Links and notes work today, more is coming. If this sounds like something you&apos;ve been looking for, I&apos;d love to build it with your feedback.
+            </p>
+          </blockquote>
+        </div>
       </div>
     </section>
   )
 }
 
-export default SocialProof
+export default FounderNote
