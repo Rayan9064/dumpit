@@ -65,17 +65,12 @@ const Pricing = () => {
                 <span className="text-sm font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300">Founding Member Offer</span>
               </div>
               <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl">
-                First 500 get 50% off Pro — forever.
+                Early supporters get 50% off Pro — forever.
               </h3>
               <p className="mt-2 text-slate-600 dark:text-slate-300">
                 <strong>$4.50/month</strong> instead of $9. Locked in as long as your subscription is active.
               </p>
-              <div className="mt-3 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                <div className="h-2 w-32 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-                  <div className="h-full w-[65%] rounded-full bg-blue-500" />
-                </div>
-                <span><strong className="text-slate-700 dark:text-slate-200">327 spots remaining</strong> of 500</span>
-              </div>
+              {/* No scarcity counter — add a real claimed-spot number here when you have one */}
             </div>
             <div className="flex flex-col gap-2 sm:shrink-0">
               <a
@@ -83,7 +78,7 @@ const Pricing = () => {
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700"
               >
                 <Zap className="h-4 w-4" />
-                Claim your spot — $9
+                Get Founding Access — $4.50/mo
                 <ArrowRight className="h-4 w-4" />
               </a>
               <div className="flex items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">

@@ -1,15 +1,15 @@
 'use client'
 
-import { ArrowRight, Bot, CheckCircle2, Chrome, Code2, FileText, Link2, StickyNote, Zap } from 'lucide-react'
+import { ArrowRight, Bot, CheckCircle2, Code2, FileText, Link2, StickyNote, Terminal, Zap } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 
+// Only features that are actually live today
 const trustItems = [
-  { icon: Link2, label: 'Links & PDFs' },
-  { icon: Bot, label: 'AI search' },
+  { icon: Link2, label: 'Save links & notes' },
+  { icon: Bot, label: 'AI search (RAG)' },
   { icon: Code2, label: 'REST API' },
   { icon: FileText, label: 'Claude MCP' },
-  { icon: Chrome, label: 'Browser extension' },
 ]
 
 const Hero = () => {
@@ -45,13 +45,49 @@ const Hero = () => {
               finally useful.
             </span>
           </h1>
+          {/* Honest subhead — describes only what's live today */}
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-            DumpIt indexes everything you save — links, notes, PDFs — and lets you ask questions across it all. Via web, browser extension, API, or Claude MCP.
+            Save links and notes, then ask questions across everything — via the web app, REST API, or Claude MCP.{' '}
+            <span className="text-slate-400 dark:text-slate-500">PDF upload and browser extension coming soon.</span>
+          </p>
+        </div>
+
+        {/* MCP differentiator snippet — visible above the fold */}
+        <div className="mx-auto mt-10 max-w-xl">
+          <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-xl shadow-black/20">
+            {/* Terminal chrome */}
+            <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-950 px-4 py-2.5">
+              <div className="flex gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-500/60" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500/60" />
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/60" />
+              </div>
+              <Terminal className="ml-2 h-3.5 w-3.5 text-slate-500" />
+              <span className="text-xs font-medium text-slate-400">Claude Desktop · DumpIt MCP</span>
+            </div>
+            {/* Conversation snippet */}
+            <div className="space-y-3 p-4 text-sm">
+              <div className="flex items-start gap-2.5">
+                <span className="mt-0.5 shrink-0 rounded bg-slate-700 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-300">You</span>
+                <span className="text-slate-200">What did I save about RAG citation patterns?</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="mt-0.5 shrink-0 rounded bg-blue-900/70 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-300">Claude</span>
+                <div className="text-slate-300">
+                  <span className="text-slate-500 text-xs">[via DumpIt MCP]</span> Found 3 resources in your vault —
+                  <br />
+                  <span className="text-blue-400 text-xs">[1] RAG citation patterns guide · [2] Vector design notes · [3] Citation UX article</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">
+            Query your saved knowledge directly from Claude Desktop
           </p>
         </div>
 
         {/* CTAs */}
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           {user ? (
             <button
               onClick={() => router.push('/dashboard')}
@@ -79,7 +115,7 @@ const Hero = () => {
           )}
         </div>
 
-        {/* Trust strip */}
+        {/* Trust strip — live features only */}
         <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
           {trustItems.map(({ label }) => (
             <div key={label} className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
@@ -140,8 +176,8 @@ const Hero = () => {
                 <div className="space-y-2.5">
                   {[
                     { icon: Link2, label: 'RAG citation patterns guide', type: 'Link', color: 'text-blue-500' },
-                    { icon: FileText, label: 'Gemini Flash prompt design.pdf', type: 'PDF', color: 'text-violet-500' },
                     { icon: StickyNote, label: 'API design notes — v2 endpoints', type: 'Note', color: 'text-amber-500' },
+                    { icon: Link2, label: 'Firestore vector index setup', type: 'Link', color: 'text-blue-500' },
                   ].map((item) => {
                     const ItemIcon = item.icon
                     return (
