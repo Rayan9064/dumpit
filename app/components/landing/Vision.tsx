@@ -19,21 +19,14 @@ const FounderNote = () => {
 
           {/* Founder note body — REPLACE THE PLACEHOLDER BELOW WITH YOUR ACTUAL TEXT */}
           <blockquote className="text-base leading-8 text-slate-700 dark:text-slate-300">
-            {/*
-             * ──────────────────────────────────────────────────────────────
-             * FOUNDER NOTE — paste your 3–4 sentence text here.
-             * Keep it honest, first-person, casual. No corporate speak.
-             * Example structure:
-             *   - Why you started building this
-             *   - The specific pain you felt
-             *   - What you hope it becomes
-             *   - An honest admission of where it is right now
-             * ──────────────────────────────────────────────────────────────
-             */}
-            <p className="italic text-slate-400 dark:text-slate-500">
-              [Your founder note goes here — a few honest sentences about why you're building DumpIt,
-              the problem you kept running into, and what you're trying to make possible.
-              Supply the text and it'll be dropped in exactly here.]
+            <p>
+              I&apos;m building DumpIt because I kept losing things I&apos;d already learned — a link I read last month, a note I wrote last week, a PDF I forgot I even saved. Most tools just dump your stuff in a folder and leave you to search for it later.
+            </p>
+            <p className="mt-4">
+              What I actually want is a second brain — for me and my team — that doesn&apos;t just store things but understands them. Something where you can save anything digital, ask questions across all of it, share what&apos;s useful, and keep the rest private. And eventually, not just a place to retrieve knowledge but a system that can act on it.
+            </p>
+            <p className="mt-4">
+              It&apos;s early. Links and notes work today, more is coming. If this sounds like something you&apos;ve been looking for, I&apos;d love to build it with your feedback.
             </p>
           </blockquote>
         </div>
