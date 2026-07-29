@@ -1,4 +1,7 @@
-import { ArrowRight, CheckCircle2, Flame, ShieldCheck, Zap } from 'lucide-react'
+'use client';
+
+import { ArrowRight, CheckCircle2, Flame, ShieldCheck, Zap } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const tiers = [
   {
@@ -50,9 +53,28 @@ const tiers = [
       '5 API keys',
     ],
   },
-]
+];
 
 const Pricing = () => {
+  const { user } = useAuth();
+
+  const getDodoCheckoutUrl = (plan: 'pro' | 'api' = 'pro') => {
+    const defaultUrl = process.env.NEXT_PUBLIC_DODOPAYMENTS_CHECKOUT_URL || 'https://checkout.dodopayments.com/buy/pro';
+    try {
+      const url = new URL(defaultUrl);
+      url.searchParams.set('metadata.plan', plan);
+      if (user) {
+        url.searchParams.set('metadata.user_id', user.uid);
+        if (user.email) {
+          url.searchParams.set('customer_email', user.email);
+        }
+      }
+      return url.toString();
+    } catch {
+      return defaultUrl;
+    }
+  };
+
   return (
     <section id="pricing" className="scroll-mt-20 border-b border-slate-200 bg-white py-24 dark:border-slate-800 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -70,11 +92,12 @@ const Pricing = () => {
               <p className="mt-2 text-slate-600 dark:text-slate-300">
                 <strong>$4.50/month</strong> instead of $9. Locked in as long as your subscription is active.
               </p>
-              {/* No scarcity counter — add a real claimed-spot number here when you have one */}
             </div>
             <div className="flex flex-col gap-2 sm:shrink-0">
               <a
-                href="https://buy.stripe.com/founding"
+                href={getDodoCheckoutUrl('pro')}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700"
               >
                 <Zap className="h-4 w-4" />
@@ -82,8 +105,8 @@ const Pricing = () => {
                 <ArrowRight className="h-4 w-4" />
               </a>
               <div className="flex items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                <span>Stripe-secured · 30-day money back</span>
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                <span>Secured by DodoPayments · 30-day money back</span>
               </div>
             </div>
           </div>
@@ -102,44 +125,52 @@ const Pricing = () => {
 
         {/* Tiers */}
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
-          {tiers.map((tier) => (
-            <div key={tier.name} className={`relative flex flex-col rounded-2xl border bg-white p-8 dark:bg-slate-900 ${tier.color}`}>
-              {tier.badge && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
-                  {tier.badge}
+          {tiers.map((tier) => {
+            const hrefUrl = tier.name === 'Starter'
+              ? tier.cta.href
+              : getDodoCheckoutUrl(tier.name === 'API / Dev' ? 'api' : 'pro');
+
+            return (
+              <div key={tier.name} className={`relative flex flex-col rounded-2xl border bg-white p-8 dark:bg-slate-900 ${tier.color}`}>
+                {tier.badge && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
+                    {tier.badge}
+                  </div>
+                )}
+                <div className="mb-6">
+                  <div className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{tier.name}</div>
+                  <div className="mt-2 flex items-end gap-1">
+                    <span className="text-4xl font-extrabold text-slate-950 dark:text-white">{tier.price}</span>
+                    {tier.period && <span className="mb-1 text-slate-500 dark:text-slate-400">{tier.period}</span>}
+                  </div>
+                  {tier.annualNote && <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">{tier.annualNote}</div>}
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{tier.description}</p>
                 </div>
-              )}
-              <div className="mb-6">
-                <div className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{tier.name}</div>
-                <div className="mt-2 flex items-end gap-1">
-                  <span className="text-4xl font-extrabold text-slate-950 dark:text-white">{tier.price}</span>
-                  {tier.period && <span className="mb-1 text-slate-500 dark:text-slate-400">{tier.period}</span>}
-                </div>
-                {tier.annualNote && <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">{tier.annualNote}</div>}
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{tier.description}</p>
+
+                <a
+                  href={hrefUrl}
+                  target={tier.name !== 'Starter' ? '_blank' : undefined}
+                  rel={tier.name !== 'Starter' ? 'noopener noreferrer' : undefined}
+                  className={`mb-8 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition ${tier.cta.style}`}
+                >
+                  {tier.cta.label}
+                </a>
+
+                <ul className="space-y-3">
+                  {tier.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2.5 text-sm text-slate-600 dark:text-slate-300">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
               </div>
-
-              <a
-                href={tier.cta.href}
-                className={`mb-8 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition ${tier.cta.style}`}
-              >
-                {tier.cta.label}
-              </a>
-
-              <ul className="space-y-3">
-                {tier.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5 text-sm text-slate-600 dark:text-slate-300">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Pricing
+export default Pricing;

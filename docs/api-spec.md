@@ -21,6 +21,7 @@ Server routes derive `uid` from the verified Firebase token and do not trust cli
 - **POST:** Create a link or text note resource.
   - Body: `{ title, link?, note?, tag?, is_public?, collection_ids?, new_collection?, captured_text? }`.
   - Duplicate detection: Returns `409 Conflict` if the link URL was already saved by the user.
+  - Tier limits: Returns `403 Forbidden` (`UPGRADE_REQUIRED`) if non-Pro user reaches 50 saved resources limit.
 - **PUT:** Update an owned resource. Body: `{ id, title, link, note, tag, is_public, collection_ids }`.
 - **DELETE:** Delete an owned resource. Query: `?id=<resource_id>`.
 
@@ -36,6 +37,7 @@ Server routes derive `uid` from the verified Firebase token and do not trust cli
     - `is_public` (optional): `'true'` | `'false'`.
     - `collection_ids` (optional): JSON array string of collection IDs.
   - Processing: Parses PDF in memory via `pdf-parse`, extracts text (up to 50,000 characters), creates a resource with `tag: 'PDF'`, and queues background RAG indexing.
+  - Tier limits: Returns `403 Forbidden` (`UPGRADE_REQUIRED`) if non-Pro user reaches 50 saved resources limit.
   - Response: `{ success, resource }`.
 
 ---
@@ -89,6 +91,7 @@ Server routes derive `uid` from the verified Firebase token and do not trust cli
 ## /api/ai/ask
 - **POST:** RAG answer generation with citations.
 - **Body:** `{ "question": "What should I read about Firebase auth?", "mode": "mine" | "shared" | "all", "limit": 8 }`.
+- **Tier limits:** Returns `403 Forbidden` (`UPGRADE_REQUIRED`) if non-Pro user exceeds 15 AI Ask queries per month.
 - **Response:** `{ success, answer, sources }`.
 
 ---
@@ -100,9 +103,19 @@ Server routes derive `uid` from the verified Firebase token and do not trust cli
 
 ---
 
+## /api/webhooks/dodopayments
+- **POST:** DodoPayments webhook handler.
+  - Signature Header: `webhook-signature` or `x-dodopayments-signature` (HMAC SHA-256 using `DODOPAYMENTS_WEBHOOK_SECRET`).
+  - Supported Events: `payment.succeeded`, `subscription.active`, `subscription.created`, `subscription.renewed`, `subscription.cancelled`, `subscription.expired`, `subscription.failed`.
+  - Action: Updates user subscription state in `users/{uid}` and records event in `subscriptions/{subscription_id}_{timestamp}`.
+  - Response: `{ success, message }`.
+
+---
+
 ## Error Codes
 - **400:** Bad Request / Missing Fields
 - **401:** Unauthorized
+- **403:** Forbidden / Upgrade Required (`UPGRADE_REQUIRED` tier limit exceeded)
 - **404:** Not Found
 - **409:** Conflict / Duplicate Link
 - **422:** Unprocessable Entity (e.g. Scanned / Image-only PDF)
