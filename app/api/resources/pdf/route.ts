@@ -4,6 +4,7 @@ import { getServerFirestore } from '../../_utils/firebaseAdmin';
 import { extractTextFromPdf } from '../../_utils/pdfExtractor';
 import { checkAuthenticatedRateLimit } from '../../_utils/rateLimit';
 import { indexResource } from '../../_utils/resourceIndexer';
+import { checkResourceLimit } from '../../_utils/subscription';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,6 +13,18 @@ export async function POST(request: NextRequest) {
     // Rate limit: 60 authenticated requests per minute per user
     const authRateLimitResponse = await checkAuthenticatedRateLimit(request, authUser.uid);
     if (authRateLimitResponse) return authRateLimitResponse;
+
+    // Check Free tier resource limit
+    const resourceLimitCheck = await checkResourceLimit(authUser.uid);
+    if (resourceLimitCheck.isLimited) {
+      return NextResponse.json(
+        {
+          error: `Free tier resource limit (${resourceLimitCheck.max}) reached. Upgrade to Pro for unlimited resource saves.`,
+          code: 'UPGRADE_REQUIRED',
+        },
+        { status: 403 }
+      );
+    }
 
     const formData = await request.formData();
     const file = formData.get('file') as File | null;

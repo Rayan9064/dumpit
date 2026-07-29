@@ -4,6 +4,7 @@ import { getServerFirestore } from '../_utils/firebaseAdmin';
 import { getPreviewFromUrl } from '../_utils/linkPreview';
 import { checkAuthenticatedRateLimit, checkPublicRateLimit } from '../_utils/rateLimit';
 import { indexResource } from '../_utils/resourceIndexer';
+import { checkResourceLimit } from '../_utils/subscription';
 
 // GET /api/resources - Get the authenticated user's resources
 export async function GET(request: NextRequest) {
@@ -121,6 +122,19 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const authUser = await requireAuth(request);
+
+    // Check Free tier resource limit
+    const resourceLimitCheck = await checkResourceLimit(authUser.uid);
+    if (resourceLimitCheck.isLimited) {
+      return NextResponse.json(
+        {
+          error: `Free tier resource limit (${resourceLimitCheck.max}) reached. Upgrade to Pro for unlimited resource saves.`,
+          code: 'UPGRADE_REQUIRED',
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { title, link, note, tag, is_public, collection_ids, new_collection, captured_text } = body;
 

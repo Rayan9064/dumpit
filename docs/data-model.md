@@ -49,8 +49,38 @@ Generated server-side for RAG search. A resource can be saved without being sear
 - `username` (string)
 - `email` (string)
 - `share_by_default` (boolean)
+- `subscription` (optional object):
+  - `status` (`'active'` | `'cancelled'` | `'inactive'`)
+  - `plan` (`'free'` | `'pro'` | `'api'`)
+  - `subscription_id` (string)
+  - `customer_email` (string | null)
+  - `product_id` (string | null)
+  - `updated_at` (timestamp)
 - `created_at` (timestamp)
 - `updated_at` (timestamp)
+
+---
+
+## `users/{uid}/ai_usage/{YYYY-MM}`
+- `count` (number)
+- `year_month` (string)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
+
+---
+
+## `subscriptions`
+Root collection for logging DodoPayments webhook events.
+
+- `id` (doc id: `{subscription_id}_{timestamp}`)
+- `subscription_id` (string)
+- `user_id` (string)
+- `customer_email` (string | null)
+- `event_type` (string)
+- `status` (`'active'` | `'cancelled'` | `'inactive'`)
+- `plan` (`'pro'` | `'api'` | `'free'`)
+- `payload` (object)
+- `created_at` (timestamp)
 
 ---
 
