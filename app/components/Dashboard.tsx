@@ -10,6 +10,7 @@ import { CollectionsSidebar } from './collections/CollectionsSidebar'
 import { ResourceCollectionManager } from './collections/ResourceCollectionManager'
 import { EditResource } from './EditResource'
 import { ResourceSkeleton } from './ui/ResourceSkeleton'
+import { useToast } from './ui/Toast'
 
 function formatDate(dateValue: any): string {
   if (!dateValue) return ''
@@ -45,6 +46,7 @@ const statusStyles: Record<string, string> = {
 export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'add' | 'shared' | 'ai' | 'profile') => void }) {
   const { user } = useAuth()
   const { collections, addResourceToCollection, removeResourceFromCollection } = useCollections()
+  const { showToast } = useToast()
   const [resources, setResources] = useState<Resource[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -88,6 +90,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
       setNextCursor(data.nextCursor || null)
     } catch (error) {
       console.error('Error loading resources:', error)
+      showToast('Failed to load resources. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -108,6 +111,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
       setNextCursor(data.nextCursor || null)
     } catch (error) {
       console.error('Error loading more resources:', error)
+      showToast('Failed to load more resources. Please try again.')
     } finally {
       setLoadingMore(false)
     }
@@ -144,9 +148,11 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
     try {
       const response = await authFetch(user, `/api/resources?id=${id}`, { method: 'DELETE' })
       if (!response.ok) throw new Error('Failed to delete resource')
+      showToast('Resource deleted.', 'success')
       loadResources()
     } catch (error) {
       console.error('Error deleting resource:', error)
+      showToast('Failed to delete resource. Please try again.')
     }
   }
 
@@ -192,25 +198,25 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
         <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="app-chip mb-3">Resource library</span>
-            <h1 className="text-3xl font-bold tracking-normal text-slate-950 dark:text-white">
+            <h1 className="text-3xl font-bold tracking-normal text-zinc-950 dark:text-white">
               {activeCollection ? activeCollection.name : 'Your vault'}
             </h1>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
               Search, organize, and inspect the resources that power Ask DumpIt.
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:min-w-[360px]">
             <div className="app-muted-panel p-3">
-              <div className="text-xl font-bold text-slate-950 dark:text-white">{resources.length}</div>
-              <div className="text-xs text-slate-500">Resources</div>
+              <div className="text-xl font-bold text-zinc-950 dark:text-white">{resources.length}</div>
+              <div className="text-xs text-zinc-500">Resources</div>
             </div>
             <div className="app-muted-panel p-3">
-              <div className="text-xl font-bold text-slate-950 dark:text-white">{indexedCount}</div>
-              <div className="text-xs text-slate-500">Indexed</div>
+              <div className="text-xl font-bold text-zinc-950 dark:text-white">{indexedCount}</div>
+              <div className="text-xs text-zinc-500">Indexed</div>
             </div>
             <div className="app-muted-panel p-3">
-              <div className="text-xl font-bold text-slate-950 dark:text-white">{publicCount}</div>
-              <div className="text-xs text-slate-500">Public</div>
+              <div className="text-xl font-bold text-zinc-950 dark:text-white">{publicCount}</div>
+              <div className="text-xs text-zinc-500">Public</div>
             </div>
           </div>
         </header>
@@ -222,7 +228,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
             <div className="app-panel p-3">
               <div className="flex flex-col gap-3 md:flex-row">
                 <div className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
                   <input
                     type="text"
                     placeholder="Search title, note, or URL..."
@@ -251,17 +257,17 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                     <Sparkles className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-slate-950 dark:text-white">Welcome to your DumpIt vault! 🚀</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Let's set up your AI knowledge vault in 3 easy steps.</p>
+                    <h3 className="text-xl font-bold text-zinc-950 dark:text-white">Welcome to your DumpIt vault! 🚀</h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">Let's set up your AI knowledge vault in 3 easy steps.</p>
                   </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
-                  <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-900/50 flex flex-col justify-between">
+                  <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 flex flex-col justify-between">
                     <div>
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">1</div>
-                      <h4 className="mt-3 font-semibold text-slate-900 dark:text-white">Capture a Source</h4>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Save your first bookmark or write a text-only note in the dashboard.</p>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-sm font-bold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">1</div>
+                      <h4 className="mt-3 font-semibold text-zinc-900 dark:text-white">Capture a Source</h4>
+                      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Save your first bookmark or write a text-only note in the dashboard.</p>
                     </div>
                     {onNavigate && (
                       <button onClick={() => onNavigate('add')} className="mt-4 text-left text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
@@ -270,11 +276,11 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-900/50 flex flex-col justify-between">
+                  <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 flex flex-col justify-between">
                     <div>
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">2</div>
-                      <h4 className="mt-3 font-semibold text-slate-900 dark:text-white">Ask AI Search</h4>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Query your sources semantic-style to get instant citations and answers.</p>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-sm font-bold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">2</div>
+                      <h4 className="mt-3 font-semibold text-zinc-900 dark:text-white">Ask AI Search</h4>
+                      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Query your sources semantic-style to get instant citations and answers.</p>
                     </div>
                     {onNavigate && (
                       <button onClick={() => onNavigate('ai')} className="mt-4 text-left text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
@@ -283,11 +289,11 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800 bg-white dark:bg-slate-900/50 flex flex-col justify-between">
+                  <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 flex flex-col justify-between">
                     <div>
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">3</div>
-                      <h4 className="mt-3 font-semibold text-slate-900 dark:text-white">Configure Profile</h4>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Make selected resources public and share your reading list with others.</p>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-sm font-bold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">3</div>
+                      <h4 className="mt-3 font-semibold text-zinc-900 dark:text-white">Configure Profile</h4>
+                      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Make selected resources public and share your reading list with others.</p>
                     </div>
                     {onNavigate && (
                       <button onClick={() => onNavigate('profile')} className="mt-4 text-left text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
@@ -297,8 +303,8 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                   </div>
                 </div>
 
-                <div className="border-t border-slate-200 pt-6 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="text-sm text-slate-600 dark:text-slate-300">
+                <div className="border-t border-zinc-200 pt-6 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-sm text-zinc-600 dark:text-zinc-300">
                     Want to see it in action first? Get started instantly with demo data.
                   </div>
                   <button
@@ -339,6 +345,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                         await loadResources(null);
                       } catch (err) {
                         console.error('Failed to import samples:', err);
+                        showToast('Failed to import demo content. Please try again.');
                       } finally {
                         setLoading(false);
                       }
@@ -352,9 +359,9 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
               </div>
             ) : filteredResources.length === 0 ? (
               <div className="app-panel p-10 text-center">
-                <Search className="mx-auto mb-3 h-10 w-10 text-slate-400" />
-                <h3 className="text-lg font-bold text-slate-950 dark:text-white">No resources found</h3>
-                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                <Search className="mx-auto mb-3 h-10 w-10 text-zinc-400" />
+                <h3 className="text-lg font-bold text-zinc-950 dark:text-white">No resources found</h3>
+                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
                   Try a different search or tag filter.
                 </p>
               </div>
@@ -370,7 +377,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                   const status = resource.index_status || 'pending'
 
                   return (
-                    <article key={resource.id} className="app-panel p-4 transition hover:border-slate-300 dark:hover:border-slate-700">
+                    <article key={resource.id} className="app-panel p-4 transition hover:border-zinc-300 dark:hover:border-zinc-700">
                       <div className="mb-3 flex items-start justify-between gap-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className={`app-chip ${resource.tag === 'PDF' ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300' : ''}`}>{resource.tag}</span>
@@ -383,23 +390,23 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                         <div className="relative">
                           <button
                             onClick={() => setOpenMenuResourceId(openMenuResourceId === resource.id ? null : resource.id)}
-                            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                            className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
                             title="More actions"
                           >
                             <MoreHorizontal className="h-5 w-5" />
                           </button>
                           {openMenuResourceId === resource.id && (
-                            <div className="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900">
-                              <button onClick={() => { setEditingResource(resource); setOpenMenuResourceId(null) }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"><Edit className="h-4 w-4" /> Edit</button>
-                              <button onClick={() => { setManagerResource(resource); setOpenMenuResourceId(null) }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"><FolderPlus className="h-4 w-4" /> Collections</button>
+                            <div className="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
+                              <button onClick={() => { setEditingResource(resource); setOpenMenuResourceId(null) }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50 dark:text-zinc-200 dark:hover:bg-zinc-800"><Edit className="h-4 w-4" /> Edit</button>
+                              <button onClick={() => { setManagerResource(resource); setOpenMenuResourceId(null) }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50 dark:text-zinc-200 dark:hover:bg-zinc-800"><FolderPlus className="h-4 w-4" /> Collections</button>
                               <button onClick={() => { deleteResource(resource.id); setOpenMenuResourceId(null) }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/30"><Trash2 className="h-4 w-4" /> Delete</button>
                             </div>
                           )}
                         </div>
                       </div>
 
-                      <h3 className="line-clamp-2 text-lg font-bold text-slate-950 dark:text-white">{resource.title}</h3>
-                      {resource.note && <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{resource.note}</p>}
+                      <h3 className="line-clamp-2 text-lg font-bold text-zinc-950 dark:text-white">{resource.title}</h3>
+                      {resource.note && <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{resource.note}</p>}
 
                       <div className="mt-4 flex flex-wrap items-center gap-2">
                         {assignedCollections.map((collection) => (
@@ -407,17 +414,17 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                             {collection.icon || 'Folder'} {collection.name}
                           </span>
                         ))}
-                        {remainingCount > 0 && <span className="text-xs text-slate-500">+{remainingCount} more</span>}
+                        {remainingCount > 0 && <span className="text-xs text-zinc-500">+{remainingCount} more</span>}
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800">
+                      <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3 text-xs text-zinc-500 dark:border-zinc-800">
                         <span>{formatDate(resource.created_at)}</span>
                         {resource.link ? (
                           <a href={resource.link} target="_blank" rel="noopener noreferrer" data-tooltip-id="dashboard-tooltip" data-tooltip-content={resource.link} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/40">
                             Open <ExternalLink className="h-3.5 w-3.5" />
                           </a>
                         ) : (
-                          <span className="font-medium text-slate-400">
+                          <span className="font-medium text-zinc-400">
                             {resource.tag === 'PDF' ? 'PDF Document' : 'Text Note'}
                           </span>
                         )}
@@ -431,7 +438,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                   <button
                     onClick={loadMore}
                     disabled={loadingMore}
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 disabled:opacity-50"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-6 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 disabled:opacity-50"
                   >
                     {loadingMore ? (
                       <>

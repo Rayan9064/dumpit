@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ReactNode, useEffect } from 'react'
 import { initializeTelemetry } from './lib/telemetry'
+import { ToastProvider } from './components/ui/Toast'
 
 export function RootLayoutClient({ children }: { children: ReactNode }) {
   useEffect(() => {
@@ -13,7 +14,9 @@ export function RootLayoutClient({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider>
       <AuthProvider>
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
   )
