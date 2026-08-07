@@ -1,0 +1,25 @@
+{
+  "name": "dumpit-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for DumpIt — query and save to your DumpIt vault from Claude Desktop, Cursor, or any MCP client.",
+  "type": "module",
+  "bin": {
+    "dumpit-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.4.5"
+  }
+}
