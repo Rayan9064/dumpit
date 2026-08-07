@@ -99,10 +99,39 @@ export async function GET(request: NextRequest) {
     const lastDoc = resourcesQuery.docs[resourcesQuery.docs.length - 1];
     const nextCursor = resourcesQuery.docs.length === limit ? lastDoc?.id : null;
 
+    // Only compute the vault-wide aggregate stats on the first page — avoids
+    // redundant count queries on every "load more" call.
+    let stats: { total: number; indexed: number; pending: number; failed: number; skipped: number; public: number } | undefined;
+    if (!cursor) {
+      const baseQuery = db.collection('resources').where('user_id', '==', authUser.uid);
+      const [totalSnap, indexedSnap, failedSnap, skippedSnap, publicSnap] = await Promise.all([
+        baseQuery.count().get(),
+        baseQuery.where('index_status', '==', 'indexed').count().get(),
+        baseQuery.where('index_status', '==', 'failed').count().get(),
+        baseQuery.where('index_status', '==', 'skipped').count().get(),
+        baseQuery.where('is_public', '==', true).count().get(),
+      ]);
+
+      const total = totalSnap.data().count;
+      const indexed = indexedSnap.data().count;
+      const failed = failedSnap.data().count;
+      const skipped = skippedSnap.data().count;
+
+      stats = {
+        total,
+        indexed,
+        failed,
+        skipped,
+        pending: Math.max(0, total - indexed - failed - skipped),
+        public: publicSnap.data().count,
+      };
+    }
+
     return NextResponse.json({
       success: true,
       resources,
-      nextCursor
+      nextCursor,
+      stats,
     });
 
   } catch (error) {
