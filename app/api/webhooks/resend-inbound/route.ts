@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { Resend } from 'resend';
 import { getServerFirestore } from '../../_utils/firebaseAdmin';
+import { checkEmailSaveRateLimit } from '../../_utils/rateLimit';
 import { indexResource } from '../../_utils/resourceIndexer';
 import { checkResourceLimit } from '../../_utils/subscription';
 
@@ -76,35 +77,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing email_id' }, { status: 400 });
     }
 
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      console.error('RESEND_API_KEY not configured — cannot fetch inbound email content');
-      return NextResponse.json({ success: true, message: 'Resend not configured' });
-    }
-
-    // The webhook payload only carries metadata — fetch the full body separately.
-    const resend = new Resend(apiKey);
-    const { data: email, error: fetchError } = await resend.emails.receiving.get(emailId);
-
-    if (fetchError || !email) {
-      console.error('Failed to fetch inbound email content:', fetchError);
-      return NextResponse.json({ success: true, message: 'Could not fetch email content' });
-    }
-
-    const fromAddress = email.from;
+    // The webhook payload's metadata already includes the sender — match the
+    // user BEFORE fetching the full body, so spam from unregistered senders
+    // costs nothing beyond this one Firestore query (no Resend fetch, no
+    // Gemini call).
+    const fromAddress: string | undefined = payload.data?.from;
     const db = getServerFirestore();
 
     // Match by the sender's registered account email — no per-user token needed,
     // matches the "just forward it" promise on the landing page. Trade-off: a
-    // spoofed From header could inject a junk note into someone's private vault
-    // (no read/exfiltration risk); revisit with rate-limiting if it's abused.
-    const userSnapshot = await db
-      .collection('users')
-      .where('email', '==', fromAddress)
-      .limit(1)
-      .get();
+    // spoofed From header could still create resources for a real user (see
+    // rate limit below, which bounds the cost of that regardless of plan).
+    const userSnapshot = fromAddress
+      ? await db.collection('users').where('email', '==', fromAddress).limit(1).get()
+      : null;
 
-    if (userSnapshot.empty) {
+    if (!userSnapshot || userSnapshot.empty) {
       console.warn('Inbound email received but sender did not match any registered account:', fromAddress);
       return NextResponse.json({ success: true, message: 'Sender not matched to a user' });
     }
@@ -115,6 +103,31 @@ export async function POST(request: NextRequest) {
     if (resourceLimitCheck.isLimited) {
       console.warn(`Inbound email save skipped for ${uid} — free tier resource limit reached`);
       return NextResponse.json({ success: true, message: 'Resource limit reached, save skipped' });
+    }
+
+    // Free-tier's 50-resource cap doesn't help Pro/unlimited accounts — this
+    // caps inbound-email-triggered saves (and their Gemini cost) regardless
+    // of plan, so a spoofed From header can't be used to run up costs.
+    const emailRateLimitCheck = await checkEmailSaveRateLimit(uid);
+    if (emailRateLimitCheck.isLimited) {
+      console.warn(`Inbound email save skipped for ${uid} — daily email-save limit reached`);
+      return NextResponse.json({ success: true, message: 'Daily email-save limit reached, save skipped' });
+    }
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error('RESEND_API_KEY not configured — cannot fetch inbound email content');
+      return NextResponse.json({ success: true, message: 'Resend not configured' });
+    }
+
+    // Only now — after confirming a real, under-limit user — fetch the full
+    // body (the webhook payload alone only carries metadata).
+    const resend = new Resend(apiKey);
+    const { data: email, error: fetchError } = await resend.emails.receiving.get(emailId);
+
+    if (fetchError || !email) {
+      console.error('Failed to fetch inbound email content:', fetchError);
+      return NextResponse.json({ success: true, message: 'Could not fetch email content' });
     }
 
     const bodyText = email.text || (email.html ? email.html.replace(/<[^>]+>/g, ' ').trim() : '') || '';

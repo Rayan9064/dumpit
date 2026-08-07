@@ -19,6 +19,7 @@ function getRedis(): Redis | null {
 let _authenticatedLimiter: Ratelimit | null = null;
 let _publicLimiter: Ratelimit | null = null;
 let _aiLimiter: Ratelimit | null = null;
+let _emailSaveLimiter: Ratelimit | null = null;
 
 function getAuthenticatedLimiter(): Ratelimit | null {
   if (_authenticatedLimiter) return _authenticatedLimiter;
@@ -57,6 +58,22 @@ function getAiLimiter(): Ratelimit | null {
     analytics: false,
   });
   return _aiLimiter;
+}
+
+function getEmailSaveLimiter(): Ratelimit | null {
+  if (_emailSaveLimiter) return _emailSaveLimiter;
+  const redis = getRedis();
+  if (!redis) return null;
+  _emailSaveLimiter = new Ratelimit({
+    redis,
+    // 20 inbound-email saves/day per user, regardless of plan — bounds Gemini
+    // embedding cost against a spoofed From header, since checkResourceLimit
+    // alone doesn't (Pro/unlimited plans have no resource cap).
+    limiter: Ratelimit.slidingWindow(20, '1 d'),
+    prefix: 'rl:email-save',
+    analytics: false,
+  });
+  return _emailSaveLimiter;
 }
 
 // ---------------------------------------------------------------------------
@@ -122,6 +139,18 @@ export async function checkPublicRateLimit(
       },
     },
   );
+}
+
+// Unlike the other checkers, this returns a plain boolean rather than a
+// NextResponse — the webhook caller (Resend) isn't the account owner, so a
+// 429 would just look like a delivery failure. The route logs and silently
+// drops the email instead, same as its other soft-fail paths.
+export async function checkEmailSaveRateLimit(userId: string): Promise<{ isLimited: boolean }> {
+  const limiter = getEmailSaveLimiter();
+  if (!limiter) return { isLimited: false }; // Redis not configured – skip
+
+  const { success } = await limiter.limit(userId);
+  return { isLimited: !success };
 }
 
 export async function checkAiRateLimit(
