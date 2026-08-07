@@ -41,18 +41,18 @@ export function CollectionFormModal({ collection, onClose, onSubmit }: Collectio
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm">
       <div className="app-panel w-full max-w-md overflow-hidden shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+        <div className="flex items-start justify-between gap-4 border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
           <div>
-            <h2 className="text-lg font-bold text-slate-950 dark:text-white">
+            <h2 className="text-lg font-bold text-zinc-950 dark:text-white">
               {collection ? 'Edit collection' : 'New collection'}
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Group related sources for faster review.</p>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Group related sources for faster review.</p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
             title="Close"
           >
             <X className="h-5 w-5" />
@@ -94,7 +94,7 @@ export function CollectionFormModal({ collection, onClose, onSubmit }: Collectio
                   type="button"
                   onClick={() => setColor(item)}
                   className={`h-9 w-9 rounded-lg border-2 transition-transform ${
-                    color === item ? 'border-slate-950 ring-2 ring-blue-200 dark:border-white dark:ring-blue-900' : 'border-transparent'
+                    color === item ? 'border-zinc-950 ring-2 ring-blue-200 dark:border-white dark:ring-blue-900' : 'border-transparent'
                   }`}
                   style={{ backgroundColor: item }}
                   aria-label={`Use color ${item}`}
@@ -103,11 +103,11 @@ export function CollectionFormModal({ collection, onClose, onSubmit }: Collectio
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-bold text-slate-950 dark:text-white">Share this collection</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                <p className="text-sm font-bold text-zinc-950 dark:text-white">Share this collection</p>
+                <p className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
                   Shared collections can help other users discover useful public sources.
                 </p>
               </div>
@@ -115,7 +115,7 @@ export function CollectionFormModal({ collection, onClose, onSubmit }: Collectio
                 type="button"
                 onClick={() => setIsShared((value) => !value)}
                 className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
-                  isShared ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
+                  isShared ? 'bg-emerald-600' : 'bg-zinc-300 dark:bg-zinc-700'
                 }`}
                 aria-pressed={isShared}
                 aria-label="Toggle collection sharing"
@@ -133,7 +133,7 @@ export function CollectionFormModal({ collection, onClose, onSubmit }: Collectio
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-zinc-200 px-4 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-800"
             >
               Cancel
             </button>

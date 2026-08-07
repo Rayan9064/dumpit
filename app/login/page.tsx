@@ -18,10 +18,10 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-    <div className="flex min-h-screen items-center justify-center bg-stone-50 dark:bg-slate-950">
+    <div className="flex min-h-screen items-center justify-center bg-stone-50 dark:bg-zinc-950">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-300">Loading...</p>
+          <p className="text-zinc-600 dark:text-zinc-300">Loading...</p>
         </div>
       </div>
     )
@@ -34,7 +34,7 @@ export default function LoginPage() {
 
   // Show login component for unauthenticated users
   return (
-    <div className="min-h-screen bg-stone-50 px-4 py-8 dark:bg-slate-950">
+    <div className="min-h-screen bg-stone-50 px-4 py-8 dark:bg-zinc-950">
       <div className="mx-auto w-full max-w-6xl">
         <Auth />
       </div>

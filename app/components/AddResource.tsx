@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useCollections } from '../contexts/CollectionsContext'
 import { jsonAuthFetch } from '../lib/authFetch'
 import { ShareModal } from './ui/ShareModal'
+import { isUpgradeRequiredError, UpgradePrompt } from './ui/UpgradePrompt'
 
 interface AddResourceProps {
   onSuccess: () => void
@@ -36,6 +37,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
   const [isPublic, setIsPublic] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [upgradeError, setUpgradeError] = useState(false)
   const [enriching, setEnriching] = useState(false)
   const [selectedCollectionId, setSelectedCollectionId] = useState('none')
   const [newCollectionName, setNewCollectionName] = useState('')
@@ -102,6 +104,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
 
     setLoading(true)
     setError('')
+    setUpgradeError(false)
 
     try {
       if (resourceType === 'pdf') {
@@ -131,6 +134,12 @@ export function AddResource({ onSuccess }: AddResourceProps) {
 
         if (!response.ok) {
           const errorData = await response.json()
+          if (isUpgradeRequiredError(response.status, errorData)) {
+            setError(errorData.error || 'Upgrade required')
+            setUpgradeError(true)
+            setLoading(false)
+            return
+          }
           throw new Error(errorData.error || 'Failed to process PDF upload')
         }
 
@@ -167,6 +176,12 @@ export function AddResource({ onSuccess }: AddResourceProps) {
 
       if (!response.ok) {
         const errorData = await response.json()
+        if (isUpgradeRequiredError(response.status, errorData)) {
+          setError(errorData.error || 'Upgrade required')
+          setUpgradeError(true)
+          setLoading(false)
+          return
+        }
         throw new Error(errorData.error || 'Failed to add resource')
       }
 
@@ -201,32 +216,36 @@ export function AddResource({ onSuccess }: AddResourceProps) {
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <span className="app-chip app-chip-ai mb-3">Capture</span>
-          <h1 className="text-3xl font-bold tracking-normal text-slate-950 dark:text-white">Save a source for AI search</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+          <h1 className="text-3xl font-bold tracking-normal text-zinc-950 dark:text-white">Save a source for AI search</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-300">
             Add links, notes, or PDFs. DumpIt indexes the content and makes it available to Ask DumpIt according to its visibility.
           </p>
         </div>
-        <div className="app-muted-panel flex items-center gap-3 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
+        <div className="app-muted-panel flex items-center gap-3 px-4 py-3 text-sm text-zinc-600 dark:text-zinc-300">
           <CheckCircle2 className="h-5 w-5 text-emerald-600" />
           Indexed sources are cited in AI search answers.
         </div>
       </header>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
-          {error}
-        </div>
+        upgradeError ? (
+          <UpgradePrompt message={error} user={user} />
+        ) : (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+            {error}
+          </div>
+        )
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800">
+      <div className="flex border-b border-zinc-200 dark:border-zinc-800">
         <button
           type="button"
           onClick={() => { setResourceType('link'); setTag('Article'); }}
           className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all -mb-px ${
             resourceType === 'link'
               ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-              : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+              : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
           }`}
         >
           Save Link
@@ -237,7 +256,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
           className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all -mb-px ${
             resourceType === 'note'
               ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-              : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+              : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
           }`}
         >
           Create Note
@@ -248,7 +267,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
           className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all -mb-px flex items-center gap-1.5 ${
             resourceType === 'pdf'
               ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-              : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+              : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
           }`}
         >
           <FileText className="h-4 w-4" /> Upload PDF
@@ -263,7 +282,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
                 <label htmlFor="resource-link" className="app-label">Link</label>
                 <div className="mt-2 flex flex-col gap-2 sm:flex-row">
                   <div className="relative flex-1">
-                    <Link2 className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <Link2 className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
                     <input
                       id="resource-link"
                       type="url"
@@ -301,18 +320,18 @@ export function AddResource({ onSuccess }: AddResourceProps) {
                 <div className="mt-2">
                   <label
                     htmlFor="pdf-file-upload"
-                    className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:bg-slate-900"
+                    className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 p-6 text-center hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-900"
                   >
                     <Upload className="mb-2 h-8 w-8 text-blue-600 dark:text-blue-400" />
                     {pdfFile ? (
                       <div>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">{pdfFile.name}</p>
-                        <p className="mt-1 text-xs text-slate-500">{(pdfFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                        <p className="text-sm font-bold text-zinc-900 dark:text-white">{pdfFile.name}</p>
+                        <p className="mt-1 text-xs text-zinc-500">{(pdfFile.size / (1024 * 1024)).toFixed(2)} MB</p>
                       </div>
                     ) : (
                       <div>
-                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Click to select or drag and drop a PDF</p>
-                        <p className="mt-1 text-xs text-slate-500">Documents up to 10MB will be parsed and indexed for AI search.</p>
+                        <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Click to select or drag and drop a PDF</p>
+                        <p className="mt-1 text-xs text-zinc-500">Documents up to 10MB will be parsed and indexed for AI search.</p>
                       </div>
                     )}
                     <input
@@ -381,7 +400,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
 
         <aside className="space-y-4">
           <section className="app-panel p-4">
-            <h2 className="text-sm font-bold text-slate-950 dark:text-white">Metadata</h2>
+            <h2 className="text-sm font-bold text-zinc-950 dark:text-white">Metadata</h2>
             <div className="mt-4 space-y-4">
               <div>
                 <label htmlFor="resource-tag" className="app-label">Tag</label>
@@ -414,7 +433,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
                       setNewCollectionName('')
                       setTimeout(() => document.getElementById('new-collection-name-input')?.focus(), 50)
                     }}
-                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800"
                     title="Create new collection"
                   >
                     <FolderPlus className="h-5 w-5" />
@@ -436,15 +455,15 @@ export function AddResource({ onSuccess }: AddResourceProps) {
           </section>
 
           <section className="app-panel p-4">
-            <h2 className="text-sm font-bold text-slate-950 dark:text-white">Visibility</h2>
+            <h2 className="text-sm font-bold text-zinc-950 dark:text-white">Visibility</h2>
             <div className="mt-4 grid gap-2">
               <button
                 type="button"
                 onClick={() => setIsPublic(false)}
                 className={`flex min-h-16 items-center gap-3 rounded-lg border px-3 text-left transition-colors ${
                   !isPublic
-                    ? 'border-slate-400 bg-slate-100 text-slate-950 dark:border-slate-600 dark:bg-slate-800 dark:text-white'
-                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-800'
+                    ? 'border-zinc-400 bg-zinc-100 text-zinc-950 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white'
+                    : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
                 <Lock className="h-5 w-5" />
@@ -459,7 +478,7 @@ export function AddResource({ onSuccess }: AddResourceProps) {
                 className={`flex min-h-16 items-center gap-3 rounded-lg border px-3 text-left transition-colors ${
                   isPublic
                     ? 'border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100'
-                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-800'
+                    : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
                 <Globe className="h-5 w-5" />

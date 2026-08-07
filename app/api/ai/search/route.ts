@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthError, requireAuth, unauthorizedResponse } from '../../_utils/auth';
+import { isAuthError, requireAuthOrApiKey, unauthorizedResponse } from '../../_utils/auth';
 import { normalizeSearchMode, searchResourceChunks } from '../../_utils/aiSearch';
 
 export async function POST(request: NextRequest) {
   try {
-    const authUser = await requireAuth(request);
+    const authUser = await requireAuthOrApiKey(request);
     const { query, mode, limit } = await request.json();
 
     if (!query || typeof query !== 'string') {

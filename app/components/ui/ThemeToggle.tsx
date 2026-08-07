@@ -73,7 +73,7 @@ export function ThemeToggle({ variant = 'icon', className = '' }: ThemeTogglePro
 
     return (
       <div
-        className={`inline-flex items-center rounded-lg border border-slate-200 bg-slate-100 p-0.5 dark:border-slate-700 dark:bg-slate-800 ${className}`}
+        className={`inline-flex items-center rounded-lg border border-zinc-200 bg-zinc-100 p-0.5 dark:border-zinc-700 dark:bg-zinc-800 ${className}`}
         role="group"
         aria-label="Theme selector"
       >
@@ -88,8 +88,8 @@ export function ThemeToggle({ variant = 'icon', className = '' }: ThemeTogglePro
               title={`${label} mode`}
               className={`relative flex h-7 w-7 items-center justify-center rounded-md transition-all ${
                 active
-                  ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
-                  : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300'
+                  ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white'
+                  : 'text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -107,7 +107,7 @@ export function ThemeToggle({ variant = 'icon', className = '' }: ThemeTogglePro
       onClick={handleAnimatedToggle}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className={`group relative flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-white ${className}`}
+      className={`group relative flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 shadow-sm transition-all hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-white ${className}`}
     >
       {/* Sun icon — shown in light mode */}
       <Sun

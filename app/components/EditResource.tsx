@@ -76,16 +76,16 @@ export function EditResource({ resource, onSuccess, onCancel }: EditResourceProp
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm">
       <div className="app-panel w-full max-w-xl overflow-hidden shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+        <div className="flex items-start justify-between gap-4 border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
           <div>
-            <h2 className="text-xl font-bold text-slate-950 dark:text-white">Edit resource</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Changes can affect future AI indexing and citations.</p>
+            <h2 className="text-xl font-bold text-zinc-950 dark:text-white">Edit resource</h2>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Changes can affect future AI indexing and citations.</p>
           </div>
           <button
             onClick={onCancel}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
             title="Close"
           >
             <X className="h-5 w-5" />
@@ -132,8 +132,8 @@ export function EditResource({ resource, onSuccess, onCancel }: EditResourceProp
                   onClick={() => setIsPublic(false)}
                   className={`flex min-h-11 items-center justify-center gap-2 rounded-lg border text-sm font-semibold ${
                     !isPublic
-                      ? 'border-slate-400 bg-slate-100 text-slate-950 dark:border-slate-600 dark:bg-slate-800 dark:text-white'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800'
+                      ? 'border-zinc-400 bg-zinc-100 text-zinc-950 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white'
+                      : 'border-zinc-200 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800'
                   }`}
                 >
                   <Lock className="h-4 w-4" />
@@ -145,7 +145,7 @@ export function EditResource({ resource, onSuccess, onCancel }: EditResourceProp
                   className={`flex min-h-11 items-center justify-center gap-2 rounded-lg border text-sm font-semibold ${
                     isPublic
                       ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800'
+                      : 'border-zinc-200 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800'
                   }`}
                 >
                   <Globe className="h-4 w-4" />
@@ -159,7 +159,7 @@ export function EditResource({ resource, onSuccess, onCancel }: EditResourceProp
             <button
               type="button"
               onClick={onCancel}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-zinc-200 px-4 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-800"
             >
               Cancel
             </button>

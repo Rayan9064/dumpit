@@ -54,10 +54,9 @@ const Hero = () => {
               finally useful.
             </span>
           </h1>
-          {/* Broad positioning up top, honest disclosure of what's live inline */}
+          {/* Broad positioning, matching what's actually live today */}
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">
-            Save anything you find — links and notes today — then ask questions across all of it via the web app, REST API, or Claude MCP.{' '}
-            <span className="text-zinc-400 dark:text-zinc-500">PDF upload and browser extension coming soon.</span>
+            Save anything you find — links, notes, and PDFs — then ask questions across all of it via the web app, browser extension, REST API, or Claude MCP.
           </p>
         </div>
 

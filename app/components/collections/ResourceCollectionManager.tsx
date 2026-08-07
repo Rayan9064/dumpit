@@ -61,16 +61,16 @@ export function ResourceCollectionManager({ open, resourceTitle, collectionIds, 
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm">
       <div ref={dialogRef} className="app-panel w-full max-w-md overflow-hidden shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+        <div className="flex items-start justify-between gap-4 border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
           <div className="min-w-0">
-            <h2 className="text-lg font-bold text-slate-950 dark:text-white">Manage collections</h2>
-            <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">{resourceTitle}</p>
+            <h2 className="text-lg font-bold text-zinc-950 dark:text-white">Manage collections</h2>
+            <p className="mt-1 truncate text-sm text-zinc-500 dark:text-zinc-400">{resourceTitle}</p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
             title="Close"
           >
             <X className="h-5 w-5" />
@@ -79,7 +79,7 @@ export function ResourceCollectionManager({ open, resourceTitle, collectionIds, 
 
         <div className="max-h-[360px] space-y-2 overflow-y-auto px-5 py-4">
           {collections.length === 0 ? (
-            <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm leading-6 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+            <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm leading-6 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
               Create a collection from the sidebar, then add this resource to it.
             </p>
           ) : (
@@ -93,17 +93,17 @@ export function ResourceCollectionManager({ open, resourceTitle, collectionIds, 
                   className={`flex min-h-14 w-full items-center justify-between rounded-lg border px-4 text-left transition-colors ${
                     isChecked
                       ? 'border-blue-300 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/40'
-                      : 'border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800'
+                      : 'border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800'
                   } disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   <span className="flex min-w-0 items-center gap-3">
                     <span
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-slate-950"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-zinc-950"
                       style={{ backgroundColor: collection.color || '#e2e8f0' }}
                     >
                       {collection.icon || collection.name.charAt(0).toUpperCase()}
                     </span>
-                    <span className="truncate font-semibold text-slate-800 dark:text-white">{collection.name}</span>
+                    <span className="truncate font-semibold text-zinc-800 dark:text-white">{collection.name}</span>
                   </span>
                   {isChecked && <Check className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-300" />}
                 </button>
@@ -112,11 +112,11 @@ export function ResourceCollectionManager({ open, resourceTitle, collectionIds, 
           )}
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4 dark:border-slate-800 sm:flex-row sm:justify-end">
+        <div className="flex flex-col gap-3 border-t border-zinc-200 px-5 py-4 dark:border-zinc-800 sm:flex-row sm:justify-end">
           <button
             onClick={onClose}
             disabled={pending}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-zinc-200 px-4 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-800"
           >
             Cancel
           </button>

@@ -4,6 +4,7 @@ import { Bot, ExternalLink, Info, Loader2, Search, Sparkles } from 'lucide-react
 import { FormEvent, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { jsonAuthFetch } from '../lib/authFetch'
+import { isUpgradeRequiredError, UpgradePrompt } from './ui/UpgradePrompt'
 
 type SearchMode = 'all' | 'mine' | 'shared'
 
@@ -39,12 +40,14 @@ export function AskDumpit() {
   const [sources, setSources] = useState<Source[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [upgradeError, setUpgradeError] = useState(false)
 
   const askQuestion = async (value: string) => {
     if (!user || !value.trim()) return
 
     setLoading(true)
     setError('')
+    setUpgradeError(false)
     setAnswer('')
     setSources([])
 
@@ -60,6 +63,11 @@ export function AskDumpit() {
 
       const data = await response.json()
       if (!response.ok) {
+        if (isUpgradeRequiredError(response.status, data)) {
+          setError(data.error || 'Upgrade required')
+          setUpgradeError(true)
+          return
+        }
         throw new Error(data.error || 'Ask DumpIt failed')
       }
 
@@ -81,17 +89,17 @@ export function AskDumpit() {
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <section className="app-panel overflow-hidden">
-          <div className="border-b border-slate-200 bg-slate-50 px-5 py-4 dark:border-slate-800 dark:bg-slate-950">
+          <div className="border-b border-zinc-200 bg-zinc-50 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-950">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-700 dark:text-blue-300">
                   <Bot className="h-4 w-4" />
                   AI Search
                 </div>
-                <h1 className="text-2xl font-bold tracking-normal text-slate-950 dark:text-white sm:text-3xl">
+                <h1 className="text-2xl font-bold tracking-normal text-zinc-950 dark:text-white sm:text-3xl">
                   Ask your saved internet.
                 </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-300">
                   DumpIt answers from indexed resources and returns source cards so you can verify the underlying links.
                 </p>
               </div>
@@ -109,7 +117,7 @@ export function AskDumpit() {
                   className={`rounded-lg border px-3 py-3 text-left transition-colors app-focus ${
                     mode === item.id
                       ? 'border-blue-300 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                      : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800'
                   }`}
                 >
                   <div className="text-sm font-bold">{item.label}</div>
@@ -118,11 +126,11 @@ export function AskDumpit() {
               ))}
             </div>
 
-            <form onSubmit={handleSubmit} className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <form onSubmit={handleSubmit} className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
               <label htmlFor="ask-dumpit" className="sr-only">Ask DumpIt</label>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
                   <input
                     id="ask-dumpit"
                     value={question}
@@ -151,7 +159,7 @@ export function AskDumpit() {
                       setQuestion(item)
                       askQuestion(item)
                     }}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                   >
                     {item}
                   </button>
@@ -162,11 +170,11 @@ export function AskDumpit() {
         </section>
 
         <aside className="app-muted-panel p-4">
-          <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100">
+          <div className="mb-3 flex items-center gap-2 text-sm font-bold text-zinc-800 dark:text-zinc-100">
             <Info className="h-4 w-4 text-blue-600" />
             How answers work
           </div>
-          <div className="space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+          <div className="space-y-3 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
             <p>DumpIt retrieves indexed chunks from resources you can access.</p>
             <p>Private resources only appear for their owner. Shared mode uses public resources from other users.</p>
             <p>Use source cards to open the original link and verify the answer.</p>
@@ -175,28 +183,32 @@ export function AskDumpit() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
-          {error}
-        </div>
+        upgradeError ? (
+          <UpgradePrompt message={error} user={user} />
+        ) : (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+            {error}
+          </div>
+        )
       )}
 
       {(answer || loading) && (
         <section className="app-panel p-5">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <h2 className="text-lg font-bold text-slate-950 dark:text-white">Answer</h2>
+            <h2 className="text-lg font-bold text-zinc-950 dark:text-white">Answer</h2>
             {sources.length > 0 && <span className="app-chip">{sources.length} sources</span>}
           </div>
           {loading ? (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">
+              <div className="flex items-center gap-3 text-sm font-medium text-zinc-600 dark:text-zinc-300">
                 <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
                 Reading indexed resources...
               </div>
-              <div className="h-3 w-full max-w-2xl rounded-full bg-slate-100 dark:bg-slate-800" />
-              <div className="h-3 w-2/3 rounded-full bg-slate-100 dark:bg-slate-800" />
+              <div className="h-3 w-full max-w-2xl rounded-full bg-zinc-100 dark:bg-zinc-800" />
+              <div className="h-3 w-2/3 rounded-full bg-zinc-100 dark:bg-zinc-800" />
             </div>
           ) : (
-            <p className="whitespace-pre-wrap text-base leading-8 text-slate-700 dark:text-slate-200">{answer}</p>
+            <p className="whitespace-pre-wrap text-base leading-8 text-zinc-700 dark:text-zinc-200">{answer}</p>
           )}
         </section>
       )}
@@ -204,8 +216,8 @@ export function AskDumpit() {
       {sources.length > 0 && (
         <section>
           <div className="mb-3 flex items-center justify-between gap-4">
-            <h2 className="text-lg font-bold text-slate-950 dark:text-white">Sources</h2>
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Open links to verify context</span>
+            <h2 className="text-lg font-bold text-zinc-950 dark:text-white">Sources</h2>
+            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Open links to verify context</span>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {sources.map((source, index) => (
@@ -216,8 +228,8 @@ export function AskDumpit() {
                     {source.isPublic ? 'Public' : 'Private'}
                   </span>
                 </div>
-                <h3 className="line-clamp-2 font-bold text-slate-950 dark:text-white">{source.title}</h3>
-                <p className="mt-2 line-clamp-4 text-sm leading-6 text-slate-600 dark:text-slate-300">{source.snippet}</p>
+                <h3 className="line-clamp-2 font-bold text-zinc-950 dark:text-white">{source.title}</h3>
+                <p className="mt-2 line-clamp-4 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{source.snippet}</p>
                 <div className="mt-4 flex items-center justify-between gap-3">
                   <span className="app-chip">{source.tag}</span>
                   <a
@@ -239,8 +251,8 @@ export function AskDumpit() {
       {!answer && !loading && !error && (
         <div className="app-panel p-8 text-center">
           <Sparkles className="mx-auto mb-3 h-10 w-10 text-blue-600" />
-          <h2 className="text-lg font-bold text-slate-950 dark:text-white">No question yet</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
+          <h2 className="text-lg font-bold text-zinc-950 dark:text-white">No question yet</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-zinc-500 dark:text-zinc-400">
             Ask about anything you have saved. If a link is not indexed yet, re-save or reindex it from the resource workflow.
           </p>
         </div>

@@ -2,8 +2,8 @@
 
 const roadmapItems = [
   {
-    label: 'Save links & notes',
-    description: 'Save any link or write plain-text notes. Both are indexed and AI-searchable.',
+    label: 'Save links, notes & PDFs',
+    description: 'Save any link, PDF, or plain-text note. All are indexed and AI-searchable.',
     status: 'live' as const,
   },
   {
@@ -12,14 +12,14 @@ const roadmapItems = [
     status: 'live' as const,
   },
   {
-    label: 'PDF upload',
-    description: 'Upload documents and make their full text AI-searchable alongside your links.',
-    status: 'building' as const,
+    label: 'Browser extension & Claude MCP',
+    description: 'Save from any tab with the browser extension, or query your vault directly from Claude Desktop.',
+    status: 'live' as const,
   },
   {
-    label: 'Browser extension',
-    description: 'Clip pages and highlights directly from Chrome without switching tabs.',
-    status: 'next' as const,
+    label: 'Email-to-save',
+    description: 'Forward anything to save@dumpit.page and it lands in your vault, indexed and searchable.',
+    status: 'planned' as const,
   },
 ]
 

@@ -160,34 +160,34 @@ export function SharedDump() {
       <header className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <span className="app-chip app-chip-success mb-3">Shared discovery</span>
-          <h1 className="text-3xl font-bold tracking-normal text-slate-950 dark:text-white">Public knowledge feed</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+          <h1 className="text-3xl font-bold tracking-normal text-zinc-950 dark:text-white">Public knowledge feed</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-300">
             Browse public resources from the community, save useful sources, and expand what shared AI search can cite.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:min-w-[280px]">
           <div className="app-muted-panel p-3">
-            <div className="text-xl font-bold text-slate-950 dark:text-white">{resources.length}</div>
-            <div className="text-xs text-slate-500">Public links</div>
+            <div className="text-xl font-bold text-zinc-950 dark:text-white">{resources.length}</div>
+            <div className="text-xs text-zinc-500">Public links</div>
           </div>
           <div className="app-muted-panel p-3">
-            <div className="text-xl font-bold text-slate-950 dark:text-white">{savedResources.size}</div>
-            <div className="text-xs text-slate-500">Already saved</div>
+            <div className="text-xl font-bold text-zinc-950 dark:text-white">{savedResources.size}</div>
+            <div className="text-xs text-zinc-500">Already saved</div>
           </div>
         </div>
       </header>
 
-      <section className="app-panel p-5 border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
-        <h2 className="text-base font-bold text-slate-950 dark:text-white flex items-center gap-2 mb-1.5">
+      <section className="app-panel p-5 border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40">
+        <h2 className="text-base font-bold text-zinc-950 dark:text-white flex items-center gap-2 mb-1.5">
           <Users className="h-4.5 w-4.5 text-blue-600 dark:text-blue-400" />
           Browse a Contributor's Library
         </h2>
-        <p className="text-xs text-slate-555 dark:text-slate-400 mb-4">
+        <p className="text-xs text-zinc-555 dark:text-zinc-400 mb-4">
           Enter a user's unique username to explore all of their publicly shared links and bookmarks.
         </p>
         <form onSubmit={handleUserSearchSubmit} className="flex gap-2 max-w-md">
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-450 dark:text-slate-500">@</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-zinc-450 dark:text-zinc-500">@</span>
             <input
               type="text"
               placeholder="username"
@@ -218,7 +218,7 @@ export function SharedDump() {
       <section className="app-panel p-3">
         <div className="flex flex-col gap-3 md:flex-row">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
               placeholder="Search title, URL, note, or contributor..."
@@ -228,7 +228,7 @@ export function SharedDump() {
             />
           </div>
           <div className="relative md:w-56">
-            <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <select value={selectedTag} onChange={(event) => setSelectedTag(event.target.value)} className="app-input pl-9">
               <option value="all">All tags</option>
               {tags.map((tag) => (
@@ -241,9 +241,9 @@ export function SharedDump() {
 
       {filteredResources.length === 0 ? (
         <div className="app-panel p-10 text-center">
-          <Globe2 className="mx-auto mb-3 h-10 w-10 text-slate-400" />
-          <h3 className="text-lg font-bold text-slate-950 dark:text-white">No shared resources found</h3>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
+          <Globe2 className="mx-auto mb-3 h-10 w-10 text-zinc-400" />
+          <h3 className="text-lg font-bold text-zinc-950 dark:text-white">No shared resources found</h3>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-zinc-500 dark:text-zinc-400">
             {searchQuery || selectedTag !== 'all'
               ? 'Try a broader search or clear the tag filter.'
               : 'Public resources will appear here once people share useful links.'}
@@ -256,7 +256,7 @@ export function SharedDump() {
             const isSaving = savingId === resource.id
 
             return (
-              <article key={resource.id} className="app-panel flex min-h-[250px] flex-col p-4 transition hover:border-slate-300 dark:hover:border-slate-700">
+              <article key={resource.id} className="app-panel flex min-h-[250px] flex-col p-4 transition hover:border-zinc-300 dark:hover:border-zinc-700">
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="app-chip">{resource.tag}</span>
@@ -291,8 +291,8 @@ export function SharedDump() {
                   </button>
                 </div>
 
-                <h3 className="line-clamp-2 text-lg font-bold text-slate-950 dark:text-white">{resource.title}</h3>
-                {resource.note && <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{resource.note}</p>}
+                <h3 className="line-clamp-2 text-lg font-bold text-zinc-950 dark:text-white">{resource.title}</h3>
+                {resource.note && <p className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{resource.note}</p>}
 
                 <div className="mt-auto pt-5">
                   <a
@@ -304,7 +304,7 @@ export function SharedDump() {
                     <ExternalLink className="h-4 w-4 shrink-0" />
                     <span className="truncate">{resource.link}</span>
                   </a>
-                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-zinc-100 pt-3 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
                     {resource.username ? (
                       <a
                         href={`/u/${resource.username.toLowerCase()}`}

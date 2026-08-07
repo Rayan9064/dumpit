@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import LoginView from '../components/LoginView';
-import { saveResource, fetchCollections, Collection } from '../lib/api';
+import { captureExtensionResource, fetchCollections, Collection } from '../lib/api';
 import { getApiBaseUrl, setApiBaseUrl, getSavedCollections, setSavedCollections } from '../lib/storage';
 import { 
   Globe, 
@@ -47,6 +47,7 @@ export default function Popup() {
   const [loadingCollections, setLoadingCollections] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [extractedMetadata, setExtractedMetadata] = useState<{ canonicalUrl: string; selectedText: string }>({ canonicalUrl: '', selectedText: '' });
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
 
   // Settings states
@@ -162,6 +163,10 @@ export default function Popup() {
         if (response && response.success && response.data) {
           setTitle(response.data.title || tab.title || '');
           setLink(response.data.url || tab.url || '');
+          setExtractedMetadata({
+            canonicalUrl: response.data.canonicalUrl || '',
+            selectedText: response.data.selectedText || '',
+          });
           if (response.data.selectedText) {
             setNote(`"${response.data.selectedText}"`);
           } else if (response.data.description) {
@@ -189,10 +194,13 @@ export default function Popup() {
         note,
         tag,
         is_public: isPublic,
-        collection_ids: selectedCollectionId !== 'none' ? [selectedCollectionId] : []
+        collection_ids: selectedCollectionId !== 'none' ? [selectedCollectionId] : [],
+        selected_text: extractedMetadata.selectedText || undefined,
+        canonical_url: extractedMetadata.canonicalUrl || undefined,
+        source_type: 'chrome_extension'
       };
 
-      const res = await saveResource(authToken, payload);
+      const res = await captureExtensionResource(authToken, payload);
       if (res.success) {
         setStatus({ type: 'success', message: 'Resource saved to DumpIt!' });
         setNote('');

@@ -78,20 +78,20 @@ const sections = [
 
 export default function TermsOfService() {
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-950 dark:bg-slate-950 dark:text-slate-50 flex flex-col">
+    <div className="min-h-screen bg-stone-50 text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50 flex flex-col">
       <LegalNav />
 
       {/* Hero */}
-      <section className="border-b border-slate-200 bg-gradient-to-b from-white to-stone-50 py-10 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
+      <section className="border-b border-zinc-200 bg-gradient-to-b from-white to-stone-50 py-10 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400">
             <Scale className="h-6 w-6" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-4xl">
             Terms of Service
           </h1>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Last updated: July 14, 2026</p>
-          <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Last updated: July 14, 2026</p>
+          <p className="mt-4 text-base leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto">
             Welcome to DumpIt! These Terms govern your access to and use of our web application, extension, and related services. By using DumpIt you agree to be bound by these Terms and our Privacy Policy.
           </p>
         </div>
@@ -100,8 +100,8 @@ export default function TermsOfService() {
       {/* Content */}
       <main className="flex-1 mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Quick nav */}
-        <nav className="mb-10 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">On this page</p>
+        <nav className="mb-10 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+          <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">On this page</p>
           <ol className="space-y-1.5">
             {sections.map((s) => (
               <li key={s.title}>
@@ -124,15 +124,15 @@ export default function TermsOfService() {
               <section
                 key={id}
                 id={id}
-                className="scroll-mt-20 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8"
+                className="scroll-mt-20 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8"
               >
-                <h2 className="mb-4 flex items-center gap-2.5 text-lg font-bold text-slate-900 dark:text-white sm:text-xl">
+                <h2 className="mb-4 flex items-center gap-2.5 text-lg font-bold text-zinc-900 dark:text-white sm:text-xl">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-600 dark:bg-violet-950/60 dark:text-violet-400">
                     <Icon className="h-4 w-4" />
                   </span>
                   <span dangerouslySetInnerHTML={{ __html: section.title }} />
                 </h2>
-                <div className="space-y-3 text-[15px] leading-7 text-slate-600 dark:text-slate-400 [&_a]:text-blue-600 [&_a:hover]:underline dark:[&_a]:text-blue-400 [&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[13px] [&_code]:font-mono [&_code]:text-slate-700 dark:[&_code]:bg-slate-800 dark:[&_code]:text-slate-300 [&_strong]:font-semibold [&_strong]:text-slate-800 dark:[&_strong]:text-slate-200 [&_ul]:mt-2 [&_ul]:space-y-2.5 [&_ul]:pl-5 [&_ul]:list-disc [&_p+p]:mt-2">
+                <div className="space-y-3 text-[15px] leading-7 text-zinc-600 dark:text-zinc-400 [&_a]:text-blue-600 [&_a:hover]:underline dark:[&_a]:text-blue-400 [&_code]:rounded [&_code]:bg-zinc-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[13px] [&_code]:font-mono [&_code]:text-zinc-700 dark:[&_code]:bg-zinc-800 dark:[&_code]:text-zinc-300 [&_strong]:font-semibold [&_strong]:text-zinc-800 dark:[&_strong]:text-zinc-200 [&_ul]:mt-2 [&_ul]:space-y-2.5 [&_ul]:pl-5 [&_ul]:list-disc [&_p+p]:mt-2">
                   {section.content}
                 </div>
               </section>
