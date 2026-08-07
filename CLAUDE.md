@@ -84,9 +84,9 @@ UPSTASH_REDIS_REST_TOKEN=
 # Sentry
 SENTRY_DSN=
 
-# Resend (email)
+# Resend (email — inbound save-by-email)
 RESEND_API_KEY=
-RESEND_FROM_EMAIL=
+RESEND_INBOUND_WEBHOOK_SECRET=
 
 # Dodo Payments
 DODO_PAYMENTS_API_KEY=
@@ -102,9 +102,13 @@ app/                        Next.js App Router pages and API routes
   (auth)/                   Auth-gated routes
   api/                      API route handlers (server-side only)
     resources/              CRUD for saved items
-    search/                 RAG query endpoint
-    digest/                 Weekly email digest
+    ai/                     Search + RAG "ask" endpoints
+    webhooks/                Dodo Payments + Resend inbound-email webhooks
+    settings/api-keys/      API key generate/list/revoke
+  share/                    Mobile share-sheet capture page
   u/[username]/             Public user profile pages
+dumpit-extension/           Chrome extension (separate package)
+dumpit-mcp/                 MCP server for Claude/Cursor (separate package)
 docs/                       Internal documentation
 public/                     Static assets
 types/                      Shared TypeScript types
@@ -128,14 +132,15 @@ types/                      Shared TypeScript types
 | AI-powered cited Q&A (RAG) | ✅ Live |
 | Upstash rate limiting on AI routes | ✅ Live |
 | Cursor-based pagination | ✅ Live |
-| Weekly email digest (Resend) | ✅ Live |
 | Sentry error monitoring | ✅ Live |
-| Browser extension (one-click save) | 🔨 Building — highest priority |
-| PDF upload + text extraction | 🔨 Next after extension |
-| Email-to-save (`save@dumpit.page`) | 📋 Planned |
-| Mobile share sheet | 📋 Planned |
-| MCP server (query vault from Claude/Cursor) | 📋 Planned — key differentiator |
-| Dodo Payments integration | 🔨 In progress |
+| Browser extension (one-click save) | ✅ Live |
+| PDF upload + text extraction | ✅ Live |
+| API keys + REST API access | ✅ Live |
+| MCP server (query vault from Claude/Cursor) | ✅ Live — `dumpit-mcp/` |
+| Dodo Payments integration | ✅ Live |
+| Mobile share sheet (Android/PWA only — no iOS Web Share Target support) | 🔨 Built, needs manual PWA icon polish |
+| Email-to-save (`save@dumpit.page`) | 🔨 Built — pending DNS + Resend dashboard setup (not yet reachable) |
+| Weekly email digest (Resend) | 📋 Planned — not built despite earlier doc claim |
 | Personal context / tone profile (shapes how answers are given) | 📋 Planned — v2, core to the vision |
 | Portable context export (take your profile to other tools) | 📋 Planned — v3, long-term vision |
 

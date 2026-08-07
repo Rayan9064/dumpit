@@ -1,11 +1,11 @@
 'use client'
 
-import { Bot, LayoutDashboard, LogOut, Plus, Share2, User } from 'lucide-react'
+import { Bot, KeyRound, LayoutDashboard, LogOut, Plus, Share2, User } from 'lucide-react'
 import { ReactNode } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { ThemeToggle } from './ui/ThemeToggle'
 
-type Page = 'dashboard' | 'add' | 'shared' | 'ai' | 'profile'
+type Page = 'dashboard' | 'add' | 'shared' | 'ai' | 'profile' | 'settings'
 
 interface LayoutProps {
   children: ReactNode
@@ -19,6 +19,7 @@ const navItems = [
   { id: 'add', label: 'Capture', shortLabel: 'Add', icon: Plus },
   { id: 'shared', label: 'Shared Dump', shortLabel: 'Shared', icon: Share2 },
   { id: 'profile', label: 'Profile', shortLabel: 'Me', icon: User },
+  { id: 'settings', label: 'Settings', shortLabel: 'Keys', icon: KeyRound },
 ] as const
 
 export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
@@ -104,7 +105,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 px-2 py-2 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 lg:hidden">
-        <div className="grid grid-cols-5 gap-1">
+        <div className="grid grid-cols-6 gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
             const active = currentPage === item.id
