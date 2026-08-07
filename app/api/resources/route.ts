@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthError, requireAuth, unauthorizedResponse } from '../_utils/auth';
+import { isAuthError, requireAuth, requireAuthOrApiKey, unauthorizedResponse } from '../_utils/auth';
 import { getServerFirestore } from '../_utils/firebaseAdmin';
 import { getPreviewFromUrl } from '../_utils/linkPreview';
 import { checkAuthenticatedRateLimit, checkPublicRateLimit } from '../_utils/rateLimit';
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
 // POST /api/resources - Create new resource
 export async function POST(request: NextRequest) {
   try {
-    const authUser = await requireAuth(request);
+    const authUser = await requireAuthOrApiKey(request);
 
     // Check Free tier resource limit
     const resourceLimitCheck = await checkResourceLimit(authUser.uid);
