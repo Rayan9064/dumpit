@@ -7,22 +7,26 @@ Read this before writing any code, suggesting any feature, or making any archite
 
 ## What DumpIt Is
 
-DumpIt is a personal knowledge vault with AI-powered retrieval. The core loop:
+DumpIt is a personal knowledge vault with AI-powered retrieval, built toward a larger vision: **a portable layer of personal context that makes every AI interaction actually personal.**
 
+The core loop today:
 1. User saves something (a link, a note, a PDF)
 2. User asks a question in natural language
 3. DumpIt returns a cited answer grounded in what the user actually saved — not hallucinated from general knowledge
 
-It is **not** a general-purpose chatbot. It is **not** a task manager. It is **not** an autonomous agent.
-It is a save-and-query tool that happens to have excellent AI retrieval underneath.
+The vision it's building toward: over time, what a user saves, reads, and asks about builds a real, living picture of them — their interests, work, how they think and talk, what they care about now versus before. Answers get sharper and more personal because the system actually knows the person asking, not because it's a smarter generic model.
 
-**One-line positioning:** "Save anything. Ask anything. Get answers from your own knowledge — not a stranger's AI."
+It is **not** a general-purpose chatbot. It is **not** a task manager. It is **not** an autonomous agent. It does **not** act on the user's behalf or impersonate them to others — it makes the user sharper, it does not replace them. This is a deliberate, permanent boundary, not a v1 limitation to relax later.
+
+**One-line positioning (product):** "Save anything. Ask anything. Get answers from your own knowledge — not a stranger's AI."
+
+**One-line positioning (vision):** "The layer of context that makes AI actually know you — once, portably, everywhere you use it."
 
 ---
 
 ## Who It's For
 
-Primary persona: knowledge workers, developers, indie hackers, researchers, students — anyone who saves things online and later can't find or remember them.
+Primary persona: knowledge workers, developers, indie hackers, researchers, students — anyone who saves things online and later can't find, remember, or get real value back from them.
 
 The Canva/Claude parallel is intentional: **simple enough for a non-technical user to start in 60 seconds, deep enough for a developer to plug into their own stack via MCP or API.**
 
@@ -132,7 +136,8 @@ types/                      Shared TypeScript types
 | Mobile share sheet | 📋 Planned |
 | MCP server (query vault from Claude/Cursor) | 📋 Planned — key differentiator |
 | Dodo Payments integration | 🔨 In progress |
-| Tone/preference profile (personalized answers) | 📋 Planned — v2 |
+| Personal context / tone profile (shapes how answers are given) | 📋 Planned — v2, core to the vision |
+| Portable context export (take your profile to other tools) | 📋 Planned — v3, long-term vision |
 
 ---
 
@@ -149,6 +154,15 @@ V1 is complete when:
 
 ---
 
+## The Vision, Staged
+
+- **v1 (now):** Capture + cited Q&A. Prove the core loop works and retains real users.
+- **v2 (next):** Personal context/tone profile — DumpIt learns how the user writes, what they care about, and shapes *how it answers them* accordingly. This is the first real step toward "AI that knows you," and the layer that differentiates DumpIt from bare RAG tools.
+- **v3 (later, only after v1/v2 prove retention):** Portability — the user's context isn't locked into DumpIt's own chat UI. It can be queried from Claude, Cursor, or other tools the user already uses (via MCP/API), so the value compounds wherever they work rather than requiring them to live inside DumpIt.
+- **Never on the roadmap as currently scoped:** autonomous action on the user's behalf, or any feature that impersonates the user to other people. If this is ever revisited, it must be a deliberate, separate decision — not an incremental feature add.
+
+---
+
 ## What Has Been Explicitly Ruled Out
 
 These decisions were made deliberately. Do not reopen them without a strong reason.
@@ -157,12 +171,12 @@ These decisions were made deliberately. Do not reopen them without a strong reas
 - Email/password auth was removed. Google Auth only. Rationale: simpler onboarding, zero password-reset overhead.
 
 ### Autonomous agents / "act on my behalf"
-- DumpIt answers questions. It does not send emails, book things, or take irreversible actions on behalf of the user.
-- This is a v1 and v2 constraint. If this ever changes it must be a deliberate, separate decision — not a feature added incrementally.
+- DumpIt answers questions and shapes answers around who the user is. It does not send emails, book things, or take irreversible actions on behalf of the user.
+- This applies at every stage of the roadmap, not just v1. Reversibility is the line: answering, even personalized answering, is low-risk if imperfect; acting is not.
 
 ### Digital clone / impersonation
-- DumpIt does not generate content that impersonates the user to other people.
-- The tone/preference profile (v2) shapes *how DumpIt answers the user*, not how it represents the user externally.
+- DumpIt does not generate content that impersonates the user to other people, and never will under the current vision.
+- The personal context/tone profile (v2) shapes *how DumpIt answers the user*, not how it represents the user externally. This is the core trust boundary of the whole product — do not blur it, even in service of a "wow" feature.
 
 ### OS-level integration
 - Not a v1 or v2 item. The browser extension covers the majority of the capture use case with a fraction of the complexity.
@@ -185,11 +199,13 @@ These decisions were made deliberately. Do not reopen them without a strong reas
 | Hermes + OMI + Obsidian | Power-user second brain stack | 30-45 min technical setup, not consumer-friendly |
 | Notion AI / Obsidian | Note-taking + AI | Organization-first, not retrieval-first; no capture layer |
 | Orchid | Consumer AI assistant via text | Acting-on-your-behalf positioning, not knowledge retrieval; receiving backlash |
-| Claude / ChatGPT memory | Native AI memory | No capture layer, no extension, no email-forward; setup-heavy for real knowledge base use |
+| Claude / ChatGPT memory | Native AI memory | Locked to one app, requires manual context-feeding, no capture layer; DumpIt's vision is to be the portable layer underneath all of these, not a competitor to any one of them |
 
-**The gap DumpIt fills:** retrieval-first, consumer-simple, with a developer escape hatch (MCP/API). Nobody has shipped this cleanly.
+**The gap DumpIt fills today:** retrieval-first, consumer-simple, with a developer escape hatch (MCP/API).
 
-**The risk:** platform memory features (Claude Projects, ChatGPT Memory) are improving fast. The window for "it just works out of the box" as a moat is real but not permanent. Ship fast, get real retention data, and decide whether this is a 2-3 year window product or something with a deeper moat.
+**The gap DumpIt is building toward:** a personal context layer that isn't locked into one AI app — portable, user-owned, and useful wherever the user chooses to work.
+
+**The risk:** platform memory features (Claude Projects, ChatGPT Memory) are improving fast, and every major AI is racing toward "remembers you natively." The out-of-the-box simplicity moat is real but not permanent. Ship v1 fast, get real retention data, and let that data determine whether to push hard into the v2/v3 personalization-and-portability vision or treat this as a smaller, time-boxed product.
 
 ---
 
@@ -243,6 +259,13 @@ Payment processor: Dodo Payments (MoR — handles all global tax compliance auto
 
 ---
 
+## Git Workflow
+
+- Claude may push directly to feature branches without asking each time.
+- `main` always goes through a PR — never push directly to `main`.
+
+---
+
 ## What Good Looks Like
 
 A session is successful if:
@@ -250,6 +273,7 @@ A session is successful if:
 - A new user can be saving and querying within 3 minutes of signing up
 - No feature outside v1 scope was added
 - No fake numbers appear anywhere in the product or on the landing page
+- Any personalization work strictly shapes *answers to the user*, never generates content *as* the user to others
 - Code follows the existing zinc/Space Grotesk design system
 - All Gemini calls go through rate-limited API routes, never client-side
 
