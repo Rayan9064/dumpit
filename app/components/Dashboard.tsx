@@ -40,7 +40,7 @@ const statusStyles: Record<string, string> = {
   indexed: 'app-chip-success',
   pending: 'app-chip-warning',
   failed: 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300',
-  skipped: '',
+  skipped: 'border-zinc-200 bg-zinc-100 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400',
 }
 
 export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'add' | 'shared' | 'ai' | 'profile') => void }) {
@@ -57,6 +57,8 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
   const [openMenuResourceId, setOpenMenuResourceId] = useState<string | null>(null)
   const [nextCursor, setNextCursor] = useState<string | null>(null)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'indexed' | 'pending' | 'failed' | 'skipped'>('all')
+  const [stats, setStats] = useState<{ total: number; indexed: number; pending: number; failed: number; skipped: number; public: number } | null>(null)
   const hasInitialFetchRef = useRef(false)
 
   useEffect(() => {
@@ -88,6 +90,7 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
       const data = await response.json()
       setResources(data.resources || [])
       setNextCursor(data.nextCursor || null)
+      if (data.stats) setStats(data.stats)
     } catch (error) {
       console.error('Error loading resources:', error)
       showToast('Failed to load resources. Please try again.')
@@ -133,13 +136,14 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
     if (selectedTag !== 'all') {
       filtered = filtered.filter((resource) => resource.tag === selectedTag)
     }
+    if (selectedStatus !== 'all') {
+      filtered = filtered.filter((resource) => (resource.index_status || 'pending') === selectedStatus)
+    }
     return filtered
-  }, [resources, selectedCollectionId, searchQuery, selectedTag])
+  }, [resources, selectedCollectionId, searchQuery, selectedTag, selectedStatus])
 
   const tags = useMemo(() => [...new Set(resources.map((resource) => resource.tag).filter(Boolean))], [resources])
   const activeCollection = useMemo(() => selectedCollectionId ? collections.find((collection) => collection.id === selectedCollectionId) : null, [selectedCollectionId, collections])
-  const indexedCount = resources.filter((resource) => resource.index_status === 'indexed').length
-  const publicCount = resources.filter((resource) => resource.is_public).length
 
   const deleteResource = async (id: string) => {
     if (!user) return
@@ -205,17 +209,21 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
               Search, organize, and inspect the resources that power Ask DumpIt.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-2 sm:min-w-[360px]">
+          <div className="grid grid-cols-4 gap-2 sm:min-w-[440px]">
             <div className="app-muted-panel p-3">
-              <div className="text-xl font-bold text-zinc-950 dark:text-white">{resources.length}</div>
+              <div className="text-xl font-bold text-zinc-950 dark:text-white">{stats?.total ?? resources.length}</div>
               <div className="text-xs text-zinc-500">Resources</div>
             </div>
             <div className="app-muted-panel p-3">
-              <div className="text-xl font-bold text-zinc-950 dark:text-white">{indexedCount}</div>
+              <div className="text-xl font-bold text-zinc-950 dark:text-white">{stats?.indexed ?? '—'}</div>
               <div className="text-xs text-zinc-500">Indexed</div>
             </div>
             <div className="app-muted-panel p-3">
-              <div className="text-xl font-bold text-zinc-950 dark:text-white">{publicCount}</div>
+              <div className="text-xl font-bold text-zinc-950 dark:text-white">{(stats?.pending ?? 0) + (stats?.failed ?? 0)}</div>
+              <div className="text-xs text-zinc-500">Pending/Failed</div>
+            </div>
+            <div className="app-muted-panel p-3">
+              <div className="text-xl font-bold text-zinc-950 dark:text-white">{stats?.public ?? '—'}</div>
               <div className="text-xs text-zinc-500">Public</div>
             </div>
           </div>
@@ -240,6 +248,17 @@ export function Dashboard({ onNavigate }: { onNavigate?: (page: 'dashboard' | 'a
                 <select value={selectedTag} onChange={(event) => setSelectedTag(event.target.value)} className="app-input md:w-44">
                   <option value="all">All tags</option>
                   {tags.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
+                </select>
+                <select
+                  value={selectedStatus}
+                  onChange={(event) => setSelectedStatus(event.target.value as typeof selectedStatus)}
+                  className="app-input md:w-44"
+                >
+                  <option value="all">All statuses</option>
+                  <option value="indexed">Indexed</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                  <option value="skipped">Skipped</option>
                 </select>
               </div>
             </div>

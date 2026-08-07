@@ -10,8 +10,9 @@ import { AddResource } from '@/components/AddResource'
 import { AskDumpit } from '@/components/AskDumpit'
 import { SharedDump } from '@/components/SharedDump'
 import { Profile } from '@/components/Profile'
+import { Settings } from '@/components/Settings'
 
-type Page = 'dashboard' | 'add' | 'shared' | 'ai' | 'profile'
+type Page = 'dashboard' | 'add' | 'shared' | 'ai' | 'profile' | 'settings'
 
 export default function DashboardRoute() {
   const { user, loading } = useAuth()
@@ -39,6 +40,7 @@ export default function DashboardRoute() {
         {currentPage === 'shared' && <SharedDump />}
         {currentPage === 'ai' && <AskDumpit />}
         {currentPage === 'profile' && <Profile />}
+        {currentPage === 'settings' && <Settings />}
       </Layout>
     </CollectionsProvider>
   )
