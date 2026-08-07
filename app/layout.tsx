@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Space_Grotesk, Inter } from 'next/font/google'
 import './globals.css'
 import { RootLayoutClient } from './RootLayoutClient'
@@ -20,6 +20,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'DumpIt — Your AI Second Brain',
   description: 'Index everything you save — links, notes, PDFs — and ask questions across it all. Via web, browser extension, API, or Claude MCP.',
+  manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico',
   },
@@ -28,6 +29,10 @@ export const metadata: Metadata = {
     description: 'Stop losing what you learn. DumpIt indexes your saved content and lets you ask anything.',
     type: 'website',
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#09090b',
 }
 
 export default function RootLayout({

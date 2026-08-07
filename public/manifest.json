@@ -1,0 +1,26 @@
+{
+  "name": "DumpIt — AI Second Brain",
+  "short_name": "DumpIt",
+  "description": "Save anything, ask anything, get answers from your own saved knowledge.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "375x379",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

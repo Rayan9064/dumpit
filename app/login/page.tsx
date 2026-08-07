@@ -2,19 +2,21 @@
 
 import { useAuth } from '../contexts/AuthContext'
 import { Auth } from '../components/Auth'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useEffect } from 'react'
 
-export default function LoginPage() {
+function LoginPageContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    // If user is already authenticated, redirect to dashboard
+    // If user is already authenticated, redirect to dashboard (or the requested page)
     if (!loading && user) {
-      router.push('/dashboard')
+      const next = searchParams.get('next')
+      router.push(next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard')
     }
-  }, [user, loading, router])
+  }, [user, loading, router, searchParams])
 
   if (loading) {
     return (
@@ -39,5 +41,13 @@ export default function LoginPage() {
         <Auth />
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
   )
 }
