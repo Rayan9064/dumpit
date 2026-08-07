@@ -5,7 +5,7 @@ const steps = [
     number: '01',
     icon: FileText,
     title: 'Save from anywhere',
-    description: 'Paste a URL, upload a PDF, write a note, or use the browser extension. DumpIt accepts any format.',
+    description: 'Paste a link, upload a PDF, write a note, or use the browser extension. DumpIt accepts any format.',
     color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/50 dark:text-blue-400',
   },
   {
@@ -33,14 +33,14 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section id="how-it-works" className="scroll-mt-20 border-b border-slate-200 bg-white py-24 dark:border-slate-800 dark:bg-slate-950">
+    <section id="how-it-works" className="scroll-mt-20 border-b border-zinc-200 bg-white py-24 dark:border-zinc-800 dark:bg-zinc-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <span className="app-chip mb-4">How it works</span>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+          <h2 className="text-3xl font-extrabold tracking-tight text-zinc-950 dark:text-white sm:text-4xl">
             From save to answer in seconds.
           </h2>
-          <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">
+          <p className="mt-4 text-base leading-7 text-zinc-600 dark:text-zinc-300">
             Four steps from raw resource to AI-cited knowledge.
           </p>
         </div>
@@ -52,15 +52,15 @@ const HowItWorks = () => {
               <div key={step.number} className="relative flex flex-col">
                 {/* Connector line */}
                 {index < steps.length - 1 && (
-                  <div className="absolute left-[calc(50%+32px)] top-6 hidden h-px w-[calc(100%+24px)] border-t-2 border-dashed border-slate-200 dark:border-slate-800 lg:block" />
+                  <div className="absolute left-[calc(50%+32px)] top-6 hidden h-px w-[calc(100%+24px)] border-t-2 border-dashed border-zinc-200 dark:border-zinc-800 lg:block" />
                 )}
                 <div className="app-panel flex flex-col p-6">
                   <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${step.color}`}>
                     <Icon className="h-6 w-6" />
                   </div>
-                  <div className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Step {step.number}</div>
-                  <h3 className="mb-2 font-bold text-slate-950 dark:text-white">{step.title}</h3>
-                  <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">{step.description}</p>
+                  <div className="mb-1 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Step {step.number}</div>
+                  <h3 className="mb-2 font-bold text-zinc-950 dark:text-white">{step.title}</h3>
+                  <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-300">{step.description}</p>
                 </div>
               </div>
             )

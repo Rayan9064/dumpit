@@ -34,11 +34,11 @@ const FAQ = () => {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <section id="faq" className="scroll-mt-20 border-b border-slate-200 bg-white py-24 dark:border-slate-800 dark:bg-slate-950">
+    <section id="faq" className="scroll-mt-20 border-b border-zinc-200 bg-white py-24 dark:border-zinc-800 dark:bg-zinc-950">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <span className="app-chip mb-4">FAQ</span>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+          <h2 className="text-3xl font-extrabold tracking-tight text-zinc-950 dark:text-white sm:text-4xl">
             Common questions
           </h2>
         </div>
@@ -53,13 +53,13 @@ const FAQ = () => {
                 onClick={() => setOpen(open === index ? null : index)}
                 className="flex w-full items-center justify-between gap-4 p-5 text-left"
               >
-                <span className="font-semibold text-slate-900 dark:text-white">{faq.q}</span>
+                <span className="font-semibold text-zinc-900 dark:text-white">{faq.q}</span>
                 <ChevronDown
-                  className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${open === index ? 'rotate-180' : ''}`}
+                  className={`h-4 w-4 shrink-0 text-zinc-400 transition-transform duration-200 ${open === index ? 'rotate-180' : ''}`}
                 />
               </button>
               {open === index && (
-                <div className="border-t border-slate-200 px-5 pb-5 pt-4 text-sm leading-7 text-slate-600 dark:border-slate-800 dark:text-slate-300">
+                <div className="border-t border-zinc-200 px-5 pb-5 pt-4 text-sm leading-7 text-zinc-600 dark:border-zinc-800 dark:text-zinc-300">
                   {faq.a}
                 </div>
               )}

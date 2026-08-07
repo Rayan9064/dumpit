@@ -12,22 +12,23 @@ const productLinks = [
 const legalLinks = [
   { label: 'Privacy Policy', href: '/privacy' },
   { label: 'Terms of Service', href: '/terms' },
+  { label: 'MIT License', href: 'https://github.com/Rayan9064/dumpit/blob/main/LICENSE.md' },
 ]
 
 const Footer = () => {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+    <footer className="border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-[1.5fr_1fr_1fr_auto]">
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2.5">
               <img src="/logo.png" alt="DumpIt" className="h-8 w-8 object-contain" />
-              <span className="text-base font-bold text-slate-950 dark:text-white">DumpIt</span>
+              <span className="text-base font-bold text-zinc-950 dark:text-white">DumpIt</span>
             </Link>
-            <p className="mt-3 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
+            <p className="mt-3 max-w-xs text-sm leading-6 text-zinc-500 dark:text-zinc-400">
               The AI second brain for everything you save, read, and learn. Index it once. Ask anything.
             </p>
             <div className="mt-5 flex items-center gap-2">
@@ -36,7 +37,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
               >
                 <Github className="h-4 w-4" />
               </a>
@@ -45,22 +46,30 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Twitter / X"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
               >
                 <Twitter className="h-4 w-4" />
               </a>
             </div>
+            <a
+              href="https://github.com/Rayan9064/dumpit"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-block text-xs font-medium text-zinc-400 underline decoration-zinc-300 underline-offset-2 transition hover:text-zinc-950 dark:decoration-zinc-700 dark:hover:text-white"
+            >
+              Open source · MIT licensed
+            </a>
           </div>
 
           {/* Product */}
           <div>
-            <div className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Product</div>
+            <div className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Product</div>
             <ul className="space-y-2.5">
               {productLinks.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-slate-500 transition hover:text-slate-950 dark:text-slate-400 dark:hover:text-white"
+                    className="text-sm text-zinc-500 transition hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
                   >
                     {link.label}
                   </a>
@@ -71,37 +80,50 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <div className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Legal</div>
+            <div className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Legal</div>
             <ul className="space-y-2.5">
-              {legalLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-slate-500 transition hover:text-slate-950 dark:text-slate-400 dark:hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {legalLinks.map((link) =>
+                link.href.startsWith('http') ? (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-zinc-500 transition hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ) : (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-zinc-500 transition hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                )
+              )}
             </ul>
           </div>
 
           {/* CTA */}
           <div>
-            <div className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Get started</div>
+            <div className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Get started</div>
             <a
               href="#pricing"
               className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
             >
               Founding Access →
             </a>
-            <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">First 500 get 50% off Pro</p>
+            <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-500">First 1,000 get 50% off Pro</p>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 border-t border-slate-200 pt-6 dark:border-slate-800">
-          <p className="text-xs text-slate-400 dark:text-slate-500">
+        <div className="mt-12 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+          <p className="text-xs text-zinc-400 dark:text-zinc-500">
             © {currentYear} DumpIt. Built with{' '}
             <span className="text-red-500">♥</span> using Next.js, Gemini, and Firebase.
           </p>
