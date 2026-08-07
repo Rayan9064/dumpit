@@ -62,13 +62,13 @@ export function ShareModal({ isOpen, onClose, resourceTitle, resourceNote, resou
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 relative overflow-hidden transition-all duration-300">
+    <div className="fixed inset-0 bg-zinc-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl max-w-md w-full p-6 relative overflow-hidden transition-all duration-300">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           aria-label="Close modal"
         >
           <X className="w-5 h-5" />
@@ -80,10 +80,10 @@ export function ShareModal({ isOpen, onClose, resourceTitle, resourceNote, resou
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1.5">
+          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1.5">
             Resource Added!
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Share this amazing resource with your network.
           </p>
         </div>
@@ -92,7 +92,7 @@ export function ShareModal({ isOpen, onClose, resourceTitle, resourceNote, resou
           {/* Twitter/X Button */}
           <button
             onClick={handleTwitterShare}
-            className="w-full flex items-center justify-center gap-3 bg-black hover:bg-slate-900 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-sm"
+            className="w-full flex items-center justify-center gap-3 bg-black hover:bg-zinc-900 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-sm"
           >
             {/* Custom Minimalist X Logo SVG */}
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -122,17 +122,17 @@ export function ShareModal({ isOpen, onClose, resourceTitle, resourceNote, resou
           {/* Copy Link Button */}
           <button
             onClick={handleCopyLink}
-            className="w-full flex items-center justify-center gap-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-3 px-4 rounded-xl transition-all duration-200 border border-slate-200 dark:border-slate-700 shadow-sm"
+            className="w-full flex items-center justify-center gap-3 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 font-semibold py-3 px-4 rounded-xl transition-all duration-200 border border-zinc-200 dark:border-zinc-700 shadow-sm"
           >
             <Copy className="w-4.5 h-4.5" />
             {copied ? 'Link Copied!' : 'Copy Link'}
           </button>
         </div>
 
-        <div className="mt-5 pt-4 border-t border-slate-150 dark:border-slate-800 flex justify-end">
+        <div className="mt-5 pt-4 border-t border-zinc-150 dark:border-zinc-800 flex justify-end">
           <button
             onClick={onClose}
-            className="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 py-1 px-3 rounded-lg transition-colors"
+            className="text-xs font-semibold text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 py-1 px-3 rounded-lg transition-colors"
           >
             Done
           </button>

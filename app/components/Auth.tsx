@@ -144,20 +144,20 @@ export function Auth() {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl shadow-slate-200/70 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/20 md:grid-cols-[0.9fr_1.1fr]">
-      <aside className="hidden bg-slate-950 p-8 text-white md:flex md:flex-col md:justify-between">
+    <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-xl shadow-zinc-200/70 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/20 md:grid-cols-[0.9fr_1.1fr]">
+      <aside className="hidden bg-zinc-950 p-8 text-white md:flex md:flex-col md:justify-between">
         <div>
           <div className="mb-8 flex items-center gap-3">
             <Image src="/logo.png" alt="DumpIt logo" width={36} height={36} className="h-9 w-9 object-contain" />
             <span className="text-lg font-bold">DumpIt</span>
           </div>
           <h1 className="text-4xl font-bold leading-tight tracking-normal">Your saved internet, ready to answer back.</h1>
-          <p className="mt-4 text-sm leading-6 text-slate-300">
+          <p className="mt-4 text-sm leading-6 text-zinc-300">
             Save resources, index links, ask questions, and verify answers with source cards.
           </p>
         </div>
 
-        <div className="space-y-3 text-sm text-slate-300">
+        <div className="space-y-3 text-sm text-zinc-300">
           <div className="flex items-center gap-3"><Bot className="h-4 w-4 text-blue-300" /> AI answers over indexed resources</div>
           <div className="flex items-center gap-3"><ShieldCheck className="h-4 w-4 text-emerald-300" /> Private by default</div>
           <div className="flex items-center gap-3"><CheckCircle2 className="h-4 w-4 text-teal-300" /> Citations you can inspect</div>
@@ -167,13 +167,13 @@ export function Auth() {
       <div className="p-6 sm:p-8">
         <div className="mb-8 md:hidden">
           <Image src="/logo.png" alt="DumpIt logo" width={56} height={56} className="mb-3 h-14 w-14 object-contain" />
-          <h1 className="text-2xl font-bold text-slate-950 dark:text-white">DumpIt</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">AI knowledge vault for saved links</p>
+          <h1 className="text-2xl font-bold text-zinc-950 dark:text-white">DumpIt</h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">AI knowledge vault for saved links</p>
         </div>
 
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-950 dark:text-white">Sign In to DumpIt</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h2 className="text-2xl font-bold text-zinc-950 dark:text-white">Sign In to DumpIt</h2>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             Continue to your AI knowledge workspace.
           </p>
         </div>
@@ -189,7 +189,7 @@ export function Auth() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading}
-            className="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3.5 font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-3.5 font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-800"
           >
             {googleLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />

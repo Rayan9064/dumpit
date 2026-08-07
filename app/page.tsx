@@ -15,7 +15,7 @@ import Footer from './components/landing/Footer'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
+    <div className="min-h-screen bg-stone-50 text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50">
       <Navbar />
       <Hero />
       <FounderNote />      {/* Founder note — replaces fake social proof */}

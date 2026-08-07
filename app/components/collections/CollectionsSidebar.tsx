@@ -87,8 +87,8 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
 
   return (
     <aside className="app-panel w-full lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-auto">
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
-        <h3 className="text-sm font-bold text-slate-950 dark:text-white">Collections</h3>
+      <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+        <h3 className="text-sm font-bold text-zinc-950 dark:text-white">Collections</h3>
         <button
           onClick={handleCreate}
           className="inline-flex min-h-9 items-center gap-1 rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700"
@@ -102,8 +102,8 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
           onClick={() => onSelect(null)}
           className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium ${
             activeCollectionId === null
-              ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950'
-              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+              ? 'bg-zinc-950 text-white shadow-sm dark:bg-white dark:text-zinc-950'
+              : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
           }`}
         >
           <span className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
           <span className="text-xs uppercase tracking-wide">All</span>
         </button>
 
-        {loading && <p className="px-3 py-2 text-xs text-slate-500">Loading collections...</p>}
+        {loading && <p className="px-3 py-2 text-xs text-zinc-500">Loading collections...</p>}
 
         {sortedCollections.map((collection, index) => {
           const isActive = activeCollectionId === collection.id
@@ -123,12 +123,12 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
                 className={`flex min-w-0 flex-1 items-center justify-between rounded-lg px-3 py-2 text-left text-sm ${
                   isActive
                     ? 'font-semibold text-blue-700 dark:text-blue-300'
-                    : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                    : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <span
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-slate-950"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-zinc-950"
                     style={{ backgroundColor: collection.color || '#e2e8f0' }}
                   >
                     {collection.icon || collection.name.charAt(0).toUpperCase()}
@@ -146,7 +146,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
               <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
                 <button
                   onClick={() => moveCollection(collection.id, 'up')}
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                  className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 disabled:opacity-30 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                   disabled={index === 0}
                   title="Move up"
                 >
@@ -154,7 +154,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
                 </button>
                 <button
                   onClick={() => moveCollection(collection.id, 'down')}
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                  className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 disabled:opacity-30 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                   disabled={index === sortedCollections.length - 1}
                   title="Move down"
                 >
@@ -162,7 +162,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
                 </button>
                 <button
                   onClick={(event) => openMenu(event, collection.id)}
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                  className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
                   title="Collection actions"
                 >
                   <MoreHorizontal className="h-4 w-4" />
@@ -172,8 +172,8 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
           )
         })}
 
-        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-4 text-xs leading-5 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
-          <div className="mb-2 flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-200">
+        <div className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-4 text-xs leading-5 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+          <div className="mb-2 flex items-center gap-2 font-semibold text-zinc-800 dark:text-zinc-200">
             <Globe2 className="h-4 w-4" /> Discover shared collections
           </div>
           <p>Browse public resources from the Shared Dump page and save useful sources into your vault.</p>
@@ -183,7 +183,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
       {menuState.open && menuState.collectionId && (
         <div className="fixed inset-0 z-40" onClick={closeMenu}>
           <div
-            className="absolute z-50 w-48 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900"
+            className="absolute z-50 w-48 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
             style={{
               top: (menuState.anchorRect?.bottom || 0) + 4,
               left: (menuState.anchorRect?.left || 0) - 96,
@@ -194,7 +194,7 @@ export function CollectionsSidebar({ activeCollectionId, onSelect }: Collections
                 const collection = collections.find((item) => item.id === menuState.collectionId)
                 if (collection) handleEdit(collection)
               }}
-              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 dark:text-zinc-200 dark:hover:bg-zinc-800"
             >
               <Pencil className="h-4 w-4" /> Edit collection
             </button>
