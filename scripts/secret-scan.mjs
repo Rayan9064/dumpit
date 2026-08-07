@@ -15,7 +15,10 @@ const forbiddenPaths = [
 const secretPatterns = [
   /AIza[0-9A-Za-z_-]{30,}/,
   /-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----/,
-  /(?:GEMINI|GOOGLE|FIREBASE|OPENAI|PINECONE)[A-Z0-9_]*_KEY\s*=\s*(?!$|your|YOUR|placeholder|example|xxx|xxxxx)[^\s#]+/i,
+  // [ \t]* (not \s*) so this can't span a CRLF/LF line break — otherwise an
+  // empty "SOMETHING_KEY=" immediately followed by another env var line gets
+  // misread as if the next line's variable name were this key's secret value.
+  /(?:GEMINI|GOOGLE|FIREBASE|OPENAI|PINECONE)[A-Z0-9_]*_KEY[ \t]*=[ \t]*(?!$|your|YOUR|placeholder|example|xxx|xxxxx)[^\s#]+/i,
 ];
 
 const allowedPlaceholderFiles = new Set([
