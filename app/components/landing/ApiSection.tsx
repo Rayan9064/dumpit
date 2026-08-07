@@ -3,7 +3,7 @@ const codeSnippet = `# Claude MCP config (~/.claude/mcp.json)
   "mcpServers": {
     "dumpit": {
       "command": "npx",
-      "args": ["-y", "@dumpit/mcp"],
+      "args": ["-y", "dumpit-mcp"],
       "env": { "DUMPIT_API_KEY": "dk_live_..." }
     }
   }
@@ -14,12 +14,14 @@ curl -X POST https://app.dumpit.app/api/resources \\
   -H "Authorization: Bearer dk_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{"link": "https://example.com/article"}'
-# → { "success": true, "id": "r_abc123", "indexed": true }
+# → { "success": true, "resourceId": "r_abc123" }
 
 # REST API — semantic search
-curl "https://app.dumpit.app/api/ai/search?q=RAG+citation+patterns" \\
-  -H "Authorization: Bearer dk_live_..."
-# → { "results": [...], "sources": [...] }`
+curl -X POST https://app.dumpit.app/api/ai/search \\
+  -H "Authorization: Bearer dk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"query": "RAG citation patterns"}'
+# → { "success": true, "results": [...] }`
 
 const ApiSection = () => {
   return (

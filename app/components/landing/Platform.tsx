@@ -28,8 +28,8 @@ const surfaces = [
   {
     icon: Chrome,
     title: 'Browser Extension',
-    tag: 'Coming soon',
-    description: '1-click save from any tab. Highlight text, save the page, clip screenshots — without leaving the browser.',
+    tag: 'Live',
+    description: '1-click save from any tab. Highlight text or save the whole page — without leaving the browser.',
     color: 'text-emerald-600 dark:text-emerald-400',
     bg: 'bg-emerald-50 dark:bg-emerald-950/50',
     preview: (
@@ -59,7 +59,7 @@ const surfaces = [
         <div className="text-zinc-500">$ curl -X POST https://dumpit.app/api/resources \</div>
         <div className="text-zinc-400">  -H <span className="text-emerald-400">"Authorization: Bearer {'{'}key{'}'}"</span> \</div>
         <div className="text-zinc-400">  -d <span className="text-amber-400">'{'{'}link{":'https://example.com'"}{'}'}'</span></div>
-        <div className="mt-2 text-emerald-400">{'{'} "success": true, "id": "r_abc123" {'}'}</div>
+        <div className="mt-2 text-emerald-400">{'{'} "success": true, "resourceId": "r_abc123" {'}'}</div>
       </div>
     ),
   },

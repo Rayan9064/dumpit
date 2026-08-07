@@ -2,6 +2,7 @@
 
 import { ArrowRight, CheckCircle2, Flame, ShieldCheck, Zap } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { getDodoCheckoutUrl } from '../../lib/dodoCheckout';
 
 const tiers = [
   {
@@ -45,23 +46,6 @@ const tiers = [
 const Pricing = () => {
   const { user } = useAuth();
 
-  const getDodoCheckoutUrl = () => {
-    const defaultUrl = process.env.NEXT_PUBLIC_DODOPAYMENTS_CHECKOUT_URL || 'https://checkout.dodopayments.com/buy/pro';
-    try {
-      const url = new URL(defaultUrl);
-      url.searchParams.set('metadata.plan', 'pro');
-      if (user) {
-        url.searchParams.set('metadata.user_id', user.uid);
-        if (user.email) {
-          url.searchParams.set('customer_email', user.email);
-        }
-      }
-      return url.toString();
-    } catch {
-      return defaultUrl;
-    }
-  };
-
   return (
     <section id="pricing" className="scroll-mt-20 border-b border-zinc-200 bg-white py-24 dark:border-zinc-800 dark:bg-zinc-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -82,7 +66,7 @@ const Pricing = () => {
             </div>
             <div className="flex flex-col gap-2 sm:shrink-0">
               <a
-                href={getDodoCheckoutUrl()}
+                href={getDodoCheckoutUrl(user)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700"
@@ -113,7 +97,7 @@ const Pricing = () => {
         {/* Tiers */}
         <div className="mt-12 grid gap-6 sm:grid-cols-2 sm:max-w-2xl sm:mx-auto">
           {tiers.map((tier) => {
-            const hrefUrl = tier.name === 'Starter' ? tier.cta.href : getDodoCheckoutUrl();
+            const hrefUrl = tier.name === 'Starter' ? tier.cta.href : getDodoCheckoutUrl(user);
 
             return (
               <div key={tier.name} className={`relative flex flex-col rounded-2xl border bg-white p-8 dark:bg-zinc-900 ${tier.color}`}>
